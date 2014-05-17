@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Purchase Return{% endblock title %}
+{% block body_id %}purchase_return{% endblock %}
+
+
+{% block controller %}ng-controller="PurchaseReturnController" ng-init="init('{{csrf_token}}', '{{invoice_number}}')"{% endblock controller %}
+
+{% block dialogue_popup %}
+	{% include 'add_new_vendor.html' %} 
+	{% include 'add_new_company.html' %} 
+	{% include 'inventory/add_new_brand.html' %}              	
+{% endblock %}
+
+{% block content %}
+
+	<div id="main-title">
+		<div class="alert alert-info" align="Center"><h4>Puchase Return</h4></div>
+	</div>
+
+	<div class="purchase_form_container">
+		<form name="purchase_entry" method="post">
+			<div class="form_contents_purchase">
+				<div class="section_1_purchase">
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="purchase_invoice_number">Purchase Invoice Number</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="purchase_invoice_number" ng-model="purchase.purchase_invoice_number" ng-change="load_purchase()" /> 
+							<p> Please enter invoice number to load details </p>
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="purchase_return_invoice_number">Purchase Return Invoice Number</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="purchase_return_invoice_number" ng-model="purchase_return.invoice_number"  readonly /> 
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="purchase_return_date">Date</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="purchase_return_date" ng-model="purchase_return.purchase_return_date" id="purchase_return_date"/>
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="vendor">Vendor</label>
+						</div>
+						<div class="forminput">
+							<input type="text"  name="vendor" ng-model="purchase.vendor" readonly />							
+						</div>
+					</div>
+					
+				</div>	
+		
+				<div class="section_3_purchase">
+					<div class="search_purchase">
+ 						
+   						<div class="clear"></div>
+
+   						<h5 ng-show='purchase.purchase_items.length > 0'>Please select items to be returned </h5> <br />
+
+	   					<div class="item_list return" ng-show='purchase.purchase_items.length > 0'>
+	   						
+							<div class="item_list_row header">
+								<span> Item Code </span>
+								<span> Item name </span>
+								<span> Barcode </span>
+								<span> Choose Item </span>
+							</div>
+							<div ng-repeat="item in purchase.purchase_items" ng-click="addPurchaseItem(item)" class="item_list_row">
+								<span>[[item.item_code]]</span>
+								<span>[[item.item_name]]</span>
+								<span>[[item.barcode]] </span>
+								<span> <input type="checkbox" ng-click="addReturnItems(item)" ng-model="item.selected" /></span>
+							</div>
+							<div class="clear"></div>
+						</div>
+    				</div>
+    				<div class="clear"></div>
+    				<p class="error_message"> [[item_select_error]] </p>
+   				</div>
+
+   				<div class="purchase_items_list return_items" ng-show="purchase_return.purchase_items.length > 0">
+   					<div class="purchase_item_list">
+   						<div class="item_list_row header">
+							<span class="small_column"> Item Code </span>
+							<span> Item name </span>
+							<span> Barcode </span>
+							<span> Stock </span>
+							<span> Quantity Purchased </span>
+							<span> Returned Quantity </span>
+							<span> Cost Price </span>
+							<span> Return cost</span>												
+							<span> Quantity </span>
+							<span> Amount </span>
+						</div>
+						<div ng-repeat="item in purchase_return.purchase_items" class="item_list_row">
+							<span class="small_column">[[item.item_code]] </span>
+							<span>[[item.item_name]] </span>
+							<span>[[item.barcode]] </span>
+							<span>[[item.current_stock]] </span>
+							<span>[[item.qty_purchased]] </span>
+							<span>[[item.already_ret_quantity]] </span>
+							<span> [[item.cost_price]] </span>
+							<span> [[item.cost_price]] </span>
+							<span> <input type="text" ng-model="item.returned_quantity" ng-change="calculate_return_amount(item)" />	</span>	
+							<span> [[item.returned_amount]] </span>							 
+						</div>
+						<div class="clear"></div>
+   					</div>
+   					<div class="clear"></div>
+   				</div>
+   				<div class="clear"></div>
+				<div class="section_1_purchase">
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="net_total">Net Total</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="net_return_total" ng-model="purchase_return.net_return_total" readonly />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div  align="Center">
+				<div class="buttons">
+					<p class="error_message"> [[validation_error]] </p>
+					<input type="button" value="Submit" ng-click="save_purchase_return();" class="btn btn-info">
+					<a href="{% url 'home' %}"><input type="button" value="Cancel" class="btn btn-info"></a>
+				</div>
+			</div>			
+		</form>
+		<div class="clear"></div>
+	</div>
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

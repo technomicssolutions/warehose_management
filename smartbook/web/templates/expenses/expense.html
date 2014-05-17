@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block body_id %}expense{% endblock %}
+
+{% block title %}New Expense{% endblock title %}
+
+{% block controller %}
+	ng-controller="ExpenseController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block content %}
+
+	<div id="main-title">
+		<div class="alert alert-info" align="Center"><h4>New Expense</h4></div>
+	</div>
+
+	<div class="expense_form_container">
+		<form name="add_expense" method="post">
+			<div class="form_contents">
+				<div class="section_1">
+					<div class="formrow">
+						<div class="formtext">
+							<label for="voucher_no">Voucher No :</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="voucher_no" value="{{voucher_no}}" id="voucher_no">
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext">
+							<label for="date">Date :</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="date" id="date" value="{{current_date}}" readonly>
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext">
+							<label for="expense_head">Select Head :</label>
+						</div>
+						<div class="forminput">
+							<select name="expense_head" ng-model="expense_head">
+								<option value="select">Select</option>
+								<option ng-repeat="head in expense_heads" value="[[head.head_name]]">[[head.head_name]]</option>
+							</select>
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext">
+							<label for="amount">Amount :</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="amount" ng-model="amount">
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext" id="radio_text">
+							<label for="payment_mode">Payment Mode:</label>
+						</div>
+						<div class="forminput" id="radio_input">
+							<input type="radio" name="payment_mode" ng-model="payment_mode" value="cash" ng-change="payment_mode_change('cash')"><label>Cash</label>
+							<input type="radio" name="payment_mode" ng-model="payment_mode" value="cheque" ng-change="payment_mode_change('cheque')"><label>Cheque</label>
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext">
+							<label for="narration">Narration :</label>
+						</div>
+						<div class="forminput">
+							<textarea name="narration" ng-model="narration"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="section_2">
+					<div class="formrow">
+						<div class="formtext">
+							<label for="chequeno">Cheque No :</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="chequeno" ng-model="cheque_no" ng-readonly="payment_mode_selection">
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext">
+							<label for="cheque_date">Cheque Date :</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="cheque_date" id="cheque_date" value="{{current_date}}" ng-readonly="payment_mode_selection">
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext">
+							<label for="bank_name">Bank Name :</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="bank_name" ng-model="bank_name" ng-readonly="payment_mode_selection">
+						</div>
+					</div>
+					<div class="formrow">
+						<div class="formtext">
+							<label for="branch">Branch :</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="branch" ng-model="branch" ng-readonly="payment_mode_selection">
+						</div>
+					</div>
+				</div>	
+				
+			</div>
+			<div ng-show="error_flag">
+				<p class="error_message">[[error_message]]</p>
+			</div>
+			<div class="buttons">
+				<a href="" class="btn btn-info" ng-click="save_expense()">Submit</a>
+				<a href="" class="btn btn-info" ng-click="reset()">Reset</a>
+				<a href="{% url 'home' %}"class="btn btn-info">Cancel</a>
+			</div>
+			
+		</form>
+
+	</div>
+
+{% endblock content %}

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Return Entry{% endblock title %}
+{% block body_id %}return_entry{% endblock %}
+{% block controller %}ng-controller="SalesReturnController" ng-init="init('{{csrf_token}}', '{{invoice_number}}')"{% endblock controller %}
+{% block content %}
+
+	<div id="main-title">
+		<div class="alert alert-info" align="Center"><h4>Sales Return</h4></div>
+	</div>
+
+	<div class="purchase_form_container">
+		<form name="purchase_entry" method="post">
+			<div class="form_contents_purchase">
+				<div class="section_1_purchase">
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="sales_invoice_number">Sales Invoice Number</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="sales_invoice_number" ng-model="sales.sales_invoice_number" ng-change="load_sales()" /> 
+							<p> Please enter invoice number to load details </p>
+							<p style="color: red;"> [[message]] </p>
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="sales_return_invoice_number">Sales Return Invoice Number</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="sales_return_invoice_number" ng-model="sales_return.invoice_number"  readonly /> 
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="sales_return_date">Date</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="sales_return_date" ng-model="sales_return.sales_return_date" id="sales_return_date"/>
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="custoemr">Customer</label>
+						</div>
+						<div class="forminput">
+							<input type="text"  name="customer" ng-model="sales.customer" readonly />							
+						</div>
+					</div>
+				</div>	
+		
+				<div class="section_3_purchase">
+					<div class="search_purchase">
+   						<div class="clear"></div>
+
+   						<h5 ng-show='sales.sales_items.length > 0'>Please select items to be returned </h5> <br />
+
+	   					<div class="item_list return" ng-show='sales.sales_items.length > 0'>
+	   						
+							<div class="item_list_row header">
+								<span> Item Code </span>
+								<span> Item name </span>
+								<span> Barcode </span>
+							</div>
+							<div ng-repeat="item in sales.sales_items" ng-click="addSalesItem(item)" class="item_list_row">
+								<span>[[item.item_code]]</span>
+								<span>[[item.item_name]]</span>
+								<span>[[item.barcode]] </span>
+								<span> <input type="checkbox" ng-click="addSalesReturnItems(item)" ng-model="item.selected" /></span>
+							</div>
+							<div class="clear"></div>
+						</div>
+    				</div>
+    				<div class="clear"></div>
+    				<p class="error_message"> [[item_select_error]] </p>
+   				</div>
+
+   				<div class="purchase_items_list return_items" ng-show="sales_return.sales_items.length > 0">
+   					<div class="purchase_item_list">
+   						<div class="item_list_row header">
+
+							<span class="small_column  "> Item Code </span>
+							<span> Item name </span>
+							<span> Barcode </span>
+							
+							<span> Unit Price </span>
+							<span> Qty Sold </span>
+							<span> Tax Amt </span>
+							<span> Dis Giv</span>												
+							<span> Quantity </span>
+							<span> Amount </span>
+							
+						</div>
+						<div ng-repeat="item in sales_return.sales_items" class="item_list_row">
+							<span class="small_column">[[item.item_code]] </span>
+							<span>[[item.item_name]] </span>
+							<span>[[item.barcode]] </span>
+							
+							<span>[[item.unit_price]] </span>
+							<span>[[item.quantity_sold]] </span>
+							<span> [[item.tax_amount]] </span>
+							<span> [[item.discount_given]] </span>
+							<span> <input type="text" ng-model="item.returned_quantity" ng-change="calculate_return_amount(item)" />	</span>	
+							<span> [[item.returned_amount]] </span>							 
+						</div>
+						<div class="clear"></div>
+   					</div>
+   					<div class="clear"></div>
+   				</div>
+   				<div class="clear"></div>
+
+				<div class="section_1_purchase">
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="net_total">Net Total</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="net_return_total" ng-model="sales_return.net_return_total" readonly />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div  align="Center">
+				<div class="buttons">
+					<p class="error_message"> [[validation_error]] </p>
+					<input type="button" value="Submit" ng-click="save_sales_return();">
+					<a href="{% url 'home' %}"><input type="button" value="Cancel"></a>
+				</div>
+			</div>			
+		</form>
+		<div class="clear"></div>
+	</div>
+				
+{% endblock content %}
+

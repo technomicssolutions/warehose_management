@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Expense Report{% endblock title %}
+{% block body_id %}expense_report{% endblock %}
+
+{% block controller %}
+	ng-controller="ExpenseReportController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block content %}
+<div class="main-title">
+		
+		<div class="alert alert-info" align="Center">Date Wise Expense Report</div>
+
+</div>
+	
+	<div class="message">
+		<p>{{msg}}</p>
+	</div>
+
+	<form name="expense_report_form" method="get" action="{% url 'expense_report' %}">
+		
+		<div class="report_container">	
+			<div class="reporttext">
+					<label for="s_date">Start Date</label>
+			</div>
+
+			<div class="reportinput">
+				<input type="text" name="start_date" id="start_date" value="{{start_date}}">
+			</div>
+						
+
+			<div class="reporttext">
+					<label for="e_date">End Date</label>
+			</div>
+
+			<div class="reportinput">
+				<input type="text" name="end_date" id="end_date" value="{{end_date}}">
+			</div>
+
+			<div class="reporttext">
+				<input type="submit" value="View Report" class="btn btn-info " style="border-top-width: 0px; margin-top: 3px;">
+			</div>			
+		</div>
+	</form>
+
+	
+
+
+{% endblock content %}

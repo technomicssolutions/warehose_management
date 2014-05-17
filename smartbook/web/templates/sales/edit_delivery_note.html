@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block body_id %}edit_delivery_note{% endblock %}
+
+{% block title %}Edit Delivery{% endblock title %}
+{% block controller %}ng-controller="EditDeliveryController" ng-init="init('{{csrf_token}}')"{% endblock controller %}
+
+{% block dialogue_popup %}
+	{% include 'add_new_customer.html' %} 	              	
+{% endblock %}
+
+{% block content %}
+
+<div id="main-title">
+		<div class="alert alert-info" align="Center"><h4>Edit Delivery</h4></div>
+	</div>
+
+	<div class="sales_form_container">
+		<form name="direct_delivery_note" method="post">
+			<div class="form_contents_sales">
+				<div class="section_1_sales">
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="delivery_no">Delivery Note No </label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="delivery_note_no" ng-model="delivery_note_no" ng-change="get_delivery_note_details()" />
+							<p class="error_message"> [[dn_message]] </p>
+						</div>
+						<div class="item_list quotation_list" ng-show='selecting_delivery_note' ng-hide="delivery_note_selected">
+							<div ng-repeat="delivery_note in delivery_notes" ng-click="add_delivery_note(delivery_note)" class="item_list_row">
+								<span>[[delivery_note.delivery_no]]</span>
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>	
+
+					<div class="formrow_sales">
+						<div class="formtext_sales	">
+							<label for="Date ">Date </label>
+						</div>
+
+						<div class="forminput_sales">
+							
+							<input type="text" name="delivery_date"  id="delivery_date" ng-model="delivery_note.date" readonly>
+						</div>
+					</div>
+
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="delivery_no">Customer Name</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="customer" id="customer" ng-model="delivery_note.customer" readonly />
+						</div>
+					</div>	
+
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="reference_number">Reference Number </label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="reference_number" id="reference_number" ng-model="delivery_note.ref_no" readonly / >
+						</div>
+					</div>
+
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="lpo_no">LPO No </label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="lpo_no" ng-model="delivery_note.lpo_no" readonly />
+						</div>
+					</div>	
+
+				</div>	
+		
+				<div class="section_3_sales">
+					<div class="search_sales">
+						<div class="control">
+							<label> Item Code </label>
+   							<input type='text' id="item_code" ng-model="item_code" ng-change="getItems('item_code')"/>
+   						</div>
+   						<div class="control">
+   							<label> Item name </label>
+   							<input type="text" id='item_name' ng-model="item_name" ng-change="getItems('item_name')"/>
+   						</div>
+   						<div class="control">
+   							<label> Barcode </label>
+   							<input type="text" id='barcode' ng-model="barcode" ng-change="getItems('barcode')"/>
+   						</div>
+   						<div class="clear"></div>
+	   					<div class="item_list" ng-show='selecting_item' ng-hide="item_selected">
+							<div class="item_list_row header">
+								<span> Item Code </span>
+								<span> Item name </span>
+								<span> Barcode </span>
+							</div>
+							<div ng-repeat="item in items" ng-click="addSalesItem(item)" class="item_list_row">
+								<span>[[item.item_code]]</span>
+								<span>[[item.item_name]]</span>
+								<span>[[item.barcode]] </span>
+							</div>
+							<div class="clear"></div>
+						</div>
+    				</div>
+    				<div class="clear"></div>
+   				</div>
+
+
+   				<div class="purchase_items_list" ng-show="delivery_note.sales_items.length > 0">
+   					<div class="purchase_item_list">
+   						
+   						<div class="item_list_row header">
+   							<span>Sl No.</span>
+							<span class="small_column"> Item Code </span>
+							<span> Item Name </span>
+							<span> Barcode </span>
+							<span> Current Stock </span>
+							<span> Unit Price </span>
+							<span> Qty  </span>		
+							<span> Net Amount </span>
+							<span> &nbsp;&nbsp; </span>
+						</div>
+						<div ng-repeat="item in delivery_note.sales_items" class="item_list_row">
+							<span>[[item.sl_no]]</span>
+							<span class="small_column">[[item.item_code]] </span>
+							<span>[[item.item_name]] </span>
+							<span>[[item.barcode]] </span>
+							<span>[[item.current_stock]] </span>
+							<span>[[item.unit_price]] </span>
+							<span> <input type="text" ng-model="item.qty_sold" ng-change="calculate_net_amount_sale(item)" /> </span> 
+							
+							<span>[[item.net_amount]] </span>
+							<span><a href="" ng-click="remove_from_item_list(item)">X</a> </span>							
+						</div>
+						
+						<div class="clear"></div>
+   					</div>
+   					<div class="clear"></div>
+   				</div>
+   				
+   				<div class="clear"></div>
+
+				
+			</div>
+			<div  align="Center">
+				<div class="buttons">
+					<p class="error_message"> [[validation_error]] </p>
+					<input type="button" value="Submit" ng-click="edit_delivery_note();">
+					<a href="{% url 'home' %}"><input type="button" value="Cancel"></a>
+				</div>
+			</div>			
+		</form>
+		<div class="clear"></div>
+	</div>
+
+{% endblock content %}
+

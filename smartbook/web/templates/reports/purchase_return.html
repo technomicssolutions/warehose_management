@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Purchase Return{% endblock title %}
+{% block body_id %}purchase_return{% endblock %}
+
+{% block controller %}
+	ng-controller="PurchaseReturnReportController" ng-init="init('{{csrf_token}}','{{report_type}}')"   
+{% endblock controller %}
+
+{% block content %}
+
+	<div class="main-title">				
+			<div class="alert alert-info" align="Center"> Purchase Return Report
+									
+			</div>
+		</div>
+			
+		<div class="message">
+			<p>{{msg}}</p>
+		</div>
+		<form name="purchasereturn_report_form" method="get" action="{% url 'purchase_return_report' %}">
+			<div class="reporttext">
+					<label for="e_date">Report type: </label>
+			</div>
+			<div class="reportinput">
+				<select name="report_type" ng-change="get_report()" ng-model="report_type">
+					<option value="date" >Date Wise Report</option>
+					<option value="vendor" >Vendor Wise Report</option>
+				</select>
+			</div>
+			<div ng-show="report_date_wise">
+				<div class="reporttext">
+						<label for="s_date">Start Date</label>
+				</div>
+				<div class="reportinput">
+					<input type="text" name="start_date" id="start_date" value="{{start_date}}">
+				</div>
+				<div class="reporttext">
+					<label for="e_date">End Date</label>
+				</div>
+				<div class="reportinput">
+					<input type="text" name="end_date" id="end_date" value="{{end_date}}">
+				</div>
+			</div>
+
+			<div ng-show="report_vendor_wise">
+				<div class="reporttext">
+					<label for="e_date">Vendor: </label>
+				</div>
+				<div class="reportinput">
+					<select name="vendor" ng-model="vendor_name">
+						<option value="select">Select Vendor</option>
+						<option ng-repeat="vendor in vendors" value="[[vendor.vendor_name]]">[[vendor.vendor_name]]</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="reporttext">
+				<input type="submit" value="View Report" class="btn btn-info " style="border-top-width: 0px; margin-top: 3px;" />
+			</div>
+		</form>
+
+	</div>
+	
+
+
+{% endblock content %}

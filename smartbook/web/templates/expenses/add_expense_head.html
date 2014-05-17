@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block body_id %}expense_head{% endblock %}
+
+{% block title %}New Expense Head{% endblock title %}
+
+{% block content %}
+	<div class="expense_form_container">
+		<form class="add_expense_head" name="add_expense_head" method="post" action="{% url 'new_expense_head' %}">{% csrf_token %}
+			<div class="content_div">
+				<div class="formrow">
+					<div class="formtext">
+						<label for="head_name">Head Name<span class="required_field">&nbsp;*</span>:</label>
+					</div>
+					<div class="forminput">
+						<input type="text" name="head_name">
+					</div>
+				</div>
+				<div class="formrow">
+					<div class="buttons">
+						<input class="btn btn-info" type="submit" value="Submit">
+						<a class="btn btn-info" id="cancel_butn" href="{% url 'home' %}">Cancel</a>
+					</div>
+				</div>
+				<div class="message">
+					<p>{{message}}</p>
+				</div>
+			</div>
+		</form>
+	</div>
+
+{% endblock content %}

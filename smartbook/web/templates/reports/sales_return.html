@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Sales Return{% endblock title %}
+{% block body_id %}sales_return{% endblock %}
+
+{% block controller %}
+	ng-controller="SalesReturnReportController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block content %}
+
+<div class="main-title">		
+	<div class="alert alert-info" align="Center"> Sales Return Reports</div>
+</div>
+
+<div class="message">
+	<p>{{msg}}</p>
+</div>	
+<form name="salesreturn_form" method="get" action="{% url 'sales_return_report' %}">					
+	<div class="reporttext">
+		<label for="s_date">Start Date</label>
+	</div>
+	<div class="reportinput">
+		<input type="text" name="start_date" id="start_date" value="{{start_date}}">
+	</div>
+
+	<div class="reporttext">
+		<label for="e_date">End Date</label>
+	</div>
+	<div class="reportinput">
+		<input type="text" name="end_date" id="end_date" value="{{end_date}}">
+	</div>
+
+	<div class="reporttext">
+		<input type="submit" value="View Report" class="btn btn-info report_button " style="border-top-width: 0px; margin-top: 3px;" >
+	</div>
+</form>
+
+
+{% endblock content %}

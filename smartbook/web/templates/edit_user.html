@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %} 
+	{% if user_type == 'staff' %} 
+		Edit Staff
+	{% endif %}
+	{% if user_type == 'vendor' %} 
+		Edit Vendor
+	{% endif %}
+	{% if user_type == 'customer' %} 
+		Edit Customer
+	{% endif %}
+{% endblock title %}
+{% block body_id %} edit_{{user_type}} {% endblock body_id %}
+{% block controller %}
+	ng-controller="AddEditUserController" ng-init="init('{{csrf_token}}', '{{user_type}}')"   
+{% endblock controller %}
+{% block dialogue_popup %}
+	{% include 'add_designation.html' %}              	
+{% endblock %}
+
+{% block content %}
+
+<div id="main-title">
+	<div class="alert alert-info" align="Center">
+		{% if user_type == 'staff' %} 
+			Edit Staff
+		{% endif %}
+		{% if user_type == 'vendor' %} 
+			Edit Vendor
+		{% endif %}
+		{% if user_type == 'customer' %} 
+			Edit Customer
+		{% endif %}
+	</div>
+</div>
+
+<div class="form_container">
+	{% if user_type == 'customer' %}
+		<form name="staffadd" method="post" action="{% url 'edit_user' user_type=user_type user_id=profile.id%}">
+	{% else %}
+		<form name="staffadd" method="post" action="{% url 'edit_user' user_type=user_type user_id=profile.user.id%}">
+	{% endif %}
+		{% csrf_token %}
+		<p class="error_message">{{ message }}</p>
+		<div class="control">
+			<label>Name</label>
+			{% if user_type == 'customer' %}
+				<input name="name" type="text" value="{{profile.customer_name}}" />
+			{% else %}
+				<input name="name" type="text" value="{{profile.user.first_name}}" />
+			{% endif %}
+		</div>
+		{% if user_type == 'vendor' %}
+			<div class="control">
+				<label>Contact Person</label>
+				<input name="contact_person" type="text" value="{{profile.user.vendor_set.all.0.contact_person}}" />
+			</div>
+		{% endif %}
+		{% if user_type == 'staff' %}
+			<div class="control">
+				<label>Username</label>
+				<input name="username" type="text" value="{{profile.user.username}}" readonly />
+			</div>
+
+			<div class="control">
+				<label>Designation</label>
+				<input type="text" name="old_designation"value="{{profile.user.staff_set.all.0.designation.title}}" ng-click="show_designation_list()" id="designation_val">
+				<select name="new_designation" ng-model="designation" ng-show="designation_flag" ng-change="add_designation()">
+						<option ng-repeat="designatn in designations" value="[[designatn.title]]" ng-selected="designatn.title == designation">[[designatn.title]]</option>
+						<option value="other">Other</option>
+				</select>
+			</div>
+		{% endif %}
+		
+		<div class="control">
+			<label>House Name</label>
+			<input name="house" type="text" value="{{profile.house_name}}" />
+		</div>
+		<div class="control">
+			<label>Street</label>
+			<input name="street" type="text" value="{{profile.street}}" />
+		</div>
+		<div class="control">
+			<label>City</label>
+			<input name="city" type="text" value="{{profile.city}}" />
+		</div>
+		<div class="control">
+			<label>District</label>
+			<input name="district" type="text" value="{{profile.district}}" />
+		</div>
+		<div class="control">
+			<label>Pin</label>
+			<input name="pin" type="text" value="{{profile.pin}}" />
+		</div>
+		<div class="control">
+			<label>Mobile</label>
+			{% if user_type == 'customer' %}
+				<input name="mobile" type="text" value="{{profile.mobile_number}}" />
+			{% else %}
+				<input name="mobile" type="text" value="{{profile.mobile}}" />
+			{% endif %}
+		</div>
+		<div class="control">
+			<label>Land Line</label>
+			<input name="phone" type="text" value="{{profile.land_line}}" />
+		</div>
+		<div class="control">
+			<label>Email Id</label>
+			{% if user_type == 'customer' %}
+				<input name="email" type="text" value="{{profile.customer_id}}" />
+			{% else %}
+				<input name="email" type="text" value="{{profile.email_id}}" />
+			{% endif %}
+		</div>
+		<div class="control">
+			<label>&nbsp; &nbsp; </label>
+			<p class="error_message"> {{error_message}} </p> 
+			<input type="submit" value="Submit" class="btn btn-info">
+		</div>
+	</form>
+</div>
+
+{% endblock content %}

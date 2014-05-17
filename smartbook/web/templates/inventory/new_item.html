@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Add Item{% endblock title %}
+{% block body_id %}add_item{% endblock %}
+
+{% block controller %}
+	ng-controller="AddItemController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block dialogue_popup %}
+	{% include 'inventory/add_new_brand.html' %}    
+	{% include 'inventory/add_uom.html' %}               	
+{% endblock %}
+
+{% block content %}
+
+
+<div id="main-title">
+	<div class="alert alert-info" align="Center"><h4>Add Item</h4></div>
+</div>
+
+
+<div class="form_container">
+	<form class="" name="add_item" method="post" action="">
+		{% csrf_token %}
+		<div ng-show="error_flag" class="message"><p>[[message]]</p></div>
+		<div class="control">
+			<label > Item Code</label>  
+			<input type="text"  name="code" value=""  ng-model="item_code">
+		</div>
+		<div class="control">
+			<label> Item Name</label>
+			<input type="text" name="name" value="" ng-model="item_name">
+		</div>
+		<div class="control">
+			<label> Description</label>
+			<input type="text"name="description" value="" ng-model="item_description"></textarea>
+		</div>
+		<div class="control">
+			<label> UOM</label>  
+			<select name="uom" ng-model="uom_value" ng-change="add_uom()">
+				<option value="select">Select</option>
+				<option ng-repeat="uom in uoms" value="[[uom.uom_name]]" ng-selected="uom.uom_name == uom_value">[[uom.uom_name]]</option>
+				<option value="other">Other</option>
+			</select>
+		</div>
+		<div class="control">
+			<label> Brand</label>  
+			
+			<select name="brand" ng-model="brand_value" ng-change="add_brand()">
+				<option value="select">Select</option>
+				<option ng-repeat="brand in brands" value="[[brand.brand_name]]" ng-selected="brand.brand_name == brand_value">[[brand.brand_name]]</option>
+				<option value="other">Other</option>
+			</select>
+		</div>
+		<div class="control">
+			<label>Barcode</label>
+			<input type="text" name="barcode" value="" ng-model="bar_code"> 
+		</div>
+
+		<div class="control">
+			<label>Tax(%)</label>  
+			<input type="text" name="tax" value="" ng-model="tax">
+		</div>
+		
+		<div  align="Center">
+			<div class="buttons">
+				<input type="button" class="btn btn-info" value="Cancel" onClick="document.location.href = '/'">
+				<input type="submit" value="Submit" ng-click="save_item()" class="btn btn-info">
+				
+			</div>
+		</div>
+	</form>
+</div>
+
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

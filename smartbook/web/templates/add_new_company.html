@@ -1,0 +1,28 @@
+<div style='display:none' id="add_company">
+    <div id='add_new_designation' style='padding:10px; background:#fff;'>
+        <div class="sign_box">
+            <div class="row-fluid">
+                <div class="span12 sign_mid">
+                    <span>
+                        <form action="" id="register" name="register" method="post" class="reg_sec">
+                            <div class="formrow">
+                                <div class="formtext">
+                                    <label>Company Name</label>
+                                </div>
+                                <div class="forminput">  
+                                    <input type="text" name="company_name" ng-model="company_name" />
+                                </div>  
+                            </div>
+                            <div align="center">
+                                <p ng-show="error_flag" class="error_message">[[message]]</p>
+                                <input name="submit" type="button" value="Add" ng-click="add_new_company()">
+                                <input name="cancel" type="button" value="Cancel" ng-click="close_popup()">
+                            </div>
+                        </form>                        
+                    </span>
+                </div>
+            </div>    
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>

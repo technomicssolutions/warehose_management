@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Edit Stock{% endblock title %}
+{% block body_id %}edit_stock{% endblock %}
+
+{% block controller %}
+	ng-controller="StockEditController" ng-init="init('{{csrf_token}}', '{{stock.item.code}}')"   
+{% endblock controller %}
+
+{% block content %}
+<div id="main-title">
+	<div class="alert alert-info" align="Center"><h4>Edit stock</h4></div>
+</div>
+
+<div class="form_container">
+	<form class="" name="edit_stock" id="edit_stock_form" method="post" action="{% url 'edit_stock' %}" >
+		{% csrf_token %}
+		<div ng-show="error_flag" class="message"><p>[[message]]</p></div>
+		<div class="control">
+			<label > Item</label>  
+			<input type="text" name="item_code" ng-model="stock.item" value="{{stock.item.code}}" />
+ 			
+		</div>
+		<div class="control">
+			<label> Quantity</label>
+			<input type="text" name="quantity" value="{{stock.quantity}}" ng-model="stock.quantity" readonly>
+		</div>
+		<div class="control">
+			<label> Unit Price</label>
+			<input type="text"name="unit_price" value="{{stock.unit_price}}" ng-model="stock.unit_price"></textarea>
+		</div>
+		<div class="control">
+			<label> Selling Price</label>  
+			<input type="text" name="selling_price" value="{{stock.selling_price}}" ng-model="stock.selling_price" />
+		</div>
+		<div class="control">
+			<label> Discount Permitted (amt)</label>  
+			<input type="text" name="discount_permit_amount" ng-model="stock.discount_permit_amount" value="{{stock.discount_permit_amount}}" />
+		</div>
+		<div class="control">
+			<label> Discount Permitted (%)</label>  
+			<input type="text" name="discount_permit_percent" ng-model="stock.discount_permit_percent" value="{{stock.discount_permit_percentage}}" />
+		</div>
+		<div  align="Center">
+			<div class="buttons">
+				<p class="error_message"> [[validation_error]] </p>
+				<a href="{% url 'home' %}"><input type="button" value="Cancel" class="btn btn-info"></a>
+				
+				<input type="button" value="Submit" ng-click="validate()" class="btn btn-info">
+				
+			</div>
+		</div>
+	</form>
+</div>
+
+
+{% endblock content %}

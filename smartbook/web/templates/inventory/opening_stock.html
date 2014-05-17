@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Opening Stock{% endblock title %}
+{% block body_id %}opening_stock_entry{% endblock %}
+
+{% block controller %}
+	ng-controller="OpeningStockController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block dialogue_popup %}
+	{% include 'inventory/add_new_brand.html' %}    
+	{% include 'inventory/add_uom.html' %}               	
+{% endblock %}
+
+{% block content %}
+
+
+<div id="main-title">
+	<div class="alert alert-info" align="Center"><h4>Add Opening stock item</h4></div>
+</div>
+
+
+<div class="form_container">
+	<form class="" name="opening_stock" id="opening_stock_form" method="post" action="{% url 'opening_stock_entry' %}" >
+		{% csrf_token %}
+		<div ng-show="error_flag" class="message"><p>[[message]]</p></div>
+		<div class="control">
+			<label > Item</label>  
+			<select name="item">
+				{% for item in items %}
+					<option value="{{item.code}}">{{item.code}} - {{item.name}} - {{item.barcode}}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="control">
+			<label> Quantity</label>
+			<input type="text" name="quantity" value="" ng-model="quantity">
+		</div>
+		<div class="control">
+			<label> Unit Price</label>
+			<input type="text"name="unit_price" value="" ng-model="unit_price"></textarea>
+		</div>
+		<div class="control">
+			<label> Selling Price</label>  
+			<input type="text" name="selling_price" ng-model="selling_price" />
+		</div>
+		<div class="control">
+			<label> Discount Permitted (amt)</label>  
+			<input type="text" name="discount_permit_amount" ng-model="discount_permit_amount" />
+		</div>
+		<div class="control">
+			<label> Discount Permitted (%)</label>  
+			<input type="text" name="discount_permit_percent" ng-model="discount_permit_percent" />
+		</div>
+		<div  align="Center">
+			<div class="buttons">
+				<p class="error_message"> [[validation_error]] </p>
+				<a href="{% url 'home' %}"><input type="button" value="Cancel" class="btn btn-info"></a>
+				
+				<input type="button" value="Submit" ng-click="validate()" class="btn btn-info">
+				
+			</div>
+		</div>
+	</form>
+</div>
+
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

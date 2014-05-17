@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Report
+{% endblock title %}
+{% block body_id %}report{% endblock %}
+{% block controller %}
+	ng-controller="ReportController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block content %}
+
+{% endblock content %}

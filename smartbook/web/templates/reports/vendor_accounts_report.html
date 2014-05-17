@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Purchase Accounts Report{% endblock title %}
+{% block body_id %}purchase_accounts_reports{% endblock %}
+
+{% block controller %}
+	ng-controller="VendorAccountReportController" ng-init="init('{{csrf_token}}','{{report_type}}')"   
+{% endblock controller %}
+
+{% block content %}
+	<div>
+
+		<div class="main-title">		
+			<div class="alert alert-info" align="Center">Date Wise Vendor Accounts</div>
+		</div>
+		
+		<div class="message">
+			<p>{{msg}}</p>
+		</div>
+
+		<form name="vendoraccount_report_form" method="get" action="{% url 'vendor_accounts_report' %}">
+				
+			<div ng-show="report_date_wise_flag">
+				<div class="reporttext">
+					<label for="s_date">Start Date</label>
+				</div>
+				<div class="reportinput">
+					<input type="text" name="start_date" id="start_date" value="{{start_date}}">
+				</div>						
+
+				<div class="reporttext">
+					<label for="e_date">End Date</label>
+				</div>
+				<div class="reportinput">
+					<input type="text" name="end_date" id="end_date" value="{{end_date}}">
+				</div>
+			</div>
+			<div ng-show="report_vendor_wise_flag">
+				<div class="reportinput">
+					<select name="vendor" ng-model="vendor_name">
+						<option value="select">Select Vendor</option>
+						<option ng-repeat="vendor in vendors" value="[[vendor.vendor_name]]">[[vendor.vendor_name]]</option>
+
+					</select>
+				</div>
+			</div>
+
+			<div class="reporttext">
+					<label for="e_date">Report type: </label>
+			</div>
+			<div class="reportinput">
+				<select name="report_type" ng-change="get_report_type()" ng-model="report_type">
+					<option value="date" >Date Wise Report</option>
+					<option value="vendor" >Vendor Wise Report</option>
+				</select>
+			</div>
+			<div class="reporttext">
+				<input type="submit" value="View Report" class="btn btn-info " style="border-top-width: 0px; margin-top: 3px;" ng-click="view_report('date')">
+			</div>
+		</form>
+		
+	</div>
+			
+	
+
+
+{% endblock content %}

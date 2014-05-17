@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block body_id %}create_sales{% endblock %}
+
+{% block title %}Sales-Quotation-DeliveryNote {% endblock title %}
+{% block controller %}ng-controller="SalesQNDNController" ng-init="init('{{csrf_token}}', '{{sales_invoice_number}}')" ng-click="hide_sales_details()"{% endblock controller %}
+{% block dialogue_popup %}
+	{% include 'add_new_customer.html' %} 
+	              	
+{% endblock %}
+
+{% block content %}
+
+	<div id="main-title">
+		<div class="alert alert-info" align="Center"><h4>Sales Entry</h4></div>
+	</div>
+
+	<div class="sales_form_container">
+		<form name="sales_entry" method="post">
+			<div class="form_contents_sales">
+				<div class="section_1_sales">
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="customer">Quotation Reference No</label>
+						</div>
+						<div class="forminput_sales">
+							<input type='text' id="quotation_no" ng-model="quotation_no" ng-change="get_quotation_details()"/>
+							<p> [[message]] </p>
+						</div>
+						<div class="item_list quotation_list" ng-show='selecting_quotation' ng-hide="quotation_selected">
+							<div ng-repeat="quotation in quotations" ng-click="add_quotation(quotation)" class="item_list_row">
+								<span>[[quotation.ref_no]]</span>
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+					
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="customer">Delivery No</label>
+						</div>
+
+						<div class="forminput_sales">
+							<input type='text' id="delivery_no" ng-model="delivery_no" ng-change="get_delivery_note_details()"/>
+							<p> [[dn_message]] </p>
+						</div>
+						<div class="item_list delivery_note" ng-show='selecting_delivery_note' ng-hide="delivery_note_selected">
+							<div ng-repeat="delivery_note in delivery_notes" ng-click="add_delivery_note(delivery_note)" class="item_list_row">
+								<span>[[delivery_note.delivery_no]]</span>
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+					<div class="formrow_sales">
+						<div class="formtext_sales	">
+							<label for="Date ">Date </label>
+						</div>
+
+						<div class="forminput_sales">
+							
+							<input type="text" name="sales_invoice_date"  id="sales_invoice_date" value="{{current_date}}" readonly>
+						</div>
+					</div>
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="customer">Customer Name</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="customer"  id="customer" ng-model="sales.customer" 
+						</div>
+					</div>
+
+				</div>	
+				<div class="formrow_sales">
+					<div class="formtext_sales">
+						<label for="sales_invoice_number">Invoice Number </label>
+					</div>
+					<div class="forminput_sales">
+						<input type="text" name="sales_invoice_number"  ng-model="sales.sales_invoice_number"  readonly / >
+					</div>
+				</div>	
+
+				<div class="formrow_sales">
+					<div class="formtext_sales">
+						<label for="lpo_number">LPO Number </label>
+					</div>
+					<div class="forminput_sales">
+						<input type="text" name="lpo_number"  ng-model="sales.lpo_number"/ >
+					</div>
+				</div>
+			
+   				<div class="purchase_items_list" ng-show="sales.sales_items.length > 0">
+   					<div class="purchase_item_list">
+   						
+   						<div class="item_list_row header">
+							<span class="small_column"> Item Code </span>
+							<span> Item Name </span>
+							<span> Barcode </span>
+							<span> Stock </span>
+							<span> Unit Price </span>
+							<span> Qty  </span>
+							<span> UOM  </span>
+							<span> Dis Given </span>	
+							<span> Net Amount </span>
+							<span> &nbsp;&nbsp; </span>
+						</div>
+						<div ng-repeat="item in sales.sales_items" class="item_list_row">
+							<span class="small_column">[[item.item_code]] </span>
+							<span>[[item.item_name]] </span>
+							<span>[[item.barcode]] </span>
+							<span>[[item.current_stock]] </span>
+							<span><input type="text" ng-model="item.unit_price" ng-click="get_latest_sales_details(item)" ng-change="calculate_net_amount_sale(item)" id="latest_price"/></span>
+							<!-- <span> [[item.qty_sold]]</span>  -->
+							<span> <input type="text" ng-model="item.qty_sold" ng-change="calculate_net_amount_sale(item)" /> </span>
+							<span>[[item.uom]] </span>
+							<span> <input type="text" ng-model="item.disc_given" ng-change="calculate_net_amount_sale(item)"/> </span> 
+							<span>[[item.net_amount]] </span>
+							<span><a href="" ng-click="remove_from_item_list(item)">X</a> </span>
+							 
+						</div>
+						
+						<div class="clear"></div>
+   					</div>
+   					<div class="clear"></div>
+   				</div>
+
+   				<div class="section_3_sales align_top">
+					<div class="search_sales">
+	   					<div class="item_list" ng-show='sales_deatils' id="latest_sales_details" ng-click="hide_sales_details()">
+							<div class="item_list_row header" ng-click="hide_sales_details()">
+								<span> Date </span>
+								<span> Unit Price </span>
+								<span> Quantity Sold </span>
+								<span> Discount Given </span>
+							</div>
+							<div ng-repeat="sales_item in latest_sales" ng-click="hide_sales_details()" class="item_list_row" id="latest_sales_details">
+								<span>[[sales_item.date]]</span>
+								<span>[[sales_item.selling_price]]</span>
+								<span>[[sales_item.qty_sold]]</span>
+								<span>[[sales_item.discount_given]]</span>
+							</div>
+							<div class="clear"></div>
+						</div>
+    				</div>
+    				<div class="clear"></div>
+   				</div>
+   				
+   				<div class="clear"></div>
+
+				<div class="section_1_sales">
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="salesman_code">Salesman Code</label>
+						</div>
+						<div class="forminput_sales">
+							<select name="staff" ng-model="sales.staff" ng-change="add_staff()" >
+								<option value="select">Select</option>
+								<option ng-repeat="staff in staffs" value="[[staff.salesman_name]]" >[[staff.salesman_name]]
+								</option>
+								
+							</select>
+								
+							</select>
+						</div>
+
+						<div class="formtext_sales" id="radio">
+							<label for="payment_mode">Payment Mode</label>
+						</div>
+						<div class="forminput_sales" id="radio_input">
+							<input type="radio" name="payment_mode" ng-model="sales.payment_mode" value="cash" ng-change="payment_mode_change_sales('cash')"><label>Cash</label>
+							<input type="radio" name="payment_mode" ng-model="sales.payment_mode" value="cheque" ng-change="payment_mode_change_sales('cheque')"><label>Cheque</label>
+							<input type="radio" name="payment_mode" ng-model="sales.payment_mode" value="card" ng-change="payment_mode_change_sales('card')"><label>Card</label>
+
+						</div>
+						<div class="formtext_sales">
+							<label for="card_number">Card Number</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="card_number"ng-model="sales.card_number" ng-readonly="payment_mode_selection">
+						</div>
+						<div class="formtext_sales">
+							<label for="bank_name">Bank Name</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="bank_name"ng-model="sales.bank_name" ng-readonly="payment_mode_selection_check">
+						</div>
+
+					</div>
+					
+
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="net_total">Net Total</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="net_total"ng-model="sales.net_total" readonly/ >
+						</div>
+					
+						<div class="formtext_sales">
+							<label for="discount">Discount</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="net_discount" ng-model="sales.net_discount"ng-change="calculate_grant_total_sale()" readonly/>
+						</div>
+
+						<div class="formtext_sales">
+							<label for="round">Round Off</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="roundoff" ng-model="sales.roundoff" ng-change="calculate_grant_total_sale()">
+						</div>
+
+						<div class="formtext_sales">
+							<label for="Grant Total">Grand Total</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="grant_total" ng-model="sales.grant_total" readonly/>
+						</div>
+
+						<div class="formtext_sales">
+							<label for="paid">Paid</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="paid" ng-model="sales.paid" ng-change="calculate_balance_sale()">
+						</div>
+
+						<div class="formtext_sales">
+							<label for="balance">Balance</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="balance" ng-model="sales.balance">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div  align="Center">
+				<div class="buttons">
+					<p class="error_message"> [[validation_error]] </p>
+					<input type="button" value="Submit" ng-click="save_sales();">
+					<a href="{% url 'home' %}"><input type="button" value="Cancel"></a>
+				</div>
+			</div>			
+		</form>
+		<div class="clear"></div>
+	</div>
+
+{% endblock content %}

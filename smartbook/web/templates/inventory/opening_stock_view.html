@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Opening Stock{% endblock title %}
+{% block body_id %}opening_stock{% endblock %}
+{% block content %}
+
+<div id="main-title">
+	<div class="alert alert-info" align="Center"><h4>Opening Stock</h4></div>
+</div>
+<a class="btn btn-info" href="{% url 'opening_stock_entry' %}" style="float: right">New Stock</a>
+
+{% if stock_items.count == 0 %}
+	<p class="error_message"> No Items on opening stock </p>
+{% else %}
+	<table class="table table-striped">
+		<tr><th> Item code </th> <th> Item Name </th> <th> Barcode </th> <th> Quantity </th> <th> UOM </th>  </tr>
+		{% for item in stock_items %}
+		 	<tr>
+		 		<td> {{item.item.code}} </td>
+		 		<td> {{item.item.name}} </td>
+		 		<td> {{item.item.barcode}} </td>
+		 		<td> {{item.quantity}} </td>
+		 		<td> {{item.item.uom}} </td>
+		 	</tr>
+		{% endfor %}
+	</table>
+{% endif %}
+
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

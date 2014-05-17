@@ -1,0 +1,79 @@
+<div class="menu_header">
+	<div class="logo">
+		<img src="/static/images/Logo.png" >
+	</div>
+	<div class="menu_div">
+		{% if user.is_authenticated %}
+			<ul>
+				<li class="menu"> <img src="/static/images/user.png" width="24px" >
+					<span class="user_name"> 
+						{% if user.is_authenticated %}
+							{% if user.first_name %}
+								{{user.first_name}} {{user.last_name}} 
+							{% else %} 
+								{{user.username}}
+							{% endif %} 
+						{% endif %}
+					</span>
+					<ul>
+						<li> <a href="{% url 'backup' %}"> DB Backup </a> </li>
+						<li> <a href="{% url 'clear_backup' %}"> Backup Folder </a> </li>
+						<li> <a href="{% url 'users' user_type='vendor' %}"> Vendors </a> </li>
+						{% comment %}<li> <a href="{% url 'users' user_type='staff' %}"> Staff </a> </li> {% endcomment %}
+						<li> <a href="{% url 'register_salesman' user_type='staff' %}"> Sales Man </a> </li>
+						<li> <a href="{% url 'users' user_type='customer'  %}"> Customers </a> </li>
+						<li> <a href="{% url 'logout' %}"> Logout </a> </li>
+						<li> <a href="{% url 'reset_password' user_id=user.id %}"> Reset password </a> </li>
+					</ul>
+				</li>
+				<li class="menu"> <a href=""> Inventory </a> 
+					<ul> 
+						<li> <a href="{% url 'add_item' %}"> New Item </a> </li>
+						<li> <a href="{% url 'stock' %}"> Stock </a> </li>
+						<li> <a href="{% url 'opening_stock' %}"> Opening Stock </a> </li>
+					</ul>
+				</li>
+				<li class="menu"> <a href=""> Purchase </a> </a> 
+					<ul> 
+						<li> <a href="{% url 'purchase' %}"> New Entry </a> </li>
+						<li> <a href="{% url 'purchase_return' %}"> Purchase Return </a> </li>
+						<li> <a href="{% url 'vendor_accounts' %}"> Vendor Accounts </a> </li>
+					</ul>
+				</li>
+				<li class="menu"> <a href=""> Sales </a>
+					<ul>
+						<li><a href="{% url 'create_quotation' %}"> Quotation</a></li>
+						<li><a href="{% url 'create_delivery_note' %}"> Delivery Note</a></li>
+						<li><a href="{% url 'direct_delivery_note' %}"> Direct Delivery Note</a></li>
+						<li><a href="{% url 'create_sales_entry' %}"> Sales (Qn/ DN)</a></li>
+						<li> <a href="{% url 'sales' %}"> Direct Sales </a> </li>
+						<li> <a href="{% url 'receipt_voucher' %}"> Receipt Voucher</a> </li>
+						<li> <a href="{% url 'return_entry' %}"> Return Entry</a> </li>
+						<li> <a href="{% url 'edit_sales_invoice' %}"> Edit Sales Invoice </a> </li>
+						<li> <a href="{% url 'edit_quotation' %}"> Edit Quotation</a> </li>
+						<li><a href="{% url 'edit_delivery_note' %}"> Edit Delivery Note </a> </li>
+					</ul>
+				</li>
+				<li class="menu"> <a href="{% url 'new_expense' %}"> Expenses </a> 
+					<ul>
+						<li><a href="{% url 'new_expense' %}">Expenses</a></li>
+						<li><a href="{% url 'new_expense_head' %}"> Expense Head</a></li>
+					</ul>
+				</li>
+
+				<li class="menu last"> <a href=""> Reports </a>
+					<ul>
+						<li><a href="{% url 'daily_report' %}"> Daily Reports </a> </li>
+						<li><a href="{% url 'sales_reports' %}"> Sales </a> </li>
+						<li><a href="{% url 'sales_return_report' %}"> Sales Return</a> </li>
+						<li><a href="{% url 'stock_reports' %}"> Stock </a> </li>
+						<li><a href="{% url 'purchase_reports' %}"> Purchase </a> </li>
+						<li><a href="{% url 'purchase_return_report' %}"> Purchase Return </a> </li>
+						<li><a href="{% url 'expense_report' %}"> Expense Report </a> </li>
+						<li><a href="{% url 'vendor_accounts_report' %}"> Vendor Accounts </a> </li>
+					</ul>
+				</li>
+			</ul>
+		{% endif %}
+	</div>
+</div>

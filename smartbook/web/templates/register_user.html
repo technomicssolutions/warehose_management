@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %} 
+	{% if user_type == 'staff' %} 
+		New Staff
+	{% endif %}
+	{% if user_type == 'vendor' %} 
+		New Vendor
+	{% endif %}
+	{% if user_type == 'customer' %} 
+		New Customer
+	{% endif %}
+{% endblock title %}
+{% block controller %}
+	ng-controller="AddEditUserController" ng-init="init('{{csrf_token}}', '{{user_type}}', '{{salesman}}')"   
+{% endblock controller %}
+{% block body_id %} new_{{user_type}} {% endblock body_id %}
+{% block content %}
+{% block dialogue_popup %}
+	{% include 'add_designation.html' %}              	
+{% endblock %}
+
+<div id="main-title">
+	<div class="alert alert-info" align="Center">
+		{% if user_type == 'staff' %} 
+			New Staff
+		{% endif %}
+		{% if user_type == 'vendor' %} 
+			New Vendo
+		{% endif %}
+		{% if user_type == 'customer' %} 
+			New Customer
+		{% endif %}
+	</div>
+</div>
+<div class="form_container">
+	{% if user_type == 'customer' %}
+		<form name="staffadd" method="post" action="{% url 'create_customer'%}">
+	{% else %}
+		<form name="staffadd" method="post" action="{% url 'register_user' user_type=user_type %}">
+	{% endif %}
+			{% csrf_token %}
+			
+			<div class="control">
+				<label>Name</label>
+				<input name="name" type="text" value="{{name.0}}" />
+			</div>
+			{% if user_type == 'vendor' %}
+				<div class="control">
+					<label>Contact Person</label>
+					<input name="contact_person" type="text" value="{{contact_person.0}}" />
+				</div>
+			{% endif %}
+			{% if user_type == 'staff' %}
+
+				<div class="control">
+					<label>Username</label>
+					<input name="username" type="text" value="{{username.0}}" />
+				</div>
+
+				<div class="control">
+					<label>Password</label>
+					<input name="password" type="password" value="{{password.0}}" />
+				</div>
+
+				<div class="control">
+					<label>Designation</label>
+					{% if salesman %}
+						<input type="text" name="designation" ng-model="designation" value="Salesman" readonly />
+					{% else %}
+						<select name="designation" ng-model="designation" ng-change="add_designation()">
+							<option value="select">Select</option>
+							<option ng-repeat="designatn in designations" value="[[designatn.title]]" ng-selected="designatn.title == designation">[[designatn.title]]</option>
+							<option value="other">Other</option>
+						</select>
+					{% endif %}
+
+				</div>
+				
+			{% endif %}
+			
+			<div class="control">
+				<label>House Name</label>
+				<input name="house" type="text" value="{{house.0}}" />
+			</div>
+			<div class="control">
+				<label>Street</label>
+				<input name="street" type="text" value="{{street.0}}" />
+			</div>
+			<div class="control">
+				<label>City</label>
+				<input name="city" type="text" value="{{city.0}}" />
+			</div>
+
+			<div class="control">
+				<label>District</label>
+				<input name="district" type="text" value="{{district.0}}" />
+			</div>
+			<div class="control">
+				<label>Pin</label>
+				<input name="pin" type="text" value="{{pin.0}}" />
+			</div>
+			<div class="control">
+				<label>Mobile</label>
+				<input name="mobile" type="text" value="{{mobile.0}}" />
+			</div>
+			<div class="control">
+				<label>Land Line</label>
+				<input name="phone" type="text" value="{{phone.0}}" />
+			</div>
+			<div class="control">
+				<label>Email Id</label>
+				<input name="email" type="text" value="{{email.0}}" />
+			</div>
+			<div class="control">
+				<label> </label>
+				<p class="error_message">{{ message }}</p>
+				<p class="error_message"> {{error_message}} </p> 
+				<input type="submit" value="Submit" class="btn btn-info">
+			</div>
+		</form>
+</div>
+
+{% endblock content %}

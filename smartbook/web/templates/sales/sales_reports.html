@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Date Wise Sales Reports{% endblock title %}
+{% block body_id %}sales_reports_date{% endblock %}
+
+{% block content %}
+<div class="main-title">
+		
+		<div class="alert alert-info" align="Center">Date wise sales report
+								
+		</div>
+
+
+</div>
+	
+		
+		<div class="reporttext">
+				<label for="s_date">Start Date</label>
+		</div>
+
+		<div class="reportinput">
+				<input type="text" name="start_date" >
+		</div>
+					
+
+		<div class="reporttext">
+				<label for="e_date">End Date</label>
+		</div>
+
+		<div class="reportinput">
+				<input type="text" name="end_date" >
+		</div>
+		<div class="reporttext">
+			<input type="submit" value="Genrate" class="btn btn-info " style="border-top-width: 0px; margin-top: 3px;">
+		</div>
+
+		<div class="reporttext">
+			<a href=""><img src="/static/images/print.png" height='25px' width='25px'/></a>
+		</div>
+
+				
+
+		<table id="list" class="table table-hover" >
+			<tr class="success" style="font-size: 12px"style="width:auto">
+			  <th>Date</th>
+			  <th>Invoice Number</th>
+			  <th>Item Name</th>
+			  <th>Quantity</th>
+			  <th>Discount</th>
+			  <th>Selling Price</th>
+			  <th>Total</th>
+			  <th>Profit</th>
+			  <th></th>
+			</tr>
+
+<!-- 			{% for item in items %}
+
+			<tr class="success" style="font-size: 12px"style="width:auto">
+			  <td>{{item.code}}</td>
+			  <td>{{item.barcode}}</td>
+			  <td>{{item.name}}</td>
+			  <td>{{item.description}}</td>
+			  <td>{{item.brand.brand}}</td>
+			  <td>Vendor</td>
+			  <td>{{item.uom.uom}}</td>
+			  <td>stock</td>
+			  <td><a href="{% url 'edit_item' item.id %}">EDIT</a></td>
+			</tr>
+			{% endfor %}
+ -->		</table> 
+		
+
+	
+
+
+{% endblock content %}

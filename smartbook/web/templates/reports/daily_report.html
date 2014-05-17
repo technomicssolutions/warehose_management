@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Daily Report{% endblock title %}
+{% block body_id %}daily_report{% endblock %}
+
+{% block controller %}
+	ng-controller="DailyReportController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block content %}
+<div class="main-title">		
+	<div class="alert alert-info" align="Center" >Daily Reports</div>
+</div>
+<div class="message">
+	<p>{{msg}}</p>
+</div>
+
+<form name="purchase_form" method="get" action="{% url 'daily_report' %}">
+
+	<div class="reporttext">
+		<label for="s_date">Start Date</label>
+	</div>
+	<div class="reportinput">			
+		<input type="text" name="start_date" id="start_date" value="{{start_date}}">
+	</div>					
+
+	<div class="reporttext">
+		<label for="e_date">End Date</label>
+	</div>
+	<div class="reportinput">
+		<input type="text" name="end_date" id="end_date" value="{{end_date}}">
+	</div>
+
+	<div class="reporttext">
+		<input type="submit" value="View Report" class="btn btn-info report_button " style="border-top-width: 0px; margin-top: 3px;">
+	</div>	
+
+</form>	
+
+
+{% endblock content %}

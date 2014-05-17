@@ -1,0 +1,57 @@
+<div style='display:none' id="add_customer">
+    <div id='add_new_customer' style='padding:10px; background:#fff;'>
+        <div class="sign_box">
+            <div class="row-fluid">
+                <div class="span12 sign_mid">
+                    <form action="" id="register" name="register" method="post" class="reg_sec">
+                        {% csrf_token %}
+                        <div class="control">
+                            <label>Customer Name</label>
+                            <input name="name" type="text" ng-model="customer_name"/>
+                        </div>
+                        
+                        <div class="control">
+                            <label>House Name</label>
+                            <input name="house" type="text" ng-model="house_name"/>
+                        </div>
+                        <div class="control">
+                            <label>Street</label>
+                            <input name="street" type="text" ng-model="street"/>
+                        </div>
+                        <div class="control">
+                            <label>City</label>
+                            <input name="city" type="text" ng-model="city"/>
+                        </div>
+                        <div class="control">
+                            <label>District</label>
+                            <input name="district" type="text" ng-model="district"/>
+                        </div>
+                        <div class="control">
+                            <label>Pin</label>
+                            <input name="pin" type="text" ng-model="pin" />
+                        </div>
+                        <div class="control">
+                            <label>Mobile</label>
+                            <input name="mobile" type="text" ng-model="mobile" />
+                        </div>
+                        <div class="control">
+                            <label>Land Line</label>
+                            <input name="phone" type="text" ng-model="land_line"/>
+                        </div>
+                        <div class="control">
+                            <label>Email Id</label>
+                            <input name="email" type="text" ng-model="email_id" />
+                        </div>
+                        <div align="center">
+                            <p ng-show="error_flag" class="error_message">[[error_message]][[message]]</p>
+                            <input name="submit" type="button" value="Add" ng-click="add_new_customer()">
+                            <input name="cancel" type="button" value="Cancel" ng-click="close_popup()">
+                            
+                        </div>
+                    </form>                        
+                </div>
+            </div>    
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>

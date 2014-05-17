@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block body_id %}purchase_edit{% endblock %}
+
+{% block title %}Purchase Edit{% endblock title %}
+{% block controller %}ng-controller="PurchaseController" ng-init="init('{{csrf_token}}', '{{invoice_number}}')"{% endblock controller %}
+
+{% block dialogue_popup %}
+	{% include 'add_new_vendor.html' %} 
+	{% include 'add_new_company.html' %} 
+	{% include 'inventory/add_new_brand.html' %}              	
+{% endblock %}
+
+{% block content %}
+
+	<div id="main-title">
+		<div class="alert alert-info" align="Center"><h4>Edit Purchase</h4></div>
+	</div>
+
+	<div class="purchase_form_container">
+		<form name="purchase_entry" method="post">
+			<div class="form_contents_purchase">
+				<div class="section_1_purchase">
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="purchase_invoice_number">Purchase Invoice Number</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="purchase_invoice_number" ng-model="purchase.purchase_invoice_number" ng-change="load_purchase()" /> 
+							<p> Please enter invoice number to load details </p>
+						</div>
+					</div>
+
+
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="vendor_invoice_number">Vendor Invoice Number </label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="vendor_invoice_number"  ng-model="purchase.vendor_invoice_number" />
+						</div>
+					</div>
+
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="vendor_do_number">Vendor DO Number</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="vendor_do_number" ng-model="purchase.vendor_do_number" />
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="vendor_invoice_date">Vendor Invoice Date</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="vendor_invoice_date" ng-model="purchase.vendor_invoice_date" id="vendor_invoice_date">
+						</div>
+					</div>
+					
+				
+
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="purchase_invoice_date">Purchase Invoice Date</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="purchase_invoice_date" ng-model="purchase.purchase_invoice_date" id="purchase_invoice_date"/>
+						</div>
+					</div>
+
+
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="brand">Brand</label>
+						</div>
+						<div class="forminput">
+							<select name="brand" ng-model="purchase.brand" ng-change="add_brand()">
+								<option value="select">Select</option>
+								<option ng-repeat="brand in brands" value="[[brand.brand_name]]" ng-selected="brand.brand_name == purchase.brand">[[brand.brand_name]]</option>
+								<option value="other">Other</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="vendor">Vendor</label>
+						</div>
+						<div class="forminput">
+							<select name="vendor" ng-model="purchase.vendor" ng-change="add_vendor()">
+								<option value="select">Select</option>
+								<option ng-repeat="vendor in vendors" value="[[vendor.vendor_name]]" ng-selected="vendor.vendor_name == purchase.vendor">[[vendor.vendor_name]]</option>
+								<option value="other">Other</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="transport">Transport</label>
+						</div>
+						<div class="forminput">
+							<select name="transport" ng-model="purchase.transport" ng-change="add_transport()">
+								<option value="select">Select</option>
+								<option ng-repeat="company in companies" value="[[company.company_name]]" ng-selected="company.company_name == purchase.transport">[[company.company_name]]</option>
+								<option value="other">Other</option>
+							</select>
+						</div>
+					</div>
+
+						
+				</div>	
+		
+				<div class="section_3_purchase">
+					<div class="search_purchase">
+						<div class="control">
+							<label> Item Code </label>
+   							<input type='text' id="item_code" ng-model="item_code" ng-change="getItems('item_code')"/>
+   						</div>
+   						<div class="control">
+   							<label> Item name </label>
+   							<input type="text" id='item_name' ng-model="item_name" ng-change="getItems('item_name')"/>
+   						</div>
+   						<div class="control">
+   							<label> Barcode </label>
+   							<input type="text" id='barcode' ng-model="barcode" ng-change="getItems('barcode')"/>
+   						</div>
+   						<div class="clear"></div>
+	   					<div class="item_list" ng-show='selecting_item' ng-hide="item_selected">
+							<div class="item_list_row header">
+								<span> Item Code </span>
+								<span> Item name </span>
+								<span> Barcode </span>
+							</div>
+							<div ng-repeat="item in items" ng-click="addPurchaseItem(item)" class="item_list_row">
+								<span>[[item.item_code]]</span>
+								<span>[[item.item_name]]</span>
+								<span>[[item.barcode]] </span>
+							</div>
+							<div class="clear"></div>
+						</div>
+    				</div>
+    				<div class="clear"></div>
+    				<p class="error_message"> [[item_select_error]] </p>
+   				</div>
+
+   				<div class="purchase_items_list" ng-show="purchase.purchase_items.length > 0">
+   					<div class="purchase_item_list">
+   						<div class="item_list_row header">
+							<span class="small_column"> Item Code </span>
+							<span> Item name </span>
+							<span> Barcode </span>
+							<span> Current Stock </span>
+							<span> Unit Price </span>
+							<span> Qty purchased </span>
+							<span> Item Frieght </span>
+							<span> Frieght/<br />Unit </span>
+							<span> Item Handling </span>
+							<span> Handling/<br />Unit </span>
+							<span> Expense </span>
+							<span class="small_column"> Expense/ <br /> Unit </span>		
+							<span> Cost Price </span>
+							<span> Selling Price</span>												
+							<span> Permit Discount (Amt) </span>
+							<span> Permit Discount (%) </span>
+							<span> Net Amount </span>
+						</div>
+						<div ng-repeat="item in purchase.purchase_items" class="item_list_row">
+							<span class="small_column">[[item.item_code]] </span>
+							<span>[[item.item_name]] </span>
+							<span>[[item.barcode]] </span>
+							<span>[[item.current_stock]] </span>
+							<span> <input type="text" ng-model="item.unit_price" ng-change="calculate_cost_price(item)" /> </span>			
+							<span> <input type="text" ng-model="item.qty_purchased" ng-change="calculate_net_amount(item)" /> </span> 
+							<span> <input type="text" ng-model="item.frieght" ng-change="calculate_frieght(item)" /> </span> 
+							<span> [[item.frieght_unit]] </span> 
+							<span> <input type="text" ng-model="item.handling" ng-change="calculate_handling(item)"/> </span> 
+							<span> [[item.handling_unit]] </span>
+							<span> <input type="text" ng-model="item.expense" ng-change="calculate_expense(item)" /> </span>	
+							<span class="small_column"> [[item.expense_unit]] </span> </span>
+							<span> <input type="text" ng-model="item.cost_price" /> </span>
+							<span> <input type="text" ng-model="item.selling_price" ng-change="calculate_discount(item)"/> </span>
+									
+							<span> <input type="text" ng-model="item.permit_disc_amt" ng-change="calculate_discount_percent(item)" /> </span>
+							<span> <input type="text" ng-model="item.permit_disc_percent" ng-change="calculate_discount_amt(item)"/> </span>
+							<span> [[item.net_amount]] </span>
+							<a class="delete_anch" href="" ng-click="delete_purchase_item(item);"> <img src="/static/images/delete.png" /> </a> 
+						</div>
+						<div class="clear"></div>
+   					</div>
+   					<div class="clear"></div>
+   				</div>
+   				<div class="clear"></div>
+				<div class="section_1_purchase">
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="vendor_amout">Vendor Amount</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="vendor_amount" ng-model="purchase.vendor_amount" readonly />
+						</div>
+						<div class="formtext_purchase">
+							<label for="purchase_expense">Purchase Expense</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="purchase_expense" ng-model="purchase.purchase_expense" readonly />
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="net_total">Net Total</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="net_total" ng-model="purchase.net_total" ng-change="calculate_grant_total()" readonly />
+						</div>
+					</div>
+
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="discount">Discount</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="discount" ng-model="purchase.discount" ng-change="calculate_grant_total()" />
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="grant_total">Grand Total</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="grant_total" ng-model="purchase.grant_total" readonly />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div  align="Center">
+				<div class="buttons">
+					<p class="error_message"> [[validation_error]] </p>
+					<input type="button" value="Submit" ng-click="save_purchase();">
+					<a href="{% url 'home' %}"><input type="button" value="Cancel"></a>
+				</div>
+			</div>			
+		</form>
+		<div class="clear"></div>
+	</div>
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
