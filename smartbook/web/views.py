@@ -147,10 +147,11 @@ class RegisterUser(View):
         template = 'register_user.html'
         if request.POST['name'] == '':
             message = "Please enter name"
-        elif request.POST['username'] == '':
-            message = "Please enter username"
-        elif request.POST['password'] == '':
-            message = "Please enter password"
+        if user_type == "Salesman":
+            if request.POST['username'] == '':
+                message = "Please enter username"
+            elif request.POST['password'] == '':
+                message = "Please enter password"
         if message:
             context = {
                 'error_message': message,
@@ -159,40 +160,28 @@ class RegisterUser(View):
             context.update(request.POST)            
             return render(request, template, context)
         else:
-            if user_type == 'staff':
-                if request.POST['designation'] == '':
-                    message = "Please select designation"
+            if user_type == 'Salesman':
+                user, created = User.objects.get_or_create(username=request.POST['username'])
+                if not created:
+                    message = "Salesman with this names exists"
                     context = {
                         'error_message': message,
                         'user_type': user_type,
-                        'salesman': 'salesman',
+                        'salesman': 'salesman'
                     }
                     context.update(request.POST)            
                     return render(request, template, context)
-                else:
-                    user, created = User.objects.get_or_create(username=request.POST['username'])
-                    if not created:
-                        message = "Staff with this names exists"
-                        context = {
-                            'error_message': message,
-                            'user_type': user_type,
-                            'salesman': 'salesman'
-                        }
-                        context.update(request.POST)            
-                        return render(request, template, context)
-                    else:                        
-                        user.set_password(request.POST['password'])
-                        user.save()
-                        designation, created = Designation.objects.get_or_create(title=request.POST['designation'])
-                        staff = Staff()
-                        staff.designation = designation
-                        staff.user = user
-                        staff.save()
-                        context = {
-                            'message' : 'Staff added correctly',
-                            'user_type': user_type,
-                            'salesman': 'salesman'
-                        }
+                else:                        
+                    user.set_password(request.POST['password'])
+                    user.save()
+                    context = {
+                        'message' : 'Salesman added correctly',
+                        'user_type': user_type,
+                        'salesman': 'salesman'
+                    }
+                user.email = request.POST['email']
+                user.first_name = request.POST['name']
+                user.save()
 
             elif user_type == 'vendor':
                 user, created = User.objects.get_or_create(username=request.POST['name']+user_type, first_name = request.POST['name'])
@@ -265,7 +254,7 @@ class EditUser(View):
             userprofile = UserProfile.objects.get(user_id=kwargs['user_id'])
             if user_type == 'vendor':
                 return render(request, 'edit_user.html',{'user_type': user_type, 'profile': userprofile})
-            elif user_type == 'staff':
+            elif user_type == 'Salesman':
                 return render(request, 'edit_user.html',{
                     'user_type': user_type,
                     'profile': userprofile
@@ -313,7 +302,7 @@ class EditUser(View):
         else:
             user = User.objects.get(id= kwargs['user_id'])
             user.first_name = post_dict['name']
-            user.username= post_dict['name']+user_type
+            
             user.email = post_dict['email']
             user.save()
             userprofile, created = UserProfile.objects.get_or_create(user = user)
@@ -329,6 +318,8 @@ class EditUser(View):
             userprofile.email_id = request.POST['email']
             userprofile.save()
             if user_type == 'vendor':
+                user.username= post_dict['name']+user_type
+                user.save()
                 vendor = user.vendor_set.all()[0]  
                 vendor.contact_person= request.POST['contact_person']
                 vendor.user = user
@@ -339,22 +330,14 @@ class EditUser(View):
                     'profile': userprofile
                 }
                 return render(request, 'edit_user.html',context)
-            elif user_type == 'staff':
+            elif user_type == 'Salesman':
                 user.username = request.POST['username']
                 user.save()
                 userprofile.user = user
                 userprofile.save()
-                staff = user.staff_set.all()[0]
-                staff.user = user
-                if request.POST['old_designation'] != request.POST['new_designation']:
-                    try:
-                        designation =  Designation.objects.get(title=request.POST['new_designation'])
-                        staff.designation = designation
-                    except Designation.DoesNotExist:
-                        pass   
-                staff.save()
+                
                 context = {
-                    'message' : 'Staff edited correctly',
+                    'message' : 'Salesman edited correctly',
                     'user_type': user_type,
                     'profile': userprofile
                 }

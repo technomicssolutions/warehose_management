@@ -19,8 +19,10 @@
 						<li> <a href="{% url 'backup' %}"> DB Backup </a> </li>
 						<li> <a href="{% url 'clear_backup' %}"> Backup Folder </a> </li>
 						<li> <a href="{% url 'users' user_type='vendor' %}"> Vendors </a> </li>
-						{% comment %}<li> <a href="{% url 'users' user_type='staff' %}"> Staff </a> </li> {% endcomment %}
-						<li> <a href="{% url 'register_salesman' user_type='staff' %}"> Sales Man </a> </li>
+						{% comment %}<li> <a href="{% url 'users' user_type='staff' %}"> Staff </a> </li> 
+						<li> <a href="{% url 'register_salesman' user_type='Salesman' %}"> Sales Men </a> </li>
+						{% endcomment %}
+						<li> <a href="{% url 'users' user_type='Salesman' %}"> Sales Men </a> </li> 
 						<li> <a href="{% url 'users' user_type='customer'  %}"> Customers </a> </li>
 						<li> <a href="{% url 'logout' %}"> Logout </a> </li>
 						<li> <a href="{% url 'reset_password' user_id=user.id %}"> Reset password </a> </li>

@@ -1,32 +1,27 @@
 {% extends 'base.html' %}
 {% block title %} 
-	{% if user_type == 'staff' %} 
-		Edit Staff
-	{% endif %}
 	{% if user_type == 'vendor' %} 
 		Edit Vendor
+	{% endif %}
+	{% if user_type == 'Salesman' %} 
+		Edit Salesman
 	{% endif %}
 	{% if user_type == 'customer' %} 
 		Edit Customer
 	{% endif %}
 {% endblock title %}
 {% block body_id %} edit_{{user_type}} {% endblock body_id %}
-{% block controller %}
-	ng-controller="AddEditUserController" ng-init="init('{{csrf_token}}', '{{user_type}}')"   
-{% endblock controller %}
-{% block dialogue_popup %}
-	{% include 'add_designation.html' %}              	
-{% endblock %}
 
 {% block content %}
 
 <div id="main-title">
 	<div class="alert alert-info" align="Center">
-		{% if user_type == 'staff' %} 
-			Edit Staff
-		{% endif %}
+		
 		{% if user_type == 'vendor' %} 
 			Edit Vendor
+		{% endif %}
+		{% if user_type == 'Salesman' %} 
+			Edit Salesman
 		{% endif %}
 		{% if user_type == 'customer' %} 
 			Edit Customer
@@ -56,19 +51,10 @@
 				<input name="contact_person" type="text" value="{{profile.user.vendor_set.all.0.contact_person}}" />
 			</div>
 		{% endif %}
-		{% if user_type == 'staff' %}
+		{% if user_type == 'Salesman' %}
 			<div class="control">
 				<label>Username</label>
 				<input name="username" type="text" value="{{profile.user.username}}" readonly />
-			</div>
-
-			<div class="control">
-				<label>Designation</label>
-				<input type="text" name="old_designation"value="{{profile.user.staff_set.all.0.designation.title}}" ng-click="show_designation_list()" id="designation_val">
-				<select name="new_designation" ng-model="designation" ng-show="designation_flag" ng-change="add_designation()">
-						<option ng-repeat="designatn in designations" value="[[designatn.title]]" ng-selected="designatn.title == designation">[[designatn.title]]</option>
-						<option value="other">Other</option>
-				</select>
 			</div>
 		{% endif %}
 		

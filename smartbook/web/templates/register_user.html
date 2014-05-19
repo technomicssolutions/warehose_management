@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %} 
-	{% if user_type == 'staff' %} 
-		New Staff
+	{% if user_type == 'Salesman' %} 
+		New Salesman
 	{% endif %}
 	{% if user_type == 'vendor' %} 
 		New Vendor
@@ -10,19 +10,13 @@
 		New Customer
 	{% endif %}
 {% endblock title %}
-{% block controller %}
-	ng-controller="AddEditUserController" ng-init="init('{{csrf_token}}', '{{user_type}}', '{{salesman}}')"   
-{% endblock controller %}
 {% block body_id %} new_{{user_type}} {% endblock body_id %}
 {% block content %}
-{% block dialogue_popup %}
-	{% include 'add_designation.html' %}              	
-{% endblock %}
 
 <div id="main-title">
 	<div class="alert alert-info" align="Center">
-		{% if user_type == 'staff' %} 
-			New Staff
+		{% if user_type == 'Salesman' %} 
+			New Salesman
 		{% endif %}
 		{% if user_type == 'vendor' %} 
 			New Vendo
@@ -50,7 +44,7 @@
 					<input name="contact_person" type="text" value="{{contact_person.0}}" />
 				</div>
 			{% endif %}
-			{% if user_type == 'staff' %}
+			{% if user_type == 'Salesman' %}
 
 				<div class="control">
 					<label>Username</label>
@@ -60,20 +54,6 @@
 				<div class="control">
 					<label>Password</label>
 					<input name="password" type="password" value="{{password.0}}" />
-				</div>
-
-				<div class="control">
-					<label>Designation</label>
-					{% if salesman %}
-						<input type="text" name="designation" ng-model="designation" value="Salesman" readonly />
-					{% else %}
-						<select name="designation" ng-model="designation" ng-change="add_designation()">
-							<option value="select">Select</option>
-							<option ng-repeat="designatn in designations" value="[[designatn.title]]" ng-selected="designatn.title == designation">[[designatn.title]]</option>
-							<option value="other">Other</option>
-						</select>
-					{% endif %}
-
 				</div>
 				
 			{% endif %}
