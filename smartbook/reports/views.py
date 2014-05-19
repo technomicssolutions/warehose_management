@@ -1280,6 +1280,11 @@ class SalesmanStockReports(View):
         if salesman_name is None:
             return render(request, 'reports/salesman_stock_report.html', {})
         if salesman_name:
+            if salesman_name == 'select':
+                context = {
+                    'message': 'Please Choose Salesman'
+                }
+                return render(request, 'reports/salesman_stock_report.html', context) 
             salesman = User.objects.get(first_name=salesman_name)
             stocks = SalesmanStock.objects.filter(salesman=salesman)
         

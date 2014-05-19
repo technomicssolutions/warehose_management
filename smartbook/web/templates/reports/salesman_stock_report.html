@@ -15,16 +15,19 @@
 </div>
 
 <form name="purchase_form" method="get" action="{% url 'salesman_stock_report' %}">
-
-	<div>	
-		<div class="reportinput">
-			<label> Salesman</label> 
-			<select name="salesman_name" ng-model="salesman_name" value="{{salesman_name}}">
+	{% if message %}
+		<p class="error_message">{{message}}</p>
+	{% endif %}
+	<div class="reporttext">
+		<label> Salesman</label> 
+	</div>
+	<div class="reportinput">			
+		<select name="salesman_name" ng-model="salesman_name" value="{{salesman_name}}">
 			 	<option value="select" >Select Salesman</option>
 			 	<option ng-repeat="salesman in salesmen" value="[[salesman.salesman_name]]">[[salesman.salesman_name]]</option>
-			</select>		
-		</div>			
+			</select>	
 	</div>
+	
 	<div class="reporttext">
 		<input type="submit" value="View Report" class="btn btn-info report_button " style="border-top-width: 0px; margin-top: 3px;">
 	</div>
