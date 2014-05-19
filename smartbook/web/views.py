@@ -235,12 +235,7 @@ class RegisterUser(View):
                         'user_type': user_type
                     }
                     context.update(request.POST)
-            else:
-                user = User()
-                user.username = request.POST['email']
-                user.email = request.POST['email']
-                user.first_name = request.POST['name']
-                user.save()
+            
             userprofile = UserProfile()
             userprofile.user_type=user_type
             userprofile.user = user
