@@ -25,6 +25,8 @@ class Purchase(models.Model):
     vendor = models.ForeignKey(Vendor, null=True, blank=True)
     payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=25, choices=PAYMENT_MODE)
     bank_name = models.CharField('Bank Name',max_length=50,null=True, blank=True)
+    cheque_no = models.CharField('Cheque No', max_length=60, null=True, blank=True)
+    cheque_date = models.DateField('Cheque Date', null=True, blank=True)
     transportation_company = models.ForeignKey(TransportationCompany, null=True, blank=True)
     discount = models.DecimalField('Discount',max_digits=14, decimal_places=3, default=0)
     net_total = models.DecimalField('Net Total',max_digits=14, decimal_places=3, default=0)

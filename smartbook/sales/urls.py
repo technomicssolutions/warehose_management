@@ -25,4 +25,7 @@ urlpatterns = patterns('',
 	url(r'edit_sales_invoice/$', EditSalesInvoice.as_view(), name='edit_sales_invoice'),
 	url(r'edit_quotation/$', EditQuotation.as_view(), name='edit_quotation'),
 	url(r'edit_delivery_note/$', EditDeliveryNote.as_view(), name='edit_delivery_note'),
+	url(r'^salesman_sales_entry/$', SalesmanSalesEntry.as_view(), name='salesman_sales_entry'),
+	url(r'^salesmanstock_items/$', SalesmanStockItemList.as_view(),name='salesmanstock_items_list'),
+	
 )

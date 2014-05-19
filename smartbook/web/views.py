@@ -55,22 +55,39 @@ class UserList(View):
 
         ctx_customers = []
         ctx_salesman = []
-        if user_type == 'Salesman':
+        if user_type == 'Salesman' or user_type == 'salesman':
             users = UserProfile.objects.filter(user_type='Salesman')
+
+            salesmen = UserProfile.objects.filter(user_type = 'Salesman')
+
             if request.is_ajax():
-                if len(users) > 0:
-                    for usr in users:
+                if len(salesmen)>0:
+                    for salesman in salesmen:
                         ctx_salesman.append({
-                            'staff_name': usr.user.first_name,
+                            'salesman_name' : salesman.user.first_name if salesman.user.first_name else salesman.user.username,
                         })
                 res = {
-                    'salesmen': ctx_salesman,
-                    
+                    'salesmen' : ctx_salesman,
                 } 
+                
 
                 response = simplejson.dumps(res)
                 status_code = 200
                 return HttpResponse(response, status = status_code, mimetype="application/json")
+            # if request.is_ajax():
+            #     if len(users) > 0:
+            #         for usr in users:
+            #             ctx_salesman.append({
+            #                 'staff_name': usr.user.first_name,
+            #             })
+            #     res = {
+            #         'salesmen': ctx_salesman,
+                    
+            #     } 
+
+            #     response = simplejson.dumps(res)
+            #     status_code = 200
+            #     return HttpResponse(response, status = status_code, mimetype="application/json")
         elif user_type == 'vendor':
             users = Vendor.objects.all()
             if request.is_ajax():
@@ -106,24 +123,24 @@ class UserList(View):
                 response = simplejson.dumps(res)
                 status_code = 200
                 return HttpResponse(response, status = status_code, mimetype="application/json")
-        elif user_type == 'salesman': 
+        # elif user_type == 'salesman': 
         
-            salesmen = UserProfile.objects.filter(user_type = 'Salesman')
+        #     salesmen = UserProfile.objects.filter(user_type = 'Salesman')
 
-            if request.is_ajax():
-                if len(salesmen)>0:
-                    for salesman in salesmen:
-                        ctx_salesman.append({
-                            'salesman_name' : salesman.user.first_name if salesman.user.first_name else salesman.user.username,
-                        })
-                res = {
-                    'salesmen' : ctx_salesman,
-                } 
+        #     if request.is_ajax():
+        #         if len(salesmen)>0:
+        #             for salesman in salesmen:
+        #                 ctx_salesman.append({
+        #                     'salesman_name' : salesman.user.first_name if salesman.user.first_name else salesman.user.username,
+        #                 })
+        #         res = {
+        #             'salesmen' : ctx_salesman,
+        #         } 
                 
 
-                response = simplejson.dumps(res)
-                status_code = 200
-                return HttpResponse(response, status = status_code, mimetype="application/json")
+        #         response = simplejson.dumps(res)
+        #         status_code = 200
+        #         return HttpResponse(response, status = status_code, mimetype="application/json")
 
         return render(request, 'user_list.html',{
             'users': users,

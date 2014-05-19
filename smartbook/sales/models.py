@@ -104,7 +104,7 @@ class Sales(models.Model):
     sales_invoice_number = models.CharField('Sales Invoice Number', null=True, blank=True, max_length=10)
     sales_invoice_date = models.DateField('Sales Invoice Date', null=True, blank=True)
     customer = models.ForeignKey(Customer, null=True, blank=True)
-    salesman = models.ForeignKey(UserProfile, null=True, blank=True)
+    salesman = models.ForeignKey(User, null=True, blank=True)
     payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=25)
     card_number = models.IntegerField('Card Number',null=True, blank=True)
     bank_name = models.CharField('Bank Name',max_length=50,null=True, blank=True)
@@ -207,6 +207,84 @@ class ReceiptVoucher(models.Model):
 
         verbose_name = 'Receipt Voucher'
         verbose_name_plural = 'Receipt Voucher'
+
+class SalesmanStock(models.Model):
+
+    item = models.ForeignKey(Item, unique=True)
+    quantity = models.IntegerField('Quantity', default=0)
+    unit_price = models.DecimalField('Unit Price',max_digits=14, decimal_places=2, default=0)
+    selling_price = models.DecimalField('Selling Price',max_digits=14, decimal_places=2, default=0)
+    discount_permit_percentage = models.DecimalField('Discount permitted percentage',max_digits=14, decimal_places=3, default=0,null=True, blank=True)
+    discount_permit_amount = models.DecimalField('Discount permitted amount',max_digits=14, decimal_places=3, default=0,null=True, blank=True)
+
+    def __unicode__(self):
+        return self.item.code
+
+    class Meta:
+        verbose_name_plural = 'Salesman Stock'
+        verbose_name = 'Salesman Stock'
+
+class SalesmanSales(models.Model): 
+
+    sales_invoice_number = models.CharField('Sales Invoice Number', null=True, blank=True, max_length=10)
+    sales_invoice_date = models.DateField('Sales Invoice Date', null=True, blank=True)
+    customer = models.ForeignKey(Customer, null=True, blank=True)
+    salesman = models.ForeignKey(User, null=True, blank=True)
+    payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=25)
+    card_number = models.IntegerField('Card Number',null=True, blank=True)
+    bank_name = models.CharField('Bank Name',max_length=50,null=True, blank=True)
+    net_amount = models.DecimalField('Net Amount',max_digits=14, decimal_places=2, default=0)
+    round_off = models.DecimalField('Net Round Off',max_digits=14, decimal_places=2, default=0)
+    grant_total = models.DecimalField('Grand Total',max_digits=14, decimal_places=2, default=0)
+    discount = models.DecimalField('Total Discount',max_digits=14, decimal_places=2, default=0)
+    lpo_number = models.CharField('LPO Number', null=True, blank=True, max_length=30)
+
+    def __unicode__(self):
+
+        return str(self.sales_invoice_number)
+
+    class Meta:
+
+        verbose_name = 'Salesman Sales'
+        verbose_name_plural = 'Salesman Sales'
+
+
+class SalesmanSalesInvoice(models.Model):
+
+    sales = models.ForeignKey(SalesmanSales)
+    customer = models.ForeignKey(Customer, null=True, blank=True)
+    date = models.DateField('Date', null=True, blank=True)
+    invoice_no = models.CharField('Invoice Number',null=True, blank=True, max_length=20)
+    prefix =  models.CharField('Prefix', max_length=20, default='SINV')
+
+
+    def __unicode__(self):
+
+        return str(self.invoice_no)
+
+    class Meta:
+
+        verbose_name = 'Salesman Sales Invoice'
+        verbose_name_plural = 'Salesman Sales Invoice'
+
+class SalesmanSalesItem(models.Model):
+
+    item = models.ForeignKey(Item)
+    sales = models.ForeignKey(SalesmanSales)
+    quantity_sold = models.IntegerField('Quantity Sold', default=0)
+    discount_given = models.DecimalField('Discount Given',max_digits=14, decimal_places=2, default=0)  
+    selling_price = models.DecimalField('Selling Price', max_digits=14, decimal_places=2, default=0) 
+    net_amount = models.DecimalField('Sold Net Amount', max_digits=14, decimal_places=2, default=0)
+    
+    
+    def __unicode__(self):
+
+        return str(self.sales.sales_invoice_number)
+
+    class Meta:
+
+        verbose_name = 'Salesman Sales Items'
+        verbose_name_plural = 'Salesman Sales Items'
 
 
 
