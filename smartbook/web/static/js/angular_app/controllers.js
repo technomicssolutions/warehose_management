@@ -4172,22 +4172,32 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
     $scope.sales_items = [];
     
     $scope.getItems = function(parameter){
-
-        if(parameter == 'item_code')
-            var param = $scope.item_code;
-        else if(parameter == 'item_name')
-            var param = $scope.item_name;
-        else if (parameter == 'barcode')
-            var param = $scope.barcode;
-        $http.get('/sales/salesmanstock_items/?'+parameter+'='+param).success(function(data)
-        {
-            $scope.selecting_item = true;
-            $scope.item_selected = false;
-            $scope.items = data.items;
-        }).error(function(data, status)
-        {
-            console.log(data || "Request failed");
-        });
+        var salesman = $scope.sales.staff;
+        if (salesman == 'select') {
+            $scope.no_salesman_error_msg = 'Please choose Salesman';
+        } else {
+            $scope.no_salesman_error_msg = '';
+            if(parameter == 'item_code')
+                var param = $scope.item_code;
+            else if(parameter == 'item_name')
+                var param = $scope.item_name;
+            else if (parameter == 'barcode')
+                var param = $scope.barcode;
+            $http.get('/sales/salesmanstock_items/?'+parameter+'='+param+'&salesman_name='+salesman).success(function(data)
+            {
+                $scope.selecting_item = true;
+                $scope.item_selected = false;
+                $scope.items = data.items;
+                if($scope.items.length == 0) {
+                    $scope.no_salesman_error_msg = 'No such items';
+                } else {
+                    $scope.no_salesman_error_msg = ''; 
+                }
+            }).error(function(data, status)
+            {
+                console.log(data || "Request failed");
+            });
+        }
     }
 
     $scope.addSalesItem = function(item) {

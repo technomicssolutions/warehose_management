@@ -58,8 +58,21 @@
 						<div class="forminput_sales">
 							<input type="text" name="lpo_number"  ng-model="sales.lpo_number"/ >
 						</div>
-					</div>	
-
+					</div>
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="salesman_code">Salesman Code</label>
+						</div>
+						<div class="forminput_sales">
+							<select name="staff" ng-model="sales.staff" >
+								<option value="select">Select</option>
+								<option ng-repeat="staff in staffs" value="[[staff.salesman_name]]" >[[staff.salesman_name]]
+								</option>
+								
+							</select>
+						</div>	
+					</div>
+					<p class="error_message">[[no_salesman_error_msg]]</p>
 				</div>	
 		
 				<div class="section_3_sales">
@@ -143,17 +156,6 @@
 
 				<div class="section_1_sales">
 					<div class="formrow_sales">
-						<div class="formtext_sales">
-							<label for="salesman_code">Salesman Code</label>
-						</div>
-						<div class="forminput_sales">
-							<select name="staff" ng-model="sales.staff" >
-								<option value="select">Select</option>
-								<option ng-repeat="staff in staffs" value="[[staff.salesman_name]]" >[[staff.salesman_name]]
-								</option>
-								
-							</select>
-						</div>
 
 						<div class="formtext_sales" id="radio">
 							<label for="payment_mode">Payment Mode</label>

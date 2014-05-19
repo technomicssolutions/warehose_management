@@ -211,6 +211,7 @@ class ReceiptVoucher(models.Model):
 class SalesmanStock(models.Model):
 
     item = models.ForeignKey(Item, unique=True)
+    salesman = models.ForeignKey(User, null=True, blank=True)
     quantity = models.IntegerField('Quantity', default=0)
     unit_price = models.DecimalField('Unit Price',max_digits=14, decimal_places=2, default=0)
     selling_price = models.DecimalField('Selling Price',max_digits=14, decimal_places=2, default=0)
