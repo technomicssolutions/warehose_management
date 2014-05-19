@@ -104,7 +104,7 @@ class Sales(models.Model):
     sales_invoice_number = models.CharField('Sales Invoice Number', null=True, blank=True, max_length=10)
     sales_invoice_date = models.DateField('Sales Invoice Date', null=True, blank=True)
     customer = models.ForeignKey(Customer, null=True, blank=True)
-    salesman = models.ForeignKey(UserProfile, null=True, blank=True)
+    salesman = models.ForeignKey(User, null=True, blank=True)
     payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=25)
     card_number = models.IntegerField('Card Number',null=True, blank=True)
     bank_name = models.CharField('Bank Name',max_length=50,null=True, blank=True)

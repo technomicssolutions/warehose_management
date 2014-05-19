@@ -866,7 +866,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
     }
 
     $scope.get_staff = function() {
-        $http.get('/salesman/list/').success(function(data)
+        $http.get('/Salesman/list/').success(function(data)
         {           
 
             $scope.staffs = data.salesmen;
@@ -1311,7 +1311,7 @@ function SalesController($scope, $element, $http, $timeout, share, $location) {
 
 
     $scope.get_staff = function() {
-        $http.get('/salesman/list/').success(function(data)
+        $http.get('/Salesman/list/').success(function(data)
         {           
 
             $scope.staffs = data.salesmen;
@@ -2044,7 +2044,7 @@ function SalesReportController($scope, $element, $http, $timeout, $location){
         });
     }
     $scope.get_salesman = function() {
-        $http.get('/salesman/list/').success(function(data)
+        $http.get('/Salesman/list/').success(function(data)
         {
             $scope.salesmen = data.salesmen;
             $scope.salesman_name = 'select';

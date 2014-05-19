@@ -74,7 +74,7 @@ class SalesEntry(View):
         sales.sales_invoice_date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
         customer = Customer.objects.get(customer_name=sales_dict['customer'])
         
-        salesman = Staff.objects.get(user__first_name=sales_dict['staff']) 
+        salesman = User.objects.get(first_name=sales_dict['staff']) 
         
         sales.discount = sales_dict['net_discount']
         sales.round_off = sales_dict['roundoff']
