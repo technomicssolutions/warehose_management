@@ -118,6 +118,13 @@ class PurchaseEntry(View):
         purchase.purchase_invoice_date = datetime.strptime(purchase_dict['purchase_invoice_date'], '%d/%m/%Y')
         brand = Brand.objects.get(brand=purchase_dict['brand'])
         purchase.brand = brand
+        purchase.payment_mode = purchase_dict['payment_mode']
+        if purchase_dict['bank_name']:
+            purchase.bank_name = purchase_dict['bank_name']
+        if purchase_dict['cheque_no']:
+            purchase.cheque_no = purchase_dict['cheque_no']
+        if purchase_dict['cheque_date']:
+            purchase.cheque_date = datetime.strptime(purchase_dict['cheque_date'], '%d/%m/%Y')
         vendor = Vendor.objects.get(user__first_name=purchase_dict['vendor_name'])       
         transport = TransportationCompany.objects.get(company_name=purchase_dict['transport'])
         purchase.vendor = vendor

@@ -89,7 +89,7 @@
 						<div class="forminput">
 							<select name="vendor" ng-model="purchase.vendor_name" ng-change="add_vendor()">
 								<option value="select">Select</option>
-								<option ng-repeat="vendor in vendors" value="[[vendor.vendor_name]]" ng-selected="vendor.vendor_name == purchase.vendor">[[vendor.vendor_name]]</option>
+								<option ng-repeat="vendor in vendors" value="[[vendor.vendor_name]]" ng-selected="vendor.vendor_name == purchase.vendor_name">[[vendor.vendor_name]]</option>
 								<option value="other">Other</option>
 							</select>
 						</div>
@@ -116,7 +116,6 @@
 							<input type="radio" name="payment_mode" ng-model="purchase.payment_mode" value="cash" ng-change="payment_mode_change_purchase('cash')"><label>Cash</label>
 							<input type="radio" name="payment_mode" ng-model="purchase.payment_mode" value="cheque" ng-change="payment_mode_change_purchase('cheque')"><label>Cheque</label>
 						</div>
-						</div>
 					</div>
 					<div class="formrow_purchase">
 						<div class="formtext_purchase">
@@ -124,7 +123,7 @@
 						</div>
 						
 						<div class="forminput" id="radio_input">
-							<input type="text" name="bank_name" ng-model="purchase.bank_name" />
+							<input type="text" name="bank_name" ng-model="purchase.bank_name" ng-readonly="payment_cheque"/>
 						</div>
 						</div>
 					</div>
@@ -134,7 +133,7 @@
 						</div>
 						
 						<div class="forminput" id="radio_input">
-							<input type="text" name="cheque_no" ng-model="purchase.cheque_no" />
+							<input type="text" name="cheque_no" ng-model="purchase.cheque_no" ng-readonly="payment_cheque"/>
 						</div>
 						</div>
 					</div>
@@ -144,9 +143,12 @@
 						</div>
 						
 						<div class="forminput" id="radio_input">
-							<input type="text" name="cheque_date" ng-model="purchase.cheque_date" />
+							<input type="text" name="cheque_date" id="cheque_date" ng-model="purchase.cheque_date" ng-readonly="payment_cheque"/>
 						</div>
 					</div>
+
+					</div>
+					
 					</div>
 
 				</div>	

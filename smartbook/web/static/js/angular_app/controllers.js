@@ -229,6 +229,7 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
     $scope.company_name = '';
     $scope.selecting_item = false;
     $scope.item_selected = false;
+    $scope.payment_cheque = true;
     $scope.purchase = {
         'purchase_items': [],
         'purchase_invoice_number': '',
@@ -237,14 +238,18 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         'vendor_invoice_date': '',
         'purchase_invoice_date': '',
         'brand': '',
-        'vendor': '',
+        'vendor_name': '',
         'transport': '',
         'discount': 0,
         'net_total': 0,
         'purchase_expense': 0,
         'grant_total': 0,
         'vendor_amount': 0,
-        'deleted_items': []
+        'deleted_items': [],
+        'payment_mode':'cash',
+        'bank_name': '',
+        'cheque_no': '',
+        'cheque_date': '',
     }
     $scope.purchase.vendor_name = 'select';
     $scope.purchase.brand = 'select';
@@ -277,6 +282,21 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         $scope.get_brands();
         $scope.get_companies();
 
+    }
+
+    $scope.payment_mode_change_purchase = function(type) {
+        if (type == 'cash') {
+            $scope.payment_cheque = true;
+        } else {
+            $scope.payment_cheque = false;
+            new Picker.Date($$('#cheque_date'), {
+                timePicker: false,
+                positionOffset: {x: 5, y: 0},
+                pickerClass: 'datepicker_bootstrap',
+                useFadeInOut: !Browser.ie,
+                format:'%d/%m/%Y',
+            });
+        }
     }
 
     $scope.get_vendors = function() {
@@ -658,6 +678,7 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
     $scope.validate_purchase = function() {
         $scope.purchase.purchase_invoice_date = $$('#purchase_invoice_date')[0].get('value');
         $scope.purchase.vendor_invoice_date = $$('#vendor_invoice_date')[0].get('value');
+        $scope.purchase.cheque_date = $$('#cheque_date')[0].get('value');
         $scope.validation_error = '';
         if($scope.purchase.vendor_invoice_number == '') {
             $scope.validation_error = "Please Enter Vendor invoice number" ;
@@ -679,6 +700,18 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
             return false;
         } else if($scope.purchase.transport == 'select') {
             $scope.validation_error = "Please select Transportation company";
+            return false;
+        } else if($scope.payment_mode == '') {
+            $scope.validation_error = "Please choose Payment mode";
+            return false;
+        } else if(!$scope.payment_cheque && $scope.purchase.bank_name == '') {
+            $scope.validation_error = "Please enter Bank name";
+            return false;
+        } else if (!$scope.payment_cheque && $scope.purchase.cheque_no == '') {
+            $scope.validation_error = "Please enter Cheque no.";
+            return false;
+        } else if (!$scope.payment_cheque && $scope.purchase.cheque_date == '') {
+            $scope.validation_error = "Please choose Cheque date";
             return false;
         } else if($scope.purchase.purchase_items.length == 0){
             $scope.validation_error = "Please Choose Item";
