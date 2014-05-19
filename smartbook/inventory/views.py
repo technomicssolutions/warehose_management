@@ -117,7 +117,7 @@ class ItemList(View):
                 ctx = {
                     'items': items
                 }
-                return render(request, 'inventory/stock.html',ctx)
+                return render(request, 'inventory/items_list.html',ctx)
 
 class StockView(View):
     def get(self, request, *args, **kwargs):
