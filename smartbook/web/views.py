@@ -146,6 +146,7 @@ class RegisterUser(View):
         user_type = kwargs['user_type']
         message = ''
         template = 'register_user.html'
+        email_validation = (re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", request.POST['email']) )
         if request.POST['name'] == '':
             message = "Please enter name"
         if user_type == "Salesman":
@@ -155,7 +156,7 @@ class RegisterUser(View):
                 message = "Please enter password"
             elif request.POST['email'] == '':
                 message = "Please enter email"
-            elif re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", request.POST['email']) != None:
+            elif email_validation == None:
                 message = "Please enter a valid email id"
 
         if message:
@@ -314,12 +315,26 @@ class EditUser(View):
             }
             return render(request, 'edit_user.html',context)
         else:
+            
+
             user = User.objects.get(id= kwargs['user_id'])
+            userprofile, created = UserProfile.objects.get_or_create(user = user)
+            email_validation = (re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", request.POST['email']) )
+            if email_validation == None:
+                message = "Please enter a valid email id"
+                context = {
+                    'message': message,
+                    'user_type': user_type,
+                    'profile': userprofile
+                }
+                context.update(request.POST)
+                return render(request, 'edit_user.html',context)
             user.first_name = post_dict['name']
             
             user.email = post_dict['email']
+
             user.save()
-            userprofile, created = UserProfile.objects.get_or_create(user = user)
+            
             userprofile.user_type=user_type
             userprofile.user = user
             userprofile.house_name =request.POST['house']
