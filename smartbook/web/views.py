@@ -4,6 +4,7 @@ import sys
 import simplejson
 import os
 import shutil
+import re
 
 from django.db import IntegrityError
 from django.core.management import call_command
@@ -154,6 +155,9 @@ class RegisterUser(View):
                 message = "Please enter password"
             elif request.POST['email'] == '':
                 message = "Please enter email"
+            elif re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", request.POST['email']) != None:
+                message = "Please enter a valid email id"
+
         if message:
             context = {
                 'error_message': message,
