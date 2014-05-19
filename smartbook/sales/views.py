@@ -1834,6 +1834,7 @@ class SalesmanSalesEntry(View):
             s_item, item_created = SalesmanSalesItem.objects.get_or_create(item=item, sales=sales)
             s_item.sales = sales
             s_item.item = item
+            s_item.salesman = salesman
             s_item.quantity_sold = sales_item['qty_sold']
             s_item.discount_given = sales_item['disc_given']
             s_item.net_amount = sales_item['net_amount']
