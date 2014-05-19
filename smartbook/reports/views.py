@@ -1269,4 +1269,57 @@ class StockReports(View):
         return response
 
 
+class SalesmanStockReports(View):
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse(content_type='application/pdf')
+        p = canvas.Canvas(response, pagesize=(1000, 1000))
+
+        status_code = 200
+        salesman_name = request.GET.get('salesman_name')
+        print salesman_name
+        if salesman_name is None:
+            return render(request, 'reports/salesman_stock_report.html', {})
+        if salesman_name:
+            salesman = User.objects.get(first_name=salesman_name)
+            stocks = SalesmanStock.objects.filter(salesman=salesman)
+        
+        
+        p.drawString(400, 900, 'Stock Report')
+
+        y = 850
+        p.drawString(80, y, 'Item Code')
+        p.drawString(160, y, 'Item Name')
+        p.drawString(280, y, 'Barcode')
+        p.drawString(360, y, 'Brand Name')    
+        p.drawString(480, y, 'Stock')
+        p.drawString(540, y, 'UOM')
+        p.drawString(600, y, 'Unit Price')
+        p.drawString(680, y, 'Tax')
+        p.drawString(760, y, 'Discount')
+        p.drawString(840, y, 'Stock By value')
+        
+        y = y - 50 
+        if len(stocks) > 0:
+            for stock in stocks:
+                p.drawString(80, y, stock.item.code)
+                p.drawString(160, y, stock.item.name)
+                p.drawString(280, y, stock.item.barcode)
+                p.drawString(360, y, stock.item.brand.brand)                
+                p.drawString(480, y, str(stock.quantity))
+                p.drawString(540, y, stock.item.uom.uom)
+                p.drawString(600, y, str(stock.unit_price))
+                p.drawString(680, y, str(stock.item.tax))
+                p.drawString(760, y, str(stock.discount_permit_percentage))
+                p.drawString(840, y, str(stock.quantity * stock.unit_price))
+                y = y - 30
+                if y <= 270:
+                    y = 850
+                    p.showPage()
+
+        p.showPage()
+        p.save()
+        return response
+
+
+
 

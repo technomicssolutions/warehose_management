@@ -15,4 +15,3 @@ urlpatterns = patterns('',
 	url(r'^openining_stock/entry/$', AddOpeningStock.as_view(), name="opening_stock_entry"),
 	url(r'^edit_stock/$', EditStockView.as_view(), name='edit_stock'),
 )
-

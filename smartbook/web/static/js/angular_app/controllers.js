@@ -1923,13 +1923,6 @@ function SalesReportController($scope, $element, $http, $timeout, $location){
             $scope.salesman_name = 'select';
         })
     }
-    $scope.get_items = function(){
-        $http.get('/inventory/items/').success(function(data)
-        {
-            $scope.items = data.items;
-            $scope.item = 'select';
-        })
-    }
     
 }
 
@@ -4337,5 +4330,24 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         
     }
 
+}
+
+function SalesmanStockReportController($scope, $element, $http, $location) {
+      
+    
+    $scope.init = function(csrf_token) {
+        $scope.csrf_token = csrf_token;
+        
+        $scope.get_salesman();
+
+    }
+    $scope.get_salesman = function() {
+        $http.get('/Salesman/list/').success(function(data)
+        {
+            $scope.salesmen = data.salesmen;
+            $scope.salesman_name = 'select';
+        })
+    }
+    
 }
 

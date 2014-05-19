@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Items{% endblock title %}
+{% block body_id %}items{% endblock %}
+{% block content %}
+
+<div id="main-title">
+	<div class="alert alert-info" align="Center"><h4>Items</h4></div>
+</div>
+
+<div class="top_section">
+	<a class="btn btn-info" href="{% url 'add_item' %}"> New Item </a>
+</div>
+{% if items.count == 0 %}
+	<p class="error_message"> No Items </p>
+{% else %}
+	<table class="table table-striped">
+		<tr>
+			<th> Item code </th> 
+			<th> Item Name </th> 
+			<th> UOM </th> 
+			<th> Brand </th> 
+			<th> Barcode </th> 
+			<th> Tax </th>
+			<th> &nbsp;</th> 
+		</tr>
+		
+		{% for item in items %}
+		 	<tr>
+		 		<td> {{item.code}} </td>
+		 		<td> {{item.name}} </td>
+		 		<td> {{item.uom.uom}} </td>
+		 		<td> {{item.brand.brand}} </td>
+		 		<td> {{item.barcode}} </td>
+		 		<td> {{item.tax}} </td>
+
+		 		<td> 
+		 			<a href="{% url 'edit_item' item_id=item.id %}">
+						<img src="/static/images/edit.png">
+					</a>
+				 </td>
+
+		 	</tr>
+		{% endfor %}
+	</table>
+{% endif %}
+
+
+{% endblock content %}

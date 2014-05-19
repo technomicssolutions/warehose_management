@@ -12,4 +12,5 @@ urlpatterns = patterns('',
 	url(r'^daily_report/$', DailyReport.as_view(), name='daily_report'),
 	url(r'^purchase_return/$', PurchaseReturnReport.as_view(), name='purchase_return_report'),
 	url(r'^expenses/$', ExpenseReport.as_view(), name='expense_report'),
+	url(r'^salesman_stock_report/$', SalesmanStockReports.as_view(), name='salesman_stock_report'),
 )
