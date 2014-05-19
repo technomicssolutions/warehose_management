@@ -152,6 +152,8 @@ class RegisterUser(View):
                 message = "Please enter username"
             elif request.POST['password'] == '':
                 message = "Please enter password"
+            elif request.POST['email'] == '':
+                message = "Please enter email"
         if message:
             context = {
                 'error_message': message,
@@ -161,9 +163,9 @@ class RegisterUser(View):
             return render(request, template, context)
         else:
             if user_type == 'Salesman':
-                user, created = User.objects.get_or_create(username=request.POST['username'])
-                if not created:
-                    message = "Salesman with this names exists"
+                try:
+                    user = User.objects.get(email = request.POST['email'])
+                    message = "Salesman with this email id already exists"
                     context = {
                         'error_message': message,
                         'user_type': user_type,
@@ -171,17 +173,30 @@ class RegisterUser(View):
                     }
                     context.update(request.POST)            
                     return render(request, template, context)
-                else:                        
-                    user.set_password(request.POST['password'])
+                    
+                except Exception as ex:
+                    print "in Exception == ", str(ex)
+                    user, created = User.objects.get_or_create(username = request.POST['username'])
+                    if not created:
+                        message = "Salesman with this name already exists"
+                        context = {
+                            'error_message': message,
+                            'user_type': user_type,
+                            'salesman': 'salesman'
+                        }
+                        context.update(request.POST)            
+                        return render(request, template, context)
+                    else:                        
+                        user.set_password(request.POST['password'])
+                        user.save()
+                        context = {
+                            'message' : 'Salesman added correctly',
+                            'user_type': user_type,
+                            'salesman': 'salesman'
+                        }
+                    user.email = request.POST['email']
+                    user.first_name = request.POST['name']
                     user.save()
-                    context = {
-                        'message' : 'Salesman added correctly',
-                        'user_type': user_type,
-                        'salesman': 'salesman'
-                    }
-                user.email = request.POST['email']
-                user.first_name = request.POST['name']
-                user.save()
 
             elif user_type == 'vendor':
                 user, created = User.objects.get_or_create(username=request.POST['name']+user_type, first_name = request.POST['name'])
