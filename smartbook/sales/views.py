@@ -1865,50 +1865,56 @@ class SalesmanStockItemList(View):
                     item_name = request.GET.get('item_name', '')
                     barcode = request.GET.get('barcode', '')
                     brand =  request.GET.get('brand', '')
-                    if brand:
-                        brand = Brand.objects.get(brand=brand)
-                    items = []
-                    if item_code:
+                    salesman_name = request.GET.get('salesman_name', '')
+                    if salesman_name:
+                        salesman = User.objects.get(first_name=salesman_name)
                         if brand:
-                            items = Item.objects.filter(code__istartswith=item_code, brand=brand)
+                            brand = Brand.objects.get(brand=brand)
+                        items = []
+                        if item_code:
+                            if brand:
+                                items = Item.objects.filter(code__istartswith=item_code, brand=brand)
+                            else:
+                                items = Item.objects.filter(code__istartswith=item_code)
+                        elif item_name:
+                            if brand:
+                                items = Item.objects.filter(name__istartswith=item_name, brand=brand)
+                            else:
+                                items = Item.objects.filter(name__istartswith=item_name)
+                        elif barcode:
+                            if brand:
+                                items = Item.objects.filter(barcode__istartswith=barcode, brand=brand)
+                            else:
+                                items = Item.objects.filter(barcode__istartswith=barcode)
                         else:
-                            items = Item.objects.filter(code__istartswith=item_code)
-                    elif item_name:
-                        if brand:
-                            items = Item.objects.filter(name__istartswith=item_name, brand=brand)
-                        else:
-                            items = Item.objects.filter(name__istartswith=item_name)
-                    elif barcode:
-                        if brand:
-                            items = Item.objects.filter(barcode__istartswith=barcode, brand=brand)
-                        else:
-                            items = Item.objects.filter(barcode__istartswith=barcode)
-                    else:
-                        items = Item.objects.all()
-                    item_list = []
-                    i = 0
-                    i = i + 1
-                    for item in items:
-
-                        item_list.append({
-                            'sl_no': i,
-                            'item_code': item.code,
-                            'item_name': item.name,
-                            'barcode': item.barcode if item.barcode else 0,
-                            'brand': item.brand.brand,
-                            'description': item.description,
-                            'tax': item.tax if item.tax else 0,
-                            'uom': item.uom.uom,
-                            'current_stock': item.salesmanstock_set.all()[0].quantity if item.salesmanstock_set.count() > 0  else 0 ,
-                            'selling_price': item.salesmanstock_set.all()[0].selling_price if item.salesmanstock_set.count() > 0 else 0 ,
-                            'discount_permit': item.salesmanstock_set.all()[0].discount_permit_percentage if item.salesmanstock_set.count() > 0 else 0,
-                        })
+                            items = Item.objects.all()
+                        item_list = []
+                        i = 0
                         i = i + 1
+                        for item in items:
+                            try:
+                                stock = SalesmanStock.objects.get(salesman=salesman, item=item)
+                                item_list.append({
+                                    'sl_no': i,
+                                    'item_code': item.code,
+                                    'item_name': item.name,
+                                    'barcode': item.barcode if item.barcode else 0,
+                                    'brand': item.brand.brand,
+                                    'description': item.description,
+                                    'tax': item.tax if item.tax else 0,
+                                    'uom': item.uom.uom,
+                                    'current_stock': item.salesmanstock_set.all()[0].quantity if item.salesmanstock_set.count() > 0  else 0 ,
+                                    'selling_price': item.salesmanstock_set.all()[0].selling_price if item.salesmanstock_set.count() > 0 else 0 ,
+                                    'discount_permit': item.salesmanstock_set.all()[0].discount_permit_percentage if item.salesmanstock_set.count() > 0 else 0,
+                                })
+                                i = i + 1
+                            except:
+                                pass
 
-                    res = {
-                        'items': item_list,
-                    }
-                    response = simplejson.dumps(res)
+                        res = {
+                            'items': item_list,
+                        }
+                        response = simplejson.dumps(res)
 
                 except Exception as ex:
                     response = simplejson.dumps({'result': 'error', 'error': str(ex)})
