@@ -1813,6 +1813,7 @@ class SalesmanSalesEntry(View):
         sales.round_off = sales_dict['roundoff']
         sales.net_amount = sales_dict['net_total']
         sales.grant_total = sales_dict['grant_total']
+        sales.payment_mode = sales_dict['payment_mode']
 
         sales.salesman = salesman  
         sales.lpo_number = sales_dict['lpo_number']      

@@ -4099,6 +4099,7 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         'paid': 0,
         'balance': 0,
         'lpo_number': '',
+        'payment_mode': '',
         
     }
     $scope.sales.staff = 'select';
@@ -4128,7 +4129,6 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         }
     }
     $scope.validate_sales = function() {
-        $scope.sales.customer = $scope.customer;
         if($scope.sales.sales_invoice_date == '') {
             $scope.validation_error = "Enter Sales invoice Date" ;
             return false;
@@ -4303,7 +4303,7 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
     }
     
     $scope.save_salesman_sales = function() {
-
+        $scope.sales.payment_mode = $scope.payment_mode;
         if($scope.validate_sales()){
             $scope.sales.sales_invoice_date = $$('#sales_invoice_date')[0].get('value');
             
