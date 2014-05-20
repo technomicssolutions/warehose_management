@@ -4128,11 +4128,11 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         } else if($scope.sales.lpo_number ==''){
             $scope.validation_error = "Enter LPO Number";
             return false;
-        } else if($scope.sales.staff =='select') {
-            $scope.validation_error = "Enter Salesman Name";
-            return false;
         } else if($scope.sales.sales_items.length == 0){
             $scope.validation_error = "Choose Item";
+            return false;
+        } else if($scope.sales.staff =='select') {
+            $scope.validation_error = "Enter Salesman Name";
             return false;
         } else if($scope.sales.sales_items.length > 0){
             for (var i=0; i < $scope.sales.sales_items.length; i++){
