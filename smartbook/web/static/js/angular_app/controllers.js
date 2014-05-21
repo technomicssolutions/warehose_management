@@ -811,7 +811,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         'sales_items': [],
         'sales_invoice_number': '',
         'date_sales': '',
-        'customer':'',
+        'customer':'select',
         'staff': '',
         'net_total': 0,
         'payment_mode':'cash',
@@ -828,7 +828,6 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
     }
     $scope.sales.quotation_ref_no = '';
     $scope.sales.staff = 'select';
-    $scope.sales.customer = '';
     $scope.init = function(csrf_token, sales_invoice_number)
     {
         $scope.csrf_token = csrf_token;
@@ -836,9 +835,50 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         $scope.popup = '';
         
         
-        $scope.get_staff();
+        $scope.get_customers();
             
     }
+
+    $scope.get_customers = function() {
+        $http.get('/customer/list/').success(function(data)
+        {   
+
+            $scope.customers = data.customers;
+
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
+
+    $scope.add_customer = function() {
+
+        if($scope.sales.customer == 'other') {
+
+            $scope.popup = new DialogueModelWindow({
+                'dialogue_popup_width': '36%',
+                'message_padding': '0px',
+                'left': '28%',
+                'top': '40px',
+                'height': 'auto',
+                'content_div': '#add_customer'
+            });
+            var height = $(document).height();
+            $scope.popup.set_overlay_height(height);
+            $scope.popup.show_content();
+        }
+    }
+
+    $scope.close_popup = function(){
+        $scope.popup.hide_popup();
+    }
+
+    $scope.add_new_customer = function() { 
+
+        add_new_customer($http, $scope);
+        $scope.sales.customer = $scope.customer_name;      
+    }
+
     $scope.payment_mode_change_sales = function(payment_mode) {
         if(payment_mode == 'cheque') {
             $scope.payment_mode_selection = true;
@@ -890,119 +930,6 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         return true;       
     }
 
-    $scope.get_staff = function() {
-        $http.get('/Salesman/list/').success(function(data)
-        {           
-
-            $scope.staffs = data.salesmen;
-
-        }).error(function(data, status)
-        {
-            console.log(data || "Request failed");
-        });
-    }
-        $scope.add_staff = function() {
-
-        if($scope.sales.staff == 'other') {
-
-            $scope.popup = new DialogueModelWindow({
-                'dialogue_popup_width': '384px',
-                'message_padding': '0px',
-                'left': '28%',
-                'top': '40px',
-                'height': '702px',
-                'content_div': '#'
-            });
-            var height = $(document).height();
-            $scope.popup.set_overlay_height(height);
-            $scope.popup.show_content();
-        }
-    }
-
-    $scope.add_new_staff = function() {
-        params = { 
-            'name':$scope.staff_name,
-            'contact_person': $scope.contact_person,
-            'house': $scope.house_name,
-            'street': $scope.street,
-            'city': $scope.city,
-            'district':$scope.district,
-            'pin': $scope.pin,
-            'mobile': $scope.mobile,
-            'phone': $scope.land_line,
-            'email': $scope.email_id,
-            "csrfmiddlewaretoken" : $scope.csrf_token
-        }
-        $http({
-            method : 'post',
-            url : "/register/staff/",
-            data : $.param(params),
-            headers : {
-                'Content-Type' : 'application/x-www-form-urlencoded'
-            }
-        }).success(function(data, status) {
-            
-            if (data.result == 'error'){
-                $scope.error_flag=true;
-                $scope.message = data.message;
-            } else {
-                $scope.popup.hide_popup();
-                $scope.get_staff();
-                $scope.sales.staff = $scope.staff_name;
-                $scope.sales.staff = data.staff_name;
-            }
-        }).error(function(data, success){
-            
-        });
-    }
-
-    $scope.get_quotation_details = function(){
-        get_quotation_details($http, $scope, 'quotation');        
-    }
-    $scope.add_quotation = function(quotation) {
-        $scope.selecting_quotation = false;
-        $scope.quotation_selected = true;
-        $scope.item_select_error = '';
-        $scope.sales.sales_items = []
-        $scope.quotation_no = quotation.ref_no; 
-        $scope.delivery_no = quotation.delivery_no;
-        $scope.sales.quotation_ref_no = $scope.quotation_no;
-        $scope.sales.delivery_no = $scope.delivery_no
-        $scope.sales.customer = quotation.customer; 
-        $scope.sales.net_total = quotation.net_total;
-        $scope.sales.lpo_number = quotation.lpo_number;
-        if(quotation.items.length > 0){
-            for(var i=0; i< quotation.items.length; i++){
-                var selected_item = {
-                    'sl_no': quotation.items[i].sl_no,
-                    'item_code': quotation.items[i].item_code,
-                    'item_name': quotation.items[i].item_name,
-                    'barcode': quotation.items[i].barcode,
-                    'item_description': quotation.items[i].item_description,
-                    'qty_sold': quotation.items[i].qty_sold,
-                    'current_stock': quotation.items[i].current_stock,
-                    'uom': quotation.items[i].uom,
-                    'unit_price': quotation.items[i].selling_price,
-                    'discount_permit': quotation.items[i].discount_permit,
-                    'tax': quotation.items[i].tax,
-                    'tax_amount': 0,
-                    'discount_permit_amount':0,
-                    'disc_given': quotation.items[i].discount_given,
-                    'unit_cost':0,
-                    'net_amount': quotation.items[i].net_amount,
-                }
-                // $scope.calculate_tax_amount_sale(selected_item);
-                // $scope.calculate_discount_amount_sale(selected_item);
-                // $scope.calculate_unit_cost_sale(selected_item);
-                $scope.sales.sales_items.push(selected_item);
-                $scope.calculate_grant_total_sale();
-                $scope.calculate_net_discount_sale();
-                
-            }
-        }
-    }
-
-
     $scope.get_delivery_note_details = function(){
 
         var delivery_no = $scope.delivery_no;
@@ -1027,20 +954,20 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         var customer_name = $scope.sales.customer;
         var item_name = item.item_name;
         $scope.latest_sales = []
-        $http.get('/sales/latest_sales_details/?customer='+customer_name+'&item_name='+item_name).success(function(data)
-        {   
+        // $http.get('/sales/latest_sales_details/?customer='+customer_name+'&item_name='+item_name).success(function(data)
+        // {   
             
-            if(data.latest_sales_details.length > 0){
-                $scope.sales_deatils = true;
-                $scope.latest_sales = data.latest_sales_details; 
-            } else {
-                $scope.sales_deatils = false;
-            }
+        //     if(data.latest_sales_details.length > 0){
+        //         $scope.sales_deatils = true;
+        //         $scope.latest_sales = data.latest_sales_details; 
+        //     } else {
+        //         $scope.sales_deatils = false;
+        //     }
             
-        }).error(function(data, status)
-        {
-            console.log(data || "Request failed");
-        });
+        // }).error(function(data, status)
+        // {
+        //     console.log(data || "Request failed");
+        // });
     }
     $scope.hide_sales_details = function(){
         $scope.sales_deatils = false;
@@ -1067,7 +994,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         $scope.delivery_no = delivery_note.delivery_no;
         $scope.sales.quotation_ref_no = $scope.quotation_no;
         $scope.sales.delivery_no = $scope.delivery_no
-        $scope.sales.customer = delivery_note.customer; 
+        $scope.sales.salesman = delivery_note.salesman; 
         $scope.sales.net_total = delivery_note.net_total;
         $scope.sales.lpo_number = delivery_note.lpo_number;
         if(delivery_note.items.length > 0){
@@ -1088,7 +1015,9 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
                     'discount_permit_amount':0,
                     'disc_given': delivery_note.items[i].discount_given,
                     'unit_cost':0,
-                    'net_amount': delivery_note.items[i].net_amount,
+                    'net_amount': 0,
+                    'remaining_qty': delivery_note.items[i].remaining_qty,
+                    'qty': 0,
                 }
                 // $scope.calculate_tax_amount_sale(selected_item);
                 // $scope.calculate_discount_amount_sale(selected_item);
@@ -1175,30 +1104,15 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         } else {
             $scope.validation_error = "";
         }
-        if(item.qty_sold != '' && item.unit_price != ''){
-            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))-parseFloat(item.disc_given)).toFixed(2);
+        if(item.qty != '' && item.unit_price != ''){
+            item.qty_sold = item.qty;
+            item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
+            item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty);
             $scope.calculate_net_discount_sale();
         }
         $scope.calculate_net_total_sale();
     }
-    // $scope.calculate_tax_amount_sale = function(item) {
-    //     if(item.tax != '' && item.unit_price != ''){
-    //         item.tax_amount = (parseFloat(item.unit_price)*parseFloat(item.tax))/100;
-    //     }
-    // }
-    // $scope.calculate_discount_amount_sale = function(item) {
-    //     if(item.discount_permit != '' && item.unit_price != ''){
-    //         item.discount_permit_amount = (parseFloat(item.unit_price)*parseFloat(item.discount_permit))/100;
-            
-    //     }
-    // }
-    // $scope.calculate_unit_cost_sale = function(item) {
-    //     if(item.unit_price != ''){
-    //         item.unit_cost = (parseFloat(item.unit_price)+parseFloat(item.tax_amount)-parseFloat(item.disc_given)).toFixed(2);
-            
-    //     }
-    // }
-
+    
     $scope.calculate_net_total_sale = function(){
         var net_total = 0;
         for(i=0; i<$scope.sales.sales_items.length; i++){
@@ -3093,57 +3007,30 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
     $scope.delivery_note = {
         'sales_items': [],
         'date': '',
-        'customer':'',
+        'salesman':'',
         'net_total': 0,
         'total_amount': '',
         'delivery_note_no': '',
         
     }
-    $scope.delivery_note.customer = 'select';
+    $scope.delivery_note.salesman = 'select';
     $scope.init = function(csrf_token, sales_invoice_number)
     {
         $scope.csrf_token = csrf_token;
-        $scope.popup = '';        
-        $scope.get_customers();            
+        $scope.popup = '';
+        $scope.get_salesman();             
     }
 
-    $scope.get_customers = function() {
-        $http.get('/customer/list/').success(function(data)
-        {   
-            $scope.customers = data.customers;
-
-        }).error(function(data, status)
+    $scope.get_salesman = function() {
+        $http.get('/Salesman/list/').success(function(data)
         {
-            console.log(data || "Request failed");
-        });
-    }
-
-    $scope.add_customer = function() {
-
-        if($scope.customer == 'other') {
-
-            $scope.popup = new DialogueModelWindow({
-                'dialogue_popup_width': '36%',
-                'message_padding': '0px',
-                'left': '28%',
-                'top': '40px',
-                'height': 'auto',
-                'content_div': '#add_customer'
-            });
-            var height = $(document).height();
-            $scope.popup.set_overlay_height(height);
-            $scope.popup.show_content();
-        }
+            $scope.salesmen = data.salesmen;
+            $scope.salesman_name = 'select';
+        })
     }
 
     $scope.close_popup = function(){
         $scope.popup.hide_popup();
-    }
-
-    $scope.add_new_customer = function() { 
-
-        add_new_customer($http, $scope);
-        $scope.delivery_note.customer = $scope.customer_name;      
     }
 
     $scope.items = [];
@@ -3239,12 +3126,9 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         if ($scope.delivery_note.date == '' || $scope.delivery_note.date == undefined) {
             $scope.validation_error = "Enter Delivery Date" ;
             return false;
-        } else if ($scope.delivery_note.customer == 'select') {
-            $scope.validation_error = "Enter Customer Name";
+        } else if ($scope.delivery_note.salesman == 'select') {
+            $scope.validation_error = "Enter Salesman Name";
             return false;
-        // } else if ($scope.delivery_note.reference_no == '' || $scope.delivery_note.reference_no == undefined) {
-        //     $scope.validation_error = "Enter Reference number";
-        //     return false;
         } else if ($scope.delivery_note.lpo_no == '' || $scope.delivery_note.lpo_no == undefined) {
             $scope.validation_error = "Enter Lpo No.";
             return false;
@@ -3290,7 +3174,7 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
                     $scope.error_flag=true;
                     $scope.message = data.message;
                 } else {
-                    document.location.href = '/sales/delivery_note_pdf/'+data.delivery_note_id+'/';
+                    document.location.href = '/sales/direct_delivery_note/';
 
                 }
             }).error(function(data, success){

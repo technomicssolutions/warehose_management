@@ -62,13 +62,12 @@ class QuotationItem(models.Model):
 class DeliveryNote(models.Model):
 
     quotation = models.ForeignKey(Quotation, null=True, blank=True)
-    customer = models.ForeignKey(Customer, null=True, blank=True)
+    salesman = models.ForeignKey(User, null=True, blank=True)
     delivery_note_number = models.CharField('Delivery Note Serial number', max_length=50, null=True, blank=True)
     date = models.DateField('Date', null=True, blank=True)
     lpo_number = models.CharField('LPO Number', null=True, blank=True, max_length=20)
-    prefix = models.CharField('Prefix', null=True, blank=True, max_length=20, default='DN')
-    processed = models.BooleanField('Is Processed', default=False)
     net_total = models.DecimalField('Net Total',max_digits=14, decimal_places=2, default=0)
+    is_pending = models.BooleanField('Pending items', default=True)
 
 
     def __unicode__(self):
@@ -88,6 +87,8 @@ class DeliveryNoteItem(models.Model):
     net_amount = models.DecimalField('Net Amount', max_digits=14, decimal_places=2, default=0)
     quantity_sold = models.IntegerField('Quantity Sold', default=0)
     discount = models.DecimalField('Total Discount', max_digits=14, decimal_places=2, default=0)
+    total_quantity = models.IntegerField('Total Quantity', default=0)
+    is_completed = models.BooleanField('Items sold completely', default=False)
 
     def __unicode__(self):
 
@@ -112,7 +113,6 @@ class Sales(models.Model):
     round_off = models.DecimalField('Net Round Off',max_digits=14, decimal_places=2, default=0)
     grant_total = models.DecimalField('Grand Total',max_digits=14, decimal_places=2, default=0)
     discount = models.DecimalField('Total Discount',max_digits=14, decimal_places=2, default=0)
-    quotation = models.ForeignKey(Quotation, null=True, blank=True)
     delivery_note = models.ForeignKey(DeliveryNote, null=True, blank=True)
     lpo_number = models.CharField('LPO Number', null=True, blank=True, max_length=30)
 

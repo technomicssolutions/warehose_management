@@ -2,7 +2,7 @@
 
 {% block body_id %}create_sales{% endblock %}
 
-{% block title %}Sales-Quotation-DeliveryNote {% endblock title %}
+{% block title %}Sales-DeliveryNote {% endblock title %}
 {% block controller %}ng-controller="SalesQNDNController" ng-init="init('{{csrf_token}}', '{{sales_invoice_number}}')" ng-click="hide_sales_details()"{% endblock controller %}
 {% block dialogue_popup %}
 	{% include 'add_new_customer.html' %} 
@@ -19,21 +19,6 @@
 		<form name="sales_entry" method="post">
 			<div class="form_contents_sales">
 				<div class="section_1_sales">
-					<div class="formrow_sales">
-						<div class="formtext_sales">
-							<label for="customer">Quotation Reference No</label>
-						</div>
-						<div class="forminput_sales">
-							<input type='text' id="quotation_no" ng-model="quotation_no" ng-change="get_quotation_details()"/>
-							<p> [[message]] </p>
-						</div>
-						<div class="item_list quotation_list" ng-show='selecting_quotation' ng-hide="quotation_selected">
-							<div ng-repeat="quotation in quotations" ng-click="add_quotation(quotation)" class="item_list_row">
-								<span>[[quotation.ref_no]]</span>
-							</div>
-							<div class="clear"></div>
-						</div>
-					</div>
 					
 					<div class="formrow_sales">
 						<div class="formtext_sales">
