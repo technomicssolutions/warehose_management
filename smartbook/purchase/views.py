@@ -31,7 +31,7 @@ class PurchaseDetail(View):
             items_list = []
             for item in purchase_items:
                 ret_quantity = 0
-                inventory = Inventory.objects.get(item=item.item)
+                inventory = item.item
                 purchase_returns = PurchaseReturn.objects.filter(purchase=purchase)
                 for ret in purchase_returns:
                     ret_items = PurchaseReturnItem.objects.filter(purchase_return=ret, item=item.item)
@@ -174,31 +174,28 @@ class PurchaseEntry(View):
         deleted_items = purchase_dict['deleted_items']
 
         for p_item in deleted_items:
-            item = Item.objects.get(code = p_item['item_code']) 
-            ps_item = PurchaseItem.objects.get(item=item)           
-            inventory = Inventory.objects.get(item=item)
-            inventory.quantity = inventory.quantity + ps_item.quantity_purchased
-            inventory.save()
+            item = InventoryItem.objects.get(code = p_item['item_code']) 
+            ps_item = PurchaseItem.objects.get(item=item)   
+            item.quantity = item.quantity + ps_item.quantity_purchased
+            item.save()
             ps_item.delete()
 
         for purchase_item in purchase_items:
 
-            item = Item.objects.get(code=purchase_item['item_code'])
+            item, created = InventoryItem.objects.get_or_create(code=purchase_item['item_code'])
             p_item, item_created = PurchaseItem.objects.get_or_create(item=item, purchase=purchase)
-            inventory, created = Inventory.objects.get_or_create(item=item)
             if created:
-                inventory.quantity = int(purchase_item['qty_purchased'])                
+                item.quantity = int(purchase_item['qty_purchased'])                
             else:
                 if purchase_created:
-                    inventory.quantity = inventory.quantity + int(purchase_item['qty_purchased'])
+                    item.quantity = item.quantity + int(purchase_item['qty_purchased'])
                 else:
-                    inventory.quantity = inventory.quantity - p_item.quantity_purchased + int(purchase_item['qty_purchased'])
-            inventory.selling_price = purchase_item['selling_price']
-            inventory.unit_price = purchase_item['unit_price']
-            inventory.discount_permit_percentage = purchase_item['permit_disc_percent']
-            inventory.discount_permit_amount = purchase_item['permit_disc_amt']
-            inventory.vendor = vendor
-            inventory.save()  
+                    item.quantity = item.quantity - p_item.quantity_purchased + int(purchase_item['qty_purchased'])
+            item.selling_price = purchase_item['selling_price']
+            item.unit_price = purchase_item['unit_price']
+            item.discount_permit_percentage = purchase_item['permit_disc_percent']
+            item.discount_permit_amount = purchase_item['permit_disc_amt']
+            item.save()  
                     
             p_item, item_created = PurchaseItem.objects.get_or_create(item=item, purchase=purchase)
             p_item.purchase = purchase
