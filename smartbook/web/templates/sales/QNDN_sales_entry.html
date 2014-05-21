@@ -137,10 +137,9 @@
 							<label for="customer">Customer name</label>
 						</div>
 						<div class="forminput_sales">
-							<select name="staff" ng-model="sales.customer" ng-change="add_customer()" >
+							<select name="staff" ng-model="customer_name" ng-change="add_customer()" >
 								<option value="select">Select</option>
-								<option ng-repeat="customer in customers" ng-selected="customer.customer_name == sales.customer">[[customer.customer_name]]
-								</option>
+								<option ng-repeat="customer in customers">[[customer.customer_name]]</option>
 								<option value="other">Other</option>
 								
 							</select>

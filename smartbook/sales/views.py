@@ -913,6 +913,7 @@ class QuotationDeliverynoteSales(View):
     def post(self, request, *args, **kwargs):
 
         sales_dict = ast.literal_eval(request.POST['sales'])
+        print sales_dict
         delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
         sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'], delivery_note=delivery_note)
         sales.sales_invoice_number = sales_dict['sales_invoice_number']
@@ -952,7 +953,7 @@ class QuotationDeliverynoteSales(View):
         sales_items = sales_dict['sales_items']
         for sales_item in sales_items:
            
-            item = Item.objects.get(code=sales_item['item_code'])
+            item = InventoryItem.objects.get(code=sales_item['item_code'])
                     
             s_item, item_created = SalesItem.objects.get_or_create(item=item, sales=sales)
             s_item.sales = sales

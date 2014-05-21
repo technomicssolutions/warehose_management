@@ -18,6 +18,10 @@ class Migration(SchemaMigration):
             ('purchase_invoice_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('brand', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Brand'], null=True, blank=True)),
             ('vendor', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.Vendor'], null=True, blank=True)),
+            ('payment_mode', self.gf('django.db.models.fields.CharField')(max_length=25, null=True, blank=True)),
+            ('bank_name', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
+            ('cheque_no', self.gf('django.db.models.fields.CharField')(max_length=60, null=True, blank=True)),
+            ('cheque_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('transportation_company', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.TransportationCompany'], null=True, blank=True)),
             ('discount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
             ('net_total', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
@@ -30,7 +34,7 @@ class Migration(SchemaMigration):
         # Adding model 'PurchaseItem'
         db.create_table(u'purchase_purchaseitem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'], null=True, blank=True)),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.InventoryItem'], null=True, blank=True)),
             ('purchase', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['purchase.Purchase'], null=True, blank=True)),
             ('item_frieght', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
             ('frieght_per_unit', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
@@ -58,7 +62,7 @@ class Migration(SchemaMigration):
         db.create_table(u'purchase_purchasereturnitem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('purchase_return', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['purchase.PurchaseReturn'])),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'])),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.InventoryItem'])),
             ('amount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
             ('quantity', self.gf('django.db.models.fields.IntegerField')(default=0)),
         ))
@@ -139,15 +143,20 @@ class Migration(SchemaMigration):
             'brand': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '51'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
-        u'inventory.item': {
-            'Meta': {'object_name': 'Item'},
+        u'inventory.inventoryitem': {
+            'Meta': {'object_name': 'InventoryItem'},
             'barcode': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']"}),
             'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '10'}),
             'description': ('django.db.models.fields.TextField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+            'discount_permit_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
+            'discount_permit_percentage': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'quantity': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'selling_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'tax': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
+            'unit_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'uom': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.UnitOfMeasure']"})
         },
         u'inventory.unitofmeasure': {
@@ -157,11 +166,15 @@ class Migration(SchemaMigration):
         },
         u'purchase.purchase': {
             'Meta': {'object_name': 'Purchase'},
+            'bank_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']", 'null': 'True', 'blank': 'True'}),
+            'cheque_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'cheque_no': ('django.db.models.fields.CharField', [], {'max_length': '60', 'null': 'True', 'blank': 'True'}),
             'discount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             'grant_total': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'net_total': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            'payment_mode': ('django.db.models.fields.CharField', [], {'max_length': '25', 'null': 'True', 'blank': 'True'}),
             'purchase_expense': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             'purchase_invoice_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'purchase_invoice_number': ('django.db.models.fields.IntegerField', [], {'unique': 'True'}),
@@ -180,7 +193,7 @@ class Migration(SchemaMigration):
             'frieght_per_unit': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             'handling_per_unit': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']", 'null': 'True', 'blank': 'True'}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.InventoryItem']", 'null': 'True', 'blank': 'True'}),
             'item_frieght': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             'item_handling': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             'net_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
@@ -199,7 +212,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'PurchaseReturnItem'},
             'amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']"}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.InventoryItem']"}),
             'purchase_return': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['purchase.PurchaseReturn']"}),
             'quantity': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },

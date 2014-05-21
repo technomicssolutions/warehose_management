@@ -30,7 +30,7 @@ class Migration(SchemaMigration):
         # Adding model 'QuotationItem'
         db.create_table(u'sales_quotationitem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'], null=True, blank=True)),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.InventoryItem'], null=True, blank=True)),
             ('quotation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.Quotation'], null=True, blank=True)),
             ('net_amount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('quantity_sold', self.gf('django.db.models.fields.IntegerField')(default=0)),
@@ -43,24 +43,25 @@ class Migration(SchemaMigration):
         db.create_table(u'sales_deliverynote', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('quotation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.Quotation'], null=True, blank=True)),
-            ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.Customer'], null=True, blank=True)),
+            ('salesman', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
             ('delivery_note_number', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
             ('date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('lpo_number', self.gf('django.db.models.fields.CharField')(max_length=20, null=True, blank=True)),
-            ('prefix', self.gf('django.db.models.fields.CharField')(default='DN', max_length=20, null=True, blank=True)),
-            ('processed', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('net_total', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
+            ('is_pending', self.gf('django.db.models.fields.BooleanField')(default=True)),
         ))
         db.send_create_signal(u'sales', ['DeliveryNote'])
 
         # Adding model 'DeliveryNoteItem'
         db.create_table(u'sales_deliverynoteitem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'], null=True, blank=True)),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.InventoryItem'], null=True, blank=True)),
             ('delivery_note', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.DeliveryNote'], null=True, blank=True)),
             ('net_amount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('quantity_sold', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('discount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
+            ('total_quantity', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('is_completed', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal(u'sales', ['DeliveryNoteItem'])
 
@@ -70,7 +71,7 @@ class Migration(SchemaMigration):
             ('sales_invoice_number', self.gf('django.db.models.fields.CharField')(max_length=10, null=True, blank=True)),
             ('sales_invoice_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.Customer'], null=True, blank=True)),
-            ('salesman', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.UserProfile'], null=True, blank=True)),
+            ('salesman', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
             ('payment_mode', self.gf('django.db.models.fields.CharField')(max_length=25, null=True, blank=True)),
             ('card_number', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('bank_name', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
@@ -78,7 +79,6 @@ class Migration(SchemaMigration):
             ('round_off', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('grant_total', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('discount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
-            ('quotation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.Quotation'], null=True, blank=True)),
             ('delivery_note', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.DeliveryNote'], null=True, blank=True)),
             ('lpo_number', self.gf('django.db.models.fields.CharField')(max_length=30, null=True, blank=True)),
         ))
@@ -87,13 +87,10 @@ class Migration(SchemaMigration):
         # Adding model 'SalesInvoice'
         db.create_table(u'sales_salesinvoice', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('quotation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.Quotation'], null=True, blank=True)),
-            ('delivery_note', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.DeliveryNote'], null=True, blank=True)),
             ('sales', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.Sales'])),
             ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.Customer'], null=True, blank=True)),
             ('date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('invoice_no', self.gf('django.db.models.fields.CharField')(max_length=20, null=True, blank=True)),
-            ('prefix', self.gf('django.db.models.fields.CharField')(default='INV', max_length=20)),
             ('is_processed', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal(u'sales', ['SalesInvoice'])
@@ -101,7 +98,7 @@ class Migration(SchemaMigration):
         # Adding model 'SalesItem'
         db.create_table(u'sales_salesitem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'])),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.InventoryItem'])),
             ('sales', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.Sales'])),
             ('quantity_sold', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('discount_given', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
@@ -124,7 +121,7 @@ class Migration(SchemaMigration):
         db.create_table(u'sales_salesreturnitem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('sales_return', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sales.SalesReturn'], null=True, blank=True)),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'], null=True, blank=True)),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.InventoryItem'], null=True, blank=True)),
             ('return_quantity', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('amount', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
         ))
@@ -219,15 +216,20 @@ class Migration(SchemaMigration):
             'brand': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '51'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
-        u'inventory.item': {
-            'Meta': {'object_name': 'Item'},
+        u'inventory.inventoryitem': {
+            'Meta': {'object_name': 'InventoryItem'},
             'barcode': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']"}),
             'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '10'}),
             'description': ('django.db.models.fields.TextField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+            'discount_permit_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
+            'discount_permit_percentage': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'quantity': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'selling_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'tax': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
+            'unit_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'uom': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.UnitOfMeasure']"})
         },
         u'inventory.unitofmeasure': {
@@ -237,24 +239,25 @@ class Migration(SchemaMigration):
         },
         u'sales.deliverynote': {
             'Meta': {'object_name': 'DeliveryNote'},
-            'customer': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['web.Customer']", 'null': 'True', 'blank': 'True'}),
             'date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'delivery_note_number': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_pending': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'lpo_number': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
             'net_total': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
-            'prefix': ('django.db.models.fields.CharField', [], {'default': "'DN'", 'max_length': '20', 'null': 'True', 'blank': 'True'}),
-            'processed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'quotation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.Quotation']", 'null': 'True', 'blank': 'True'})
+            'quotation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.Quotation']", 'null': 'True', 'blank': 'True'}),
+            'salesman': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
         },
         u'sales.deliverynoteitem': {
             'Meta': {'object_name': 'DeliveryNoteItem'},
             'delivery_note': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.DeliveryNote']", 'null': 'True', 'blank': 'True'}),
             'discount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']", 'null': 'True', 'blank': 'True'}),
+            'is_completed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.InventoryItem']", 'null': 'True', 'blank': 'True'}),
             'net_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
-            'quantity_sold': ('django.db.models.fields.IntegerField', [], {'default': '0'})
+            'quantity_sold': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'total_quantity': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         u'sales.quotation': {
             'Meta': {'object_name': 'Quotation'},
@@ -277,7 +280,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'QuotationItem'},
             'discount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']", 'null': 'True', 'blank': 'True'}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.InventoryItem']", 'null': 'True', 'blank': 'True'}),
             'net_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'quantity_sold': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'quotation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.Quotation']", 'null': 'True', 'blank': 'True'}),
@@ -309,29 +312,25 @@ class Migration(SchemaMigration):
             'lpo_number': ('django.db.models.fields.CharField', [], {'max_length': '30', 'null': 'True', 'blank': 'True'}),
             'net_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'payment_mode': ('django.db.models.fields.CharField', [], {'max_length': '25', 'null': 'True', 'blank': 'True'}),
-            'quotation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.Quotation']", 'null': 'True', 'blank': 'True'}),
             'round_off': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'sales_invoice_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'sales_invoice_number': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'salesman': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['web.UserProfile']", 'null': 'True', 'blank': 'True'})
+            'salesman': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
         },
         u'sales.salesinvoice': {
             'Meta': {'object_name': 'SalesInvoice'},
             'customer': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['web.Customer']", 'null': 'True', 'blank': 'True'}),
             'date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'delivery_note': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.DeliveryNote']", 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'invoice_no': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
             'is_processed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'prefix': ('django.db.models.fields.CharField', [], {'default': "'INV'", 'max_length': '20'}),
-            'quotation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.Quotation']", 'null': 'True', 'blank': 'True'}),
             'sales': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.Sales']"})
         },
         u'sales.salesitem': {
             'Meta': {'object_name': 'SalesItem'},
             'discount_given': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']"}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.InventoryItem']"}),
             'net_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'quantity_sold': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'sales': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.Sales']"}),
@@ -349,7 +348,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'SalesReturnItem'},
             'amount': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']", 'null': 'True', 'blank': 'True'}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.InventoryItem']", 'null': 'True', 'blank': 'True'}),
             'return_quantity': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'sales_return': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sales.SalesReturn']", 'null': 'True', 'blank': 'True'})
         },
@@ -365,20 +364,6 @@ class Migration(SchemaMigration):
             'mobile_number': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'pin': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
             'street': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'})
-        },
-        u'web.userprofile': {
-            'Meta': {'object_name': 'UserProfile'},
-            'city': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'district': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'email_id': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
-            'house_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'land_line': ('django.db.models.fields.CharField', [], {'max_length': '15', 'blank': 'True'}),
-            'mobile': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
-            'pin': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'street': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
-            'user_type': ('django.db.models.fields.CharField', [], {'max_length': '10'})
         }
     }
 

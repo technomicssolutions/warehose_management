@@ -827,7 +827,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         'lpo_number': '', 
     }
     $scope.sales.quotation_ref_no = '';
-    $scope.sales.staff = 'select';
+    $scope.customer_name = 'select';
     $scope.init = function(csrf_token, sales_invoice_number)
     {
         $scope.csrf_token = csrf_token;
@@ -844,6 +844,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         {   
 
             $scope.customers = data.customers;
+            console.log($scope.customers);
 
         }).error(function(data, status)
         {
@@ -852,8 +853,8 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
     }
 
     $scope.add_customer = function() {
-
-        if($scope.sales.customer == 'other') {
+        console.log($scope.customer_name);
+        if($scope.customer_name == 'other') {
 
             $scope.popup = new DialogueModelWindow({
                 'dialogue_popup_width': '36%',
@@ -866,6 +867,8 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             var height = $(document).height();
             $scope.popup.set_overlay_height(height);
             $scope.popup.show_content();
+        } else {
+            $scope.sales.customer = $scope.customer_name;
         }
     }
 
@@ -876,7 +879,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
     $scope.add_new_customer = function() { 
 
         add_new_customer($http, $scope);
-        $scope.sales.customer = $scope.customer_name;      
+           
     }
 
     $scope.payment_mode_change_sales = function(payment_mode) {
@@ -906,9 +909,6 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             return false;
         } else if($scope.sales.lpo_number == '') {
             $scope.validation_error = "Enter LPO Number" ;
-            return false;
-        } else if($scope.sales.staff =='select') {
-            $scope.validation_error = "Enter Salesman Name";
             return false;
         } else if($scope.sales.sales_items.length == 0){
             $scope.validation_error = "Choose Item";
@@ -1088,6 +1088,8 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             'disc_given': 0,
             'unit_cost':0,
             'net_amount': 0,
+            'qty': 0,
+            'remaining_qty':0,
         }
         $scope.calculate_tax_amount_sale(selected_item);
         $scope.calculate_discount_amount_sale(selected_item);
@@ -1141,22 +1143,24 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         $scope.sales.balance = $scope.sales.grant_total - $scope.sales.paid;
     }
     $scope.save_sales = function() {
+        $scope.sales.customer = $scope.customer_name;
         if($scope.validate_sales()){
             $scope.sales.sales_invoice_date = $$('#sales_invoice_date')[0].get('value');
-            
+            console.log($scope.sales);
             params = { 
                 'sales': angular.toJson($scope.sales),
                 "csrfmiddlewaretoken" : $scope.csrf_token
             }
+            console.log(params);
             $http({
                 method : 'post',
-                url : "/sales/quotaion_deliverynote_sales/",
+                url : "/sales/deliverynote_sales/",
                 data : $.param(params),
                 headers : {
                     'Content-Type' : 'application/x-www-form-urlencoded'
                 }
             }).success(function(data, status) {
-                document.location.href = '/sales/sales_invoice_pdf/'+data.sales_invoice_id+'/';               
+                document.location.href = '/sales/deliverynote_sales/';               
             }).error(function(data, success){
                 
             });

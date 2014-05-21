@@ -22,8 +22,8 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'inventory', ['Brand'])
 
-        # Adding model 'Item'
-        db.create_table(u'inventory_item', (
+        # Adding model 'InventoryItem'
+        db.create_table(u'inventory_inventoryitem', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('code', self.gf('django.db.models.fields.CharField')(unique=True, max_length=10)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
@@ -32,25 +32,18 @@ class Migration(SchemaMigration):
             ('brand', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Brand'])),
             ('barcode', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
             ('tax', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
-        ))
-        db.send_create_signal(u'inventory', ['Item'])
-
-        # Adding model 'Inventory'
-        db.create_table(u'inventory_inventory', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'], unique=True)),
             ('quantity', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('unit_price', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('selling_price', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('discount_permit_percentage', self.gf('django.db.models.fields.DecimalField')(default=0, null=True, max_digits=14, decimal_places=3, blank=True)),
             ('discount_permit_amount', self.gf('django.db.models.fields.DecimalField')(default=0, null=True, max_digits=14, decimal_places=3, blank=True)),
         ))
-        db.send_create_signal(u'inventory', ['Inventory'])
+        db.send_create_signal(u'inventory', ['InventoryItem'])
 
         # Adding model 'OpeningStock'
         db.create_table(u'inventory_openingstock', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Item'])),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.InventoryItem'])),
             ('quantity', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('unit_price', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('selling_price', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
@@ -66,11 +59,8 @@ class Migration(SchemaMigration):
         # Deleting model 'Brand'
         db.delete_table(u'inventory_brand')
 
-        # Deleting model 'Item'
-        db.delete_table(u'inventory_item')
-
-        # Deleting model 'Inventory'
-        db.delete_table(u'inventory_inventory')
+        # Deleting model 'InventoryItem'
+        db.delete_table(u'inventory_inventoryitem')
 
         # Deleting model 'OpeningStock'
         db.delete_table(u'inventory_openingstock')
@@ -81,25 +71,20 @@ class Migration(SchemaMigration):
             'brand': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '51'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
-        u'inventory.inventory': {
-            'Meta': {'object_name': 'Inventory'},
-            'discount_permit_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
-            'discount_permit_percentage': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']", 'unique': 'True'}),
-            'quantity': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'selling_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
-            'unit_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'})
-        },
-        u'inventory.item': {
-            'Meta': {'object_name': 'Item'},
+        u'inventory.inventoryitem': {
+            'Meta': {'object_name': 'InventoryItem'},
             'barcode': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']"}),
             'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '10'}),
             'description': ('django.db.models.fields.TextField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+            'discount_permit_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
+            'discount_permit_percentage': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'quantity': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'selling_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'tax': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
+            'unit_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'uom': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.UnitOfMeasure']"})
         },
         u'inventory.openingstock': {
@@ -107,7 +92,7 @@ class Migration(SchemaMigration):
             'discount_permit_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
             'discount_permit_percentage': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Item']"}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.InventoryItem']"}),
             'quantity': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'selling_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'unit_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'})
