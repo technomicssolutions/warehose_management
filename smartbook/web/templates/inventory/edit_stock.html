@@ -3,7 +3,7 @@
 {% block body_id %}edit_stock{% endblock %}
 
 {% block controller %}
-	ng-controller="StockEditController" ng-init="init('{{csrf_token}}', '{{stock.item.code}}')"   
+	ng-controller="StockEditController" ng-init="init('{{csrf_token}}', '{{stock.code}}')"   
 {% endblock controller %}
 
 {% block content %}

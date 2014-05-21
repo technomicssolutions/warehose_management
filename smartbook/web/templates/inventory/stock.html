@@ -17,14 +17,14 @@
 		
 		{% for item in inventory %}
 		 	<tr>
-		 		<td> {{item.item.code}} </td>
-		 		<td> {{item.item.name}} </td>
-		 		<td> {{item.item.barcode}} </td>
+		 		<td> {{item.code}} </td>
+		 		<td> {{item.name}} </td>
+		 		<td> {{item.barcode}} </td>
 		 		<td> {{item.quantity}} </td>
-		 		<td> {{item.item.uom}} </td>
+		 		<td> {{item.uom.uom}} </td>
 
 		 		<td> 
-		 			<a href="{% url 'edit_stock' %}?item_code={{item.item.code}}">
+		 			<a href="{% url 'edit_stock' %}?item_code={{item.code}}">
 						<img src="/static/images/edit.png">
 					</a>
 				 </td>

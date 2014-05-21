@@ -11,6 +11,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
+import ast
+
 from inventory.models import *
 
 class ItemAdd(View):
@@ -23,7 +25,7 @@ class ItemAdd(View):
             try:
                 uom = UnitOfMeasure.objects.get(uom = request.POST['uom'])
                 brand = Brand.objects.get(brand = request.POST['brand'])
-                item, created = Item.objects.get_or_create(code=request.POST['code'], brand=brand, uom=uom, name=request.POST['name'])
+                item, created = InventoryItem.objects.get_or_create(code=request.POST['code'], brand=brand, uom=uom, name=request.POST['name'])
                 if not created:
                     res = {
                         'result': 'error',
@@ -67,21 +69,21 @@ class ItemList(View):
                     items = []
                     if item_code:
                         if brand:
-                            items = Item.objects.filter(code__istartswith=item_code, brand=brand)
+                            items = InventoryItem.objects.filter(code__istartswith=item_code, brand=brand)
                         else:
-                            items = Item.objects.filter(code__istartswith=item_code)
+                            items = InventoryItem.objects.filter(code__istartswith=item_code)
                     elif item_name:
                         if brand:
-                            items = Item.objects.filter(name__istartswith=item_name, brand=brand)
+                            items = InventoryItem.objects.filter(name__istartswith=item_name, brand=brand)
                         else:
-                            items = Item.objects.filter(name__istartswith=item_name)
+                            items = InventoryItem.objects.filter(name__istartswith=item_name)
                     elif barcode:
                         if brand:
-                            items = Item.objects.filter(barcode__istartswith=barcode, brand=brand)
+                            items = InventoryItem.objects.filter(barcode__istartswith=barcode, brand=brand)
                         else:
-                            items = Item.objects.filter(barcode__istartswith=barcode)
+                            items = InventoryItem.objects.filter(barcode__istartswith=barcode)
                     else:
-                        items = Item.objects.all()
+                        items = InventoryItem.objects.all()
                     item_list = []
                     i = 0
                     i = i + 1
@@ -96,9 +98,9 @@ class ItemList(View):
                             'description': item.description,
                             'tax': item.tax,
                             'uom': item.uom.uom,
-                            'current_stock': item.inventory_set.all()[0].quantity if item.inventory_set.count() > 0  else 0 ,
-                            'selling_price': item.inventory_set.all()[0].selling_price if item.inventory_set.count() > 0 else 0 ,
-                            'discount_permit': item.inventory_set.all()[0].discount_permit_percentage if item.inventory_set.count() > 0 else 0,
+                            'current_stock': item.quantity if item.quantity  else 0 ,
+                            'selling_price': item.selling_price if item.selling_price else 0 ,
+                            'discount_permit': item.discount_permit_percentage if item.discount_permit_percentage else 0,
                         })
                         i = i + 1
 
@@ -113,7 +115,7 @@ class ItemList(View):
                 status_code = 200
                 return HttpResponse(response, status = status_code, mimetype = 'application/json')
             else:
-                items = Item.objects.all().order_by('code')
+                items = InventoryItem.objects.all().order_by('code')
                 ctx = {
                     'items': items
                 }
@@ -121,7 +123,7 @@ class ItemList(View):
 
 class StockView(View):
     def get(self, request, *args, **kwargs):
-        inventory = Inventory.objects.all()
+        inventory = InventoryItem.objects.all()
         ctx = {
             'inventory': inventory
         }
@@ -255,11 +257,11 @@ class AddOpeningStock(View):
 
 class EditStockView(View):
     def get(self, request, *args, **kwargs):
-        stock = Inventory.objects.get(item__code=request.GET['item_code'])
+        stock = InventoryItem.objects.get(code=request.GET['item_code'])
         if request.is_ajax():
             res = {
                  'stock': {
-                    'item': stock.item.code,
+                    'item': stock.code,
                     'quantity': stock.quantity,
                     'unit_price': stock.unit_price,
                     'selling_price': stock.selling_price,
@@ -275,8 +277,7 @@ class EditStockView(View):
 
     def post(self, request, *args, **kwargs):
 
-        inventory = Inventory.objects.get(item__code=request.POST['item_code'])
-        inventory.quantity = request.POST['quantity']
+        inventory = InventoryItem.objects.get(code=request.POST['item_code'])
         inventory.unit_price = request.POST['unit_price']
         inventory.selling_price = request.POST['selling_price']
         inventory.discount_permit_amount = request.POST['discount_permit_amount']
@@ -294,7 +295,7 @@ class EditItem(View):
         ctx_item_data = []
         if request.is_ajax():
             try:
-                item = Item.objects.get(id = item_id)
+                item = InventoryItem.objects.get(id = item_id)
                 ctx_item_data.append({
                     'name': item.name if item.name else '',
                     'code': item.code if item.code else '',
@@ -325,7 +326,7 @@ class EditItem(View):
 
         item_id = kwargs['item_id']
 
-        item = Item.objects.get(id = item_id)
+        item = InventoryItem.objects.get(id = item_id)
         item_data = ast.literal_eval(request.POST['item'])
         try:
             item.name = item_data['name']

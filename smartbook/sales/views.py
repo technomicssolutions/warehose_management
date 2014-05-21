@@ -21,7 +21,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from sales.models import *
-from inventory.models import Item, Inventory
+from inventory.models import InventoryItem
 from web.models import Customer, OwnerCompany
 
 from reportlab.lib.units import cm
@@ -129,7 +129,7 @@ class SalesEntry(View):
                     
         res = {
             'result': 'Ok',
-            'sales_invoice_id': sales_invoice.id,
+            'sales_invoice_id': 'sales_invoice.id',
         }
         response = simplejson.dumps(res)
         status_code = 200
@@ -1922,7 +1922,111 @@ class SalesmanStockItemList(View):
                 status_code = 200
                 return HttpResponse(response, status = status_code, mimetype = 'application/json')
             
+# class CreateSalesInvoicePDF(View):
 
+#     def get(self, request, *args, **kwargs):
+
+#         sales_invoice_id = kwargs['sales_invoice_id']
+#         sales_invoice = SalesmanSalesInvoice.objects.get(id=sales_invoice_id)
+#         sales = sales_invoice.sales
+
+#         response = HttpResponse(content_type='application/pdf')
+#         p = canvas.Canvas(response, pagesize=(1000, 1200))
+
+#         status_code = 200
+
+#         y = 1100
+#         style = [
+#             ('FONTSIZE', (0,0), (-1, -1), 20),
+#             ('FONTNAME',(0,0),(-1,-1),'Helvetica') 
+#         ]
+
+#         new_style = [
+#             ('FONTSIZE', (0,0), (-1, -1), 30),
+#             ('FONTNAME',(0,0),(-1,-1),'Helvetica') 
+#         ]
+
+#         para_style = ParagraphStyle('fancy')
+#         para_style.fontSize = 20
+#         para_style.fontName = 'Helvetica'
+#         para = Paragraph('<b> INVOICE </b>', para_style)
+
+#         data =[['', sales_invoice.date.strftime('%d-%m-%Y'), para , sales_invoice.invoice_no]]
+        
+#         table = Table(data, colWidths=[30, 360, 420, 100], rowHeights=50, style=style) 
+#         # table.setStyle(TableStyle([
+#         #                ('FONTSIZE', (2,0), (2,0), 30),
+#         #                ]))     
+#         table.wrapOn(p, 200, 400)
+#         table.drawOn(p,50, 975)
+
+#         customer_name = ''
+#         if sales_invoice.customer:
+#             customer_name = sales_invoice.customer.customer_name
+
+#         data=[['', customer_name, sales_invoice.sales.lpo_number if sales_invoice.sales else '' ]]
+
+#         table = Table(data, colWidths=[30, 540, 60], rowHeights=30, style = style)      
+#         table.wrapOn(p, 200, 400)
+#         table.drawOn(p, 50, 935)
+
+#         data=[['', '', sales_invoice.date.strftime('%d-%m-%Y')]]
+
+#         table = Table(data, colWidths=[450, 120, 70], rowHeights=50, style = style)      
+
+#         table.wrapOn(p, 200, 400)
+#         table.drawOn(p,50, 910)
+
+#         if sales_invoice.quotation or sales_invoice.delivery_note:            
+#             data=[['', '', sales_invoice.delivery_note.delivery_note_number if sales_invoice.delivery_note else sales_invoice.quotation.reference_id]]
+
+#             table = Table(data, colWidths=[450, 120, 70], rowHeights=40, style = style)      
+#             table.wrapOn(p, 200, 400)
+#             table.drawOn(p,50, 880)
+
+#         y = 790
+
+#         i = 0
+#         i = i + 1
+
+#         TWOPLACES = Decimal(10) ** -2
+#         total_amount = 0
+#         for s_item in sales.salesitem_set.all():
+                   
+#             y = y-30
+#             if y <= 270:
+#                 y = 790
+#                 p.showPage()
+            
+#             item_price = s_item.selling_price
+#             total_amount = total_amount + (item_price*s_item.quantity_sold)
+            
+#             data1=[[i, s_item.item.code, s_item.item.name, s_item.quantity_sold, s_item.item.uom.uom, s_item.selling_price.quantize(TWOPLACES), s_item.net_amount]]
+#             table = Table(data1, colWidths=[50, 100, 440, 80, 90, 100, 50], rowHeights=40, style=style)
+#             table.wrapOn(p, 200, 400)
+#             table.drawOn(p,10,y)
+#             i = i + 1
+#         y = 600
+#         if y <= 270:
+#             y = 800
+#             p.showPage()
+#         total_amount = sales.net_amount
+#         try:
+#             total_amount = total_amount.quantize(TWOPLACES)
+#         except:
+#             total_amount = total_amount
+#         total_amount_in_words = num2words(total_amount).title() + ' Only'
+       
+#         data=[[total_amount_in_words, total_amount]]  
+
+#         table = Table(data, colWidths=[700, 50], rowHeights=40, style = style)      
+
+#         table.wrapOn(p, 200, 100)
+#         table.drawOn(p, 200, 10)
+
+#         p.showPage()
+#         p.save()
+#         return response
 
 
     

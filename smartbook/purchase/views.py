@@ -13,13 +13,12 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.db.models import Max
 
-from inventory.models import Item
+from inventory.models import InventoryItem
 from inventory.models import UnitOfMeasure
 from inventory.models import Brand
 
 from web.models import (UserProfile, Vendor, Customer, TransportationCompany)
 from purchase.models import Purchase, PurchaseItem, VendorAccount, PurchaseReturn, PurchaseReturnItem
-from inventory.models import Inventory
 from expenses.models import Expense, ExpenseHead
 
 class PurchaseDetail(View):

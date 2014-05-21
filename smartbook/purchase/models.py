@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from datetime import datetime
 
-from inventory.models import Item
+from inventory.models import InventoryItem
 from inventory.models import Brand
 from web.models import Vendor, TransportationCompany
 
@@ -44,7 +44,7 @@ class Purchase(models.Model):
 
 class PurchaseItem(models.Model):
 
-    item = models.ForeignKey(Item, null=True, blank=True)
+    item = models.ForeignKey(InventoryItem, null=True, blank=True)
     purchase = models.ForeignKey(Purchase, null=True, blank=True)
     item_frieght = models.DecimalField('Item Frieght', max_digits=14, decimal_places=3, default=0)
     frieght_per_unit = models.DecimalField('Item Frieght per Unit', max_digits=14, decimal_places=3, default=0)
@@ -77,7 +77,7 @@ class PurchaseReturn(models.Model):
 
 class PurchaseReturnItem(models.Model):
     purchase_return = models.ForeignKey(PurchaseReturn)
-    item = models.ForeignKey(Item)
+    item = models.ForeignKey(InventoryItem)
     amount = models.DecimalField('Amount', max_digits=14, decimal_places=3, default=0)
     quantity = models.IntegerField('Quantity', default=0)
     
