@@ -123,7 +123,7 @@ class ItemList(View):
 
 class StockView(View):
     def get(self, request, *args, **kwargs):
-        inventory = InventoryItem.objects.all()
+        inventory = InventoryItem.objects.all().order_by('code')
         ctx = {
             'inventory': inventory
         }
@@ -222,14 +222,14 @@ class OpeningStockView(View):
 class AddOpeningStock(View):
 
     def get(self, request, *args, **kwargs):
-        items = Item.objects.all()
+        items = InventoryItem.objects.all()
         return render(request, 'inventory/opening_stock.html', {
             'items': items
         })
 
     def post(self, request, *args, **kwargs):
 
-        item = Item.objects.get(code=request.POST['item'])
+        item , created= InventoryItem.objects.get_or_create(code=request.POST['item'])
         opening_stock = OpeningStock()
         opening_stock.item = item
         opening_stock.quantity = request.POST['quantity']
@@ -238,19 +238,17 @@ class AddOpeningStock(View):
         opening_stock.discount_permit_percentage = request.POST['discount_permit_percent']
         opening_stock.discount_permit_amount = request.POST['discount_permit_amount']
         opening_stock.save()
-
-        inventory, created = Inventory.objects.get_or_create(item=item)
         if created:
-            inventory.quantity = request.POST['quantity']
+            item.quantity = int(request.POST['quantity'])
         else:
-            inventory.quantity = inventory.quantity + int(request.POST['quantity'])
-        inventory.unit_price = request.POST['unit_price']
-        inventory.selling_price = request.POST['selling_price']
-        inventory.discount_permit_amount = request.POST['discount_permit_amount']
-        inventory.discount_permit_percentage = request.POST['discount_permit_percent']
-        inventory.save()
+            item.quantity = item.quantity + int(request.POST['quantity'])
+        item.unit_price = request.POST['unit_price']
+        item.selling_price = request.POST['selling_price']
+        item.discount_permit_amount = request.POST['discount_permit_amount']
+        item.discount_permit_percentage = request.POST['discount_permit_percent']
+        item.save()
 
-        items = Item.objects.all()
+        items = InventoryItem.objects.all()
         return render(request, 'inventory/opening_stock.html', {
             'items': items
         })

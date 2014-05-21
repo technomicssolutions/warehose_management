@@ -52,7 +52,7 @@ class OpeningStock(models.Model):
 	discount_permit_amount = models.DecimalField('Discount permitted amount',max_digits=14, decimal_places=3, default=0,null=True, blank=True)
 
 	def __unicode__(self):
-		return self.code
+		return self.item.code
 
 	class Meta:
 		verbose_name_plural = 'Opening Stock'
