@@ -846,7 +846,7 @@ class DeliveryNoteDetails(View):
 
         delivery_no = request.GET.get('delivery_no', '')
 
-        delivery_note_details = DeliveryNote.objects.filter(delivery_note_number__istartswith=delivery_no, processed=False)
+        delivery_note_details = DeliveryNote.objects.filter(delivery_note_number__istartswith=delivery_no, is_pending=True)
         
         delivery_note_list = []
         net_total = 0
@@ -855,24 +855,6 @@ class DeliveryNoteDetails(View):
             i = 0 
             i = i + 1
             item_list = []
-            if delivery_note.quotation:
-                for q_item in delivery_note.quotation.quotationitem_set.all():
-                        item_list.append({
-                            'sl_no': i,
-                            'item_name': q_item.item.name,
-                            'item_code': q_item.item.code,
-                            'barcode': q_item.item.barcode,
-                            'item_description': q_item.item.description,
-                            'qty_sold': q_item.quantity_sold,
-                            'tax': q_item.item.tax,
-                            'uom': q_item.item.uom.uom,
-                            'current_stock': q_item.item.inventory_set.all()[0].quantity if q_item.item.inventory_set.count() > 0  else 0 ,
-                            'selling_price': q_item.item.inventory_set.all()[0].selling_price if q_item.item.inventory_set.count() > 0 else 0 ,
-                            'discount_permit': q_item.item.inventory_set.all()[0].discount_permit_percentage if q_item.item.inventory_set.count() > 0 else 0,
-                            'net_amount': q_item.net_amount,
-                            'discount_given': q_item.discount,
-                        })
-                        i = i + 1
             if delivery_note.deliverynoteitem_set.all().count() > 0:  
                 for delivery_note_item in delivery_note.deliverynoteitem_set.all():
                     item_list.append({
@@ -884,22 +866,22 @@ class DeliveryNoteDetails(View):
                         'qty_sold': delivery_note_item.quantity_sold,
                         'tax': delivery_note_item.item.tax,
                         'uom': delivery_note_item.item.uom.uom,
-                        'current_stock': delivery_note_item.item.inventory_set.all()[0].quantity if delivery_note_item.item.inventory_set.count() > 0  else 0 ,
-                        'selling_price': delivery_note_item.item.inventory_set.all()[0].selling_price if delivery_note_item.item.inventory_set.count() > 0 else 0 ,
-                        'discount_permit': delivery_note_item.item.inventory_set.all()[0].discount_permit_percentage if delivery_note_item.item.inventory_set.count() > 0 else 0,
+                        'current_stock': delivery_note_item.total_quantity if delivery_note_item.item else 0 ,
+                        'selling_price': delivery_note_item.item.selling_price if delivery_note_item.item else 0 ,
+                        'discount_permit': delivery_note_item.item.discount_permit_percentage if delivery_note_item.item else 0,
                         'net_amount': delivery_note_item.net_amount,
                         'discount_given': delivery_note_item.discount,
+                        'remaining_qty': int(delivery_note_item.total_quantity - delivery_note_item.quantity_sold) if delivery_note_item else 0,
                     })
                     i = i + 1
                         
             delivery_note_list.append({
-                'ref_no': delivery_note.quotation.reference_id if delivery_note.quotation else 0,
-                'customer': delivery_note.quotation.to.customer_name if delivery_note.quotation else delivery_note.customer.customer_name ,
+                'salesman': delivery_note.salesman.first_name if delivery_note.salesman else '' ,
                 'items': item_list,
-                'net_total': delivery_note.quotation.net_total if delivery_note.quotation else delivery_note.net_total,
+                'net_total': delivery_note.net_total if delivery_note.net_total else '' ,
                 'delivery_no': delivery_note.delivery_note_number,
                 'lpo_number': delivery_note.lpo_number if delivery_note.lpo_number else '',
-                'date': delivery_note.date.strftime('%d/%m/%Y'),
+                'date': delivery_note.date.strftime('%d/%m/%Y') if delivery_note.date else '',
             })
         res = {
             'delivery_notes': delivery_note_list,
@@ -919,11 +901,9 @@ class QuotationDeliverynoteSales(View):
         
         if not inv_number:
             inv_number = 1
-            prefix = 'INV'
         else:
             inv_number = inv_number + 1
-            prefix = SalesInvoice.objects.latest('id').prefix
-        invoice_number = prefix + str(inv_number)
+        invoice_number = 'INV' + str(inv_number)
 
         return render(request, 'sales/QNDN_sales_entry.html',{
             'sales_invoice_number': invoice_number,
@@ -931,94 +911,33 @@ class QuotationDeliverynoteSales(View):
         })
 
     def post(self, request, *args, **kwargs):
-        quotation_item_names = []
+
         sales_dict = ast.literal_eval(request.POST['sales'])
-        sales, sales_created = Sales.objects.get_or_create(sales_invoice_number=sales_dict['sales_invoice_number'])
+        delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
+        sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'], delivery_note=delivery_note)
         sales.sales_invoice_number = sales_dict['sales_invoice_number']
         sales.sales_invoice_date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
-        quotation = ''
 
         customer = Customer.objects.get(customer_name = sales_dict['customer'])
-
-        if sales_dict['quotation_ref_no']:
-            quotation = Quotation.objects.get(reference_id=sales_dict['quotation_ref_no'])
-            for q_item in quotation.quotationitem_set.all():
-                quotation_item_names = []
-                for item_data in sales_dict['sales_items']:
-                    quotation_item_names.append(item_data['item_name'])
-                if q_item.item.name not in quotation_item_names:
-                    item = q_item.item 
-                    inventory, created = Inventory.objects.get_or_create(item=item)
-                    inventory.quantity = inventory.quantity + int(q_item.quantity_sold)
-                    inventory.save()
-                    q_item.delete()
-                else:
-                    for item_data in sales_dict['sales_items']:
-                        if q_item.item.code == item_data['item_code']:
-                            if q_item.quantity_sold != int(item_data['qty_sold']):
-                                item = q_item.item
-                                inventory, created = Inventory.objects.get_or_create(item=item)
-                                inventory.quantity = inventory.quantity + int(q_item.quantity_sold)
-                                inventory.save()
-                                inventory.quantity = inventory.quantity - int(item_data['qty_sold'])
-                                inventory.save()
-                                q_item.quantity_sold = int(item_data['qty_sold'])
-                                q_item.save()
-                            if q_item.discount != float(item_data['disc_given']):
-                                q_item.discount = item_data['disc_given']
-                                q_item.save()
-                            if q_item.net_amount != float(item_data['net_amount']):
-                                q_item.net_amount = item_data['net_amount']
-                                q_item.save()
-
-            if quotation.net_total != float(sales_dict['net_total']):
-                quotation.net_total = sales_dict['net_total']
-                quotation.save()
-            sales.quotation = quotation
-            sales.customer = quotation.to
-            if sales_dict['delivery_no'] is not 0:
-                delivery_note, delivery_note_created = DeliveryNote.objects.get_or_create(delivery_note_number=sales_dict['delivery_no'], quotation=quotation)
-                sales.delivery_note = delivery_note
-        else:
-            delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
-            for q_item in delivery_note.deliverynoteitem_set.all():
-                delivery_note_item_names = []
-                for item_data in sales_dict['sales_items']:
-                    delivery_note_item_names.append(item_data['item_name'])
-                if q_item.item.name not in delivery_note_item_names:
-                    item = q_item.item 
-                    inventory, created = Inventory.objects.get_or_create(item=item)
-                    inventory.quantity = inventory.quantity + int(q_item.quantity_sold)
-                    inventory.save()
-                    q_item.delete()
-                else:
-                    for item_data in sales_dict['sales_items']:
-                        if q_item.item.code == item_data['item_code']:
-                            if q_item.quantity_sold != int(item_data['qty_sold']):
-                                item = q_item.item
-                                inventory, created = Inventory.objects.get_or_create(item=item)
-                                inventory.quantity = inventory.quantity + int(q_item.quantity_sold)
-                                inventory.save()
-                                inventory.quantity = inventory.quantity - int(item_data['qty_sold'])
-                                inventory.save()
-                                q_item.quantity_sold = int(item_data['qty_sold'])
-                                q_item.save()
-                            if q_item.discount != float(item_data['disc_given']):
-                                q_item.discount = item_data['disc_given']
-                                q_item.save()
-                            if q_item.net_amount != float(item_data['net_amount']):
-                                q_item.net_amount = item_data['net_amount']
-                                q_item.save()
-
-            if delivery_note.net_total != float(sales_dict['net_total']):
-                delivery_note.net_total = sales_dict['net_total']
-                delivery_note.save()
+        not_completed_selling = []
+        for d_item in delivery_note.deliverynoteitem_set.all():
+    
+            for item_data in sales_dict['sales_items']:
+                d_item.quantity_sold = d_item.quantity_sold + int(item_data['qty'])
+                d_item.save()
+            if d_item.total_quantity == d_item.quantity_sold:
+                d_item.is_completed = True
+            if not d_item.is_completed:
+                not_completed_selling.append(d_item.id)
+        if len(not_completed_selling) == 0:
+            delivery_note.is_pending = False
+            delivery_note.save()
 
         sales.lpo_number = sales_dict['lpo_number']
 
         sales.save()
 
-        salesman = Staff.objects.get(user__first_name=sales_dict['staff']) 
+        salesman = User.objects.get(first_name=sales_dict['staff']) 
         
         sales.discount = sales_dict['net_discount']
         sales.round_off = sales_dict['roundoff']
@@ -1038,7 +957,7 @@ class QuotationDeliverynoteSales(View):
             s_item, item_created = SalesItem.objects.get_or_create(item=item, sales=sales)
             s_item.sales = sales
             s_item.item = item
-            s_item.quantity_sold = sales_item['qty_sold']
+            s_item.quantity_sold = sales_item['qty']
             s_item.discount_given = sales_item['disc_given']
             s_item.net_amount = sales_item['net_amount']
             s_item.selling_price = sales_item['unit_price']
@@ -1049,21 +968,14 @@ class QuotationDeliverynoteSales(View):
         # Creating sales invoice 
 
         sales_invoice, created = SalesInvoice.objects.get_or_create(sales=sales)
-        if quotation:
-            sales_invoice.quotation = quotation
-            quotation.is_sales_invoice_created = True
-            quotation.save()
+        
         if sales_dict['delivery_no'] is not 0:
             delivery_note.processed = True
             delivery_note.save()
             sales.delivery_note = delivery_note
             sales_invoice.delivery_note = delivery_note
-            if quotation:
-                quotation.processed = True
-                quotation.save()
         
         sales_invoice.date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
-        sales_invoice.customer = customer
         sales_invoice.invoice_no = sales_dict['sales_invoice_number']
         sales_invoice.save()
 
@@ -1448,11 +1360,9 @@ class DirectDeliveryNote(View):
         
         if not ref_number:
             ref_number = 1
-            prefix = 'DN'
         else:
             ref_number = ref_number + 1
-            prefix = DeliveryNote.objects.latest('id').prefix
-        delivery_no = prefix + str(ref_number)
+        delivery_no = 'DN' + str(ref_number)
 
         context = {
             'current_date': current_date.strftime('%d-%m-%Y'),
@@ -1465,8 +1375,8 @@ class DirectDeliveryNote(View):
 
         if request.is_ajax():
             delivery_note_details = ast.literal_eval(request.POST['delivery_note'])
-            customer = Customer.objects.get(customer_name=delivery_note_details['customer'])
-            delivery_note = DeliveryNote.objects.create(customer=customer)
+            salesman = User.objects.get(first_name=delivery_note_details['salesman'])
+            delivery_note = DeliveryNote.objects.create(salesman=salesman)
             delivery_note.date = datetime.strptime(delivery_note_details['date'], '%d-%m-%Y')
             delivery_note.lpo_number = delivery_note_details['lpo_no']
             delivery_note.delivery_note_number = delivery_note_details['delivery_note_no']
@@ -1475,18 +1385,16 @@ class DirectDeliveryNote(View):
 
             delivery_note_data_items = delivery_note_details['sales_items']
             for delivery_note_item in delivery_note_data_items:
-                item = Item.objects.get(code=delivery_note_item['item_code'])
+                item, created = InventoryItem.objects.get_or_create(code=delivery_note_item['item_code'])
                 delivery_note_item_obj, item_created = DeliveryNoteItem.objects.get_or_create(item=item, delivery_note=delivery_note)
-                inventory, created = Inventory.objects.get_or_create(item=item)
-                inventory.quantity = inventory.quantity - int(delivery_note_item['qty_sold'])
-                inventory.save()
+                item.quantity = item.quantity - int(delivery_note_item['qty_sold'])
+                item.save()
                 delivery_note_item_obj.net_amount = float(delivery_note_item['net_amount'])
-                delivery_note_item_obj.quantity_sold = int(delivery_note_item['qty_sold'])
+                delivery_note_item_obj.total_quantity = int(delivery_note_item['qty_sold'])
                 delivery_note_item_obj.save()
 
             res = {
                 'result': 'ok',
-                'delivery_note_id': delivery_note.id
             }
             print res
 
@@ -1778,256 +1686,149 @@ class EditDeliveryNote(View):
 
             return HttpResponse(response, status=200, mimetype='application/json')
 
-class SalesmanSalesEntry(View):
-
-    def get(self, request, *args, **kwargs):
-        
-        current_date = dt.datetime.now().date()
-
-        inv_number = SalesmanSalesInvoice.objects.aggregate(Max('id'))['id__max']
-
-        if not inv_number:
-            inv_number = 1
-            prefix = 'SINV'
-        else:
-            inv_number = inv_number + 1
-            prefix = SalesmanSalesInvoice.objects.latest('id').prefix
-        
-        invoice_number = prefix + str(inv_number)
-        return render(request, 'sales/salesman_sales_entry.html',{
-            'sales_invoice_number': invoice_number,
-            'current_date': current_date.strftime('%d/%m/%Y'),
-        })
-
-
-    def post(self, request, *args, **kwargs):
-
-        sales_dict = ast.literal_eval(request.POST['sales'])
-        sales, sales_created = SalesmanSales.objects.get_or_create(sales_invoice_number=sales_dict['sales_invoice_number'])
-        sales.sales_invoice_number = sales_dict['sales_invoice_number']
-        sales.sales_invoice_date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
-        
-        salesman = User.objects.get(first_name=sales_dict['staff']) 
-        
-        sales.discount = sales_dict['net_discount']
-        sales.round_off = sales_dict['roundoff']
-        sales.net_amount = sales_dict['net_total']
-        sales.grant_total = sales_dict['grant_total']
-        sales.payment_mode = sales_dict['payment_mode']
-
-        sales.salesman = salesman  
-        sales.lpo_number = sales_dict['lpo_number']      
-        sales.save()
-        sales_items = sales_dict['sales_items']
-        for sales_item in sales_items:
-           
-            item = Item.objects.get(code=sales_item['item_code'])
-            s_item, item_created = SalesmanSalesItem.objects.get_or_create(item=item, sales=sales)
-            inventory, created = SalesmanStock.objects.get_or_create(item=item)
-            if created:
-                inventory.quantity = inventory.quantity - int(sales_item['qty_sold'])
-            else:
-                inventory.quantity = inventory.quantity + s_item.quantity_sold - int(sales_item['qty_sold'])      
-
-            inventory.save()
-                    
-            s_item, item_created = SalesmanSalesItem.objects.get_or_create(item=item, sales=sales)
-            s_item.sales = sales
-            s_item.item = item
-            s_item.quantity_sold = sales_item['qty_sold']
-            s_item.discount_given = sales_item['disc_given']
-            s_item.net_amount = sales_item['net_amount']
-            s_item.selling_price = sales_item['unit_price']
-            s_item.save()
-
-        sales_invoice, created = SalesmanSalesInvoice.objects.get_or_create(sales=sales)
-        sales.save()
-        sales_invoice.date = sales.sales_invoice_date
-        sales_invoice.invoice_no = sales.sales_invoice_number
-        sales_invoice.save()
-                    
-        res = {
-            'result': 'Ok',
-            'sales_invoice_id': sales_invoice.id,
-        }
-        response = simplejson.dumps(res)
-        status_code = 200
-        return HttpResponse(response, status = status_code, mimetype="application/json")
-
-
-class SalesmanStockItemList(View):
-    
-    def get(self, request, *args, **kwargs):
-        
-            if request.is_ajax():
-                try:
-                    item_code = request.GET.get('item_code', '')
-                    item_name = request.GET.get('item_name', '')
-                    barcode = request.GET.get('barcode', '')
-                    brand =  request.GET.get('brand', '')
-                    salesman_name = request.GET.get('salesman_name', '')
-                    if salesman_name:
-                        salesman = User.objects.get(first_name=salesman_name)
-                        if brand:
-                            brand = Brand.objects.get(brand=brand)
-                        items = []
-                        if item_code:
-                            if brand:
-                                items = Item.objects.filter(code__istartswith=item_code, brand=brand)
-                            else:
-                                items = Item.objects.filter(code__istartswith=item_code)
-                        elif item_name:
-                            if brand:
-                                items = Item.objects.filter(name__istartswith=item_name, brand=brand)
-                            else:
-                                items = Item.objects.filter(name__istartswith=item_name)
-                        elif barcode:
-                            if brand:
-                                items = Item.objects.filter(barcode__istartswith=barcode, brand=brand)
-                            else:
-                                items = Item.objects.filter(barcode__istartswith=barcode)
-                        else:
-                            items = Item.objects.all()
-                        item_list = []
-                        i = 0
-                        i = i + 1
-                        for item in items:
-                            try:
-                                stock = SalesmanStock.objects.get(salesman=salesman, item=item)
-                                item_list.append({
-                                    'sl_no': i,
-                                    'item_code': item.code,
-                                    'item_name': item.name,
-                                    'barcode': item.barcode if item.barcode else 0,
-                                    'brand': item.brand.brand,
-                                    'description': item.description,
-                                    'tax': item.tax if item.tax else 0,
-                                    'uom': item.uom.uom,
-                                    'current_stock': item.salesmanstock_set.all()[0].quantity if item.salesmanstock_set.count() > 0  else 0 ,
-                                    'selling_price': item.salesmanstock_set.all()[0].selling_price if item.salesmanstock_set.count() > 0 else 0 ,
-                                    'discount_permit': item.salesmanstock_set.all()[0].discount_permit_percentage if item.salesmanstock_set.count() > 0 else 0,
-                                })
-                                i = i + 1
-                            except:
-                                pass
-
-                        res = {
-                            'items': item_list,
-                        }
-                        response = simplejson.dumps(res)
-
-                except Exception as ex:
-                    response = simplejson.dumps({'result': 'error', 'error': str(ex)})
-                    status_code = 500
-                status_code = 200
-                return HttpResponse(response, status = status_code, mimetype = 'application/json')
-            
-# class CreateSalesInvoicePDF(View):
+# class SalesmanSalesEntry(View):
 
 #     def get(self, request, *args, **kwargs):
-
-#         sales_invoice_id = kwargs['sales_invoice_id']
-#         sales_invoice = SalesmanSalesInvoice.objects.get(id=sales_invoice_id)
-#         sales = sales_invoice.sales
-
-#         response = HttpResponse(content_type='application/pdf')
-#         p = canvas.Canvas(response, pagesize=(1000, 1200))
-
-#         status_code = 200
-
-#         y = 1100
-#         style = [
-#             ('FONTSIZE', (0,0), (-1, -1), 20),
-#             ('FONTNAME',(0,0),(-1,-1),'Helvetica') 
-#         ]
-
-#         new_style = [
-#             ('FONTSIZE', (0,0), (-1, -1), 30),
-#             ('FONTNAME',(0,0),(-1,-1),'Helvetica') 
-#         ]
-
-#         para_style = ParagraphStyle('fancy')
-#         para_style.fontSize = 20
-#         para_style.fontName = 'Helvetica'
-#         para = Paragraph('<b> INVOICE </b>', para_style)
-
-#         data =[['', sales_invoice.date.strftime('%d-%m-%Y'), para , sales_invoice.invoice_no]]
         
-#         table = Table(data, colWidths=[30, 360, 420, 100], rowHeights=50, style=style) 
-#         # table.setStyle(TableStyle([
-#         #                ('FONTSIZE', (2,0), (2,0), 30),
-#         #                ]))     
-#         table.wrapOn(p, 200, 400)
-#         table.drawOn(p,50, 975)
+#         current_date = dt.datetime.now().date()
 
-#         customer_name = ''
-#         if sales_invoice.customer:
-#             customer_name = sales_invoice.customer.customer_name
+#         inv_number = SalesmanSalesInvoice.objects.aggregate(Max('id'))['id__max']
 
-#         data=[['', customer_name, sales_invoice.sales.lpo_number if sales_invoice.sales else '' ]]
+#         if not inv_number:
+#             inv_number = 1
+#             prefix = 'SINV'
+#         else:
+#             inv_number = inv_number + 1
+#             prefix = SalesmanSalesInvoice.objects.latest('id').prefix
+        
+#         invoice_number = prefix + str(inv_number)
+#         return render(request, 'sales/salesman_sales_entry.html',{
+#             'sales_invoice_number': invoice_number,
+#             'current_date': current_date.strftime('%d/%m/%Y'),
+#         })
 
-#         table = Table(data, colWidths=[30, 540, 60], rowHeights=30, style = style)      
-#         table.wrapOn(p, 200, 400)
-#         table.drawOn(p, 50, 935)
 
-#         data=[['', '', sales_invoice.date.strftime('%d-%m-%Y')]]
+#     def post(self, request, *args, **kwargs):
 
-#         table = Table(data, colWidths=[450, 120, 70], rowHeights=50, style = style)      
+#         sales_dict = ast.literal_eval(request.POST['sales'])
+#         sales, sales_created = SalesmanSales.objects.get_or_create(sales_invoice_number=sales_dict['sales_invoice_number'])
+#         sales.sales_invoice_number = sales_dict['sales_invoice_number']
+#         sales.sales_invoice_date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
+        
+#         salesman = User.objects.get(first_name=sales_dict['staff']) 
+        
+#         sales.discount = sales_dict['net_discount']
+#         sales.round_off = sales_dict['roundoff']
+#         sales.net_amount = sales_dict['net_total']
+#         sales.grant_total = sales_dict['grant_total']
+#         sales.payment_mode = sales_dict['payment_mode']
 
-#         table.wrapOn(p, 200, 400)
-#         table.drawOn(p,50, 910)
+#         sales.salesman = salesman  
+#         sales.lpo_number = sales_dict['lpo_number']      
+#         sales.save()
+#         sales_items = sales_dict['sales_items']
+#         for sales_item in sales_items:
+           
+#             item = Item.objects.get(code=sales_item['item_code'])
+#             s_item, item_created = SalesmanSalesItem.objects.get_or_create(item=item, sales=sales)
+#             inventory, created = SalesmanStock.objects.get_or_create(item=item)
+#             if created:
+#                 inventory.quantity = inventory.quantity - int(sales_item['qty_sold'])
+#             else:
+#                 inventory.quantity = inventory.quantity + s_item.quantity_sold - int(sales_item['qty_sold'])      
 
-#         if sales_invoice.quotation or sales_invoice.delivery_note:            
-#             data=[['', '', sales_invoice.delivery_note.delivery_note_number if sales_invoice.delivery_note else sales_invoice.quotation.reference_id]]
+#             inventory.save()
+                    
+#             s_item, item_created = SalesmanSalesItem.objects.get_or_create(item=item, sales=sales)
+#             s_item.sales = sales
+#             s_item.item = item
+#             s_item.quantity_sold = sales_item['qty_sold']
+#             s_item.discount_given = sales_item['disc_given']
+#             s_item.net_amount = sales_item['net_amount']
+#             s_item.selling_price = sales_item['unit_price']
+#             s_item.save()
 
-#             table = Table(data, colWidths=[450, 120, 70], rowHeights=40, style = style)      
-#             table.wrapOn(p, 200, 400)
-#             table.drawOn(p,50, 880)
+#         sales_invoice, created = SalesmanSalesInvoice.objects.get_or_create(sales=sales)
+#         sales.save()
+#         sales_invoice.date = sales.sales_invoice_date
+#         sales_invoice.invoice_no = sales.sales_invoice_number
+#         sales_invoice.save()
+                    
+#         res = {
+#             'result': 'Ok',
+#             'sales_invoice_id': sales_invoice.id,
+#         }
+#         response = simplejson.dumps(res)
+#         status_code = 200
+#         return HttpResponse(response, status = status_code, mimetype="application/json")
 
-#         y = 790
 
-#         i = 0
-#         i = i + 1
+# class SalesmanStockItemList(View):
+    
+#     def get(self, request, *args, **kwargs):
+        
+#             if request.is_ajax():
+#                 try:
+#                     item_code = request.GET.get('item_code', '')
+#                     item_name = request.GET.get('item_name', '')
+#                     barcode = request.GET.get('barcode', '')
+#                     brand =  request.GET.get('brand', '')
+#                     salesman_name = request.GET.get('salesman_name', '')
+#                     if salesman_name:
+#                         salesman = User.objects.get(first_name=salesman_name)
+#                         if brand:
+#                             brand = Brand.objects.get(brand=brand)
+#                         items = []
+#                         if item_code:
+#                             if brand:
+#                                 items = Item.objects.filter(code__istartswith=item_code, brand=brand)
+#                             else:
+#                                 items = Item.objects.filter(code__istartswith=item_code)
+#                         elif item_name:
+#                             if brand:
+#                                 items = Item.objects.filter(name__istartswith=item_name, brand=brand)
+#                             else:
+#                                 items = Item.objects.filter(name__istartswith=item_name)
+#                         elif barcode:
+#                             if brand:
+#                                 items = Item.objects.filter(barcode__istartswith=barcode, brand=brand)
+#                             else:
+#                                 items = Item.objects.filter(barcode__istartswith=barcode)
+#                         else:
+#                             items = Item.objects.all()
+#                         item_list = []
+#                         i = 0
+#                         i = i + 1
+#                         for item in items:
+#                             try:
+#                                 stock = SalesmanStock.objects.get(salesman=salesman, item=item)
+#                                 item_list.append({
+#                                     'sl_no': i,
+#                                     'item_code': item.code,
+#                                     'item_name': item.name,
+#                                     'barcode': item.barcode if item.barcode else 0,
+#                                     'brand': item.brand.brand,
+#                                     'description': item.description,
+#                                     'tax': item.tax if item.tax else 0,
+#                                     'uom': item.uom.uom,
+#                                     'current_stock': item.salesmanstock_set.all()[0].quantity if item.salesmanstock_set.count() > 0  else 0 ,
+#                                     'selling_price': item.salesmanstock_set.all()[0].selling_price if item.salesmanstock_set.count() > 0 else 0 ,
+#                                     'discount_permit': item.salesmanstock_set.all()[0].discount_permit_percentage if item.salesmanstock_set.count() > 0 else 0,
+#                                 })
+#                                 i = i + 1
+#                             except:
+#                                 pass
 
-#         TWOPLACES = Decimal(10) ** -2
-#         total_amount = 0
-#         for s_item in sales.salesitem_set.all():
-                   
-#             y = y-30
-#             if y <= 270:
-#                 y = 790
-#                 p.showPage()
-            
-#             item_price = s_item.selling_price
-#             total_amount = total_amount + (item_price*s_item.quantity_sold)
-            
-#             data1=[[i, s_item.item.code, s_item.item.name, s_item.quantity_sold, s_item.item.uom.uom, s_item.selling_price.quantize(TWOPLACES), s_item.net_amount]]
-#             table = Table(data1, colWidths=[50, 100, 440, 80, 90, 100, 50], rowHeights=40, style=style)
-#             table.wrapOn(p, 200, 400)
-#             table.drawOn(p,10,y)
-#             i = i + 1
-#         y = 600
-#         if y <= 270:
-#             y = 800
-#             p.showPage()
-#         total_amount = sales.net_amount
-#         try:
-#             total_amount = total_amount.quantize(TWOPLACES)
-#         except:
-#             total_amount = total_amount
-#         total_amount_in_words = num2words(total_amount).title() + ' Only'
-       
-#         data=[[total_amount_in_words, total_amount]]  
+#                         res = {
+#                             'items': item_list,
+#                         }
+#                         response = simplejson.dumps(res)
 
-#         table = Table(data, colWidths=[700, 50], rowHeights=40, style = style)      
-
-#         table.wrapOn(p, 200, 100)
-#         table.drawOn(p, 200, 10)
-
-#         p.showPage()
-#         p.save()
-#         return response
-
+#                 except Exception as ex:
+#                     response = simplejson.dumps({'result': 'error', 'error': str(ex)})
+#                     status_code = 500
+#                 status_code = 200
+#                 return HttpResponse(response, status = status_code, mimetype = 'application/json')
 
     
 

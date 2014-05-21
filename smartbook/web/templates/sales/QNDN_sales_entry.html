@@ -19,21 +19,6 @@
 		<form name="sales_entry" method="post">
 			<div class="form_contents_sales">
 				<div class="section_1_sales">
-					<div class="formrow_sales">
-						<div class="formtext_sales">
-							<label for="customer">Quotation Reference No</label>
-						</div>
-						<div class="forminput_sales">
-							<input type='text' id="quotation_no" ng-model="quotation_no" ng-change="get_quotation_details()"/>
-							<p> [[message]] </p>
-						</div>
-						<div class="item_list quotation_list" ng-show='selecting_quotation' ng-hide="quotation_selected">
-							<div ng-repeat="quotation in quotations" ng-click="add_quotation(quotation)" class="item_list_row">
-								<span>[[quotation.ref_no]]</span>
-							</div>
-							<div class="clear"></div>
-						</div>
-					</div>
 					
 					<div class="formrow_sales">
 						<div class="formtext_sales">
@@ -63,31 +48,33 @@
 					</div>
 					<div class="formrow_sales">
 						<div class="formtext_sales">
-							<label for="customer">Customer Name</label>
+							<label for="salesman">Salesman Name</label>
 						</div>
 						<div class="forminput_sales">
-							<input type="text" name="customer"  id="customer" ng-model="sales.customer" 
+							<input type="text" name="salesman"  id="salesman" ng-model="sales.salesman" readonly/>
+						</div>
+					</div>
+
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="sales_invoice_number">Invoice Number </label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="sales_invoice_number"  ng-model="sales.sales_invoice_number"  readonly / >
+						</div>
+					</div>	
+
+					<div class="formrow_sales">
+						<div class="formtext_sales">
+							<label for="lpo_number">LPO Number </label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="lpo_number"  ng-model="sales.lpo_number"/ >
 						</div>
 					</div>
 
 				</div>	
-				<div class="formrow_sales">
-					<div class="formtext_sales">
-						<label for="sales_invoice_number">Invoice Number </label>
-					</div>
-					<div class="forminput_sales">
-						<input type="text" name="sales_invoice_number"  ng-model="sales.sales_invoice_number"  readonly / >
-					</div>
-				</div>	
-
-				<div class="formrow_sales">
-					<div class="formtext_sales">
-						<label for="lpo_number">LPO Number </label>
-					</div>
-					<div class="forminput_sales">
-						<input type="text" name="lpo_number"  ng-model="sales.lpo_number"/ >
-					</div>
-				</div>
+				
 			
    				<div class="purchase_items_list" ng-show="sales.sales_items.length > 0">
    					<div class="purchase_item_list">
@@ -95,25 +82,22 @@
    						<div class="item_list_row header">
 							<span class="small_column"> Item Code </span>
 							<span> Item Name </span>
-							<span> Barcode </span>
-							<span> Stock </span>
+							<span> Total Quantity </span>
 							<span> Unit Price </span>
-							<span> Qty  </span>
-							<span> UOM  </span>
-							<span> Dis Given </span>	
+							<span> Qty Sold </span>
+							<span> Remaining </span>
+							<span> Qty </span>	
 							<span> Net Amount </span>
 							<span> &nbsp;&nbsp; </span>
 						</div>
 						<div ng-repeat="item in sales.sales_items" class="item_list_row">
 							<span class="small_column">[[item.item_code]] </span>
 							<span>[[item.item_name]] </span>
-							<span>[[item.barcode]] </span>
 							<span>[[item.current_stock]] </span>
-							<span><input type="text" ng-model="item.unit_price" ng-click="get_latest_sales_details(item)" ng-change="calculate_net_amount_sale(item)" id="latest_price"/></span>
-							<!-- <span> [[item.qty_sold]]</span>  -->
-							<span> <input type="text" ng-model="item.qty_sold" ng-change="calculate_net_amount_sale(item)" /> </span>
-							<span>[[item.uom]] </span>
-							<span> <input type="text" ng-model="item.disc_given" ng-change="calculate_net_amount_sale(item)"/> </span> 
+							<span>[[item.unit_price]] </span>
+							<span>[[item.qty_sold]]</span>
+							<span>[[item.remaining_qty]]</span> 
+							<span> <input type="text" ng-model="item.qty" ng-change="calculate_net_amount_sale(item)" /> </span>
 							<span>[[item.net_amount]] </span>
 							<span><a href="" ng-click="remove_from_item_list(item)">X</a> </span>
 							 
@@ -150,15 +134,14 @@
 				<div class="section_1_sales">
 					<div class="formrow_sales">
 						<div class="formtext_sales">
-							<label for="salesman_code">Salesman Code</label>
+							<label for="customer">Customer name</label>
 						</div>
 						<div class="forminput_sales">
-							<select name="staff" ng-model="sales.staff" ng-change="add_staff()" >
+							<select name="staff" ng-model="sales.customer" ng-change="add_customer()" >
 								<option value="select">Select</option>
-								<option ng-repeat="staff in staffs" value="[[staff.salesman_name]]" >[[staff.salesman_name]]
+								<option ng-repeat="customer in customers" ng-selected="customer.customer_name == sales.customer">[[customer.customer_name]]
 								</option>
-								
-							</select>
+								<option value="other">Other</option>
 								
 							</select>
 						</div>

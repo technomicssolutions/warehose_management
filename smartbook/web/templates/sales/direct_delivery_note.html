@@ -41,26 +41,17 @@
 
 					<div class="formrow_sales">
 						<div class="formtext_sales">
-							<label for="customer">Customer Name</label>
+							<label for="customer">Salesman Name</label>
 						</div>
 						<div class="forminput_sales">
-							<select name="customer" ng-model="customer" ng-change="add_customer()" >
+							<select name="customer" ng-model="delivery_note.salesman" ng-change="add_customer()" >
 								<option value="select">Select</option>
-								<option ng-repeat="custmer in customers" value="[[custmer.customer_name]]" ng-selected="custmer.customer_name == customer">[[custmer.customer_name]]
+								<option ng-repeat="salesman in salesmen" value="[[salesman.salesman_name]]" ng-selected="salesman.salesman_name == delivery_note.salesman">[[salesman.salesman_name]]
 								</option>
 								<option value="other">Other</option>
 							</select>							
 						</div>
 					</div>
-
-					<!-- <div class="formrow_sales">
-						<div class="formtext_sales">
-							<label for="reference_number">Reference Number </label>
-						</div>
-						<div class="forminput_sales">
-							<input type="text" name="reference_number" id="reference_number" value="{{reference_number}}" readonly / >
-						</div>
-					</div> -->
 
 					<div class="formrow_sales">
 						<div class="formtext_sales">
@@ -70,29 +61,6 @@
 							<input type="text" name="lpo_no" ng-model="delivery_note.lpo_no" id="lpo_no" value="" / >
 						</div>
 					</div>	
-
-						
-					<!-- <div class="formrow_sales">
-						<div class="formtext_sales	">
-							<label for="Date ">Attention </label>
-						</div>
-
-						<div class="forminput_sales">
-							
-							<input type="text" name="attention"  ng-model="quotation.attention">
-						</div>
-					</div>
-
-					<div class="formrow_sales">
-						<div class="formtext_sales">
-							<label for="Date ">Subject </label>
-						</div>
-
-						<div class="forminput_sales">
-							
-							<input type="text" name="subject"  ng-model="quotation.subject">
-						</div>
-					</div> -->
 
 				</div>	
 		
