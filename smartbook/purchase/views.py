@@ -319,15 +319,15 @@ class PurchaseReturnView(View):
         return_items = post_dict['purchase_items']
 
         for item in return_items:
-            return_item = Item.objects.get(code=item['item_code'])
+            return_item = InventoryItem.objects.get(code=item['item_code'])
             p_return_item, created = PurchaseReturnItem.objects.get_or_create(item=return_item, purchase_return=purchase_return)
             p_return_item.amount = item['returned_amount']
             p_return_item.quantity = item['returned_quantity']
             p_return_item.save()
 
-            inventory = Inventory.objects.get(item=return_item)
-            inventory.quantity = inventory.quantity - int(item['returned_quantity'])
-            inventory.save()
+            # inventory = Inventory.objects.get(item=return_item)
+            return_item.quantity = return_item.quantity - int(item['returned_quantity'])
+            return_item.save()
         response = {
                 'result': 'Ok',
             }
