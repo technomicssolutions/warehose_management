@@ -1018,6 +1018,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
                     'net_amount': 0,
                     'remaining_qty': delivery_note.items[i].remaining_qty,
                     'qty': 0,
+                    'id': delivery_note.items[i].id,
                 }
                 // $scope.calculate_tax_amount_sale(selected_item);
                 // $scope.calculate_discount_amount_sale(selected_item);
@@ -1090,6 +1091,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             'net_amount': 0,
             'qty': 0,
             'remaining_qty':0,
+            'id': ''
         }
         $scope.calculate_tax_amount_sale(selected_item);
         $scope.calculate_discount_amount_sale(selected_item);
@@ -1107,9 +1109,9 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             $scope.validation_error = "";
         }
         if(item.qty != '' && item.unit_price != ''){
-            item.qty_sold = item.qty;
+            item.qty_sold = parseInt(item.qty_sold) + parseInt(item.qty);
             item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
-            item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty);
+            item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
             $scope.calculate_net_discount_sale();
         }
         $scope.calculate_net_total_sale();

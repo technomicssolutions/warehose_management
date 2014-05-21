@@ -859,6 +859,7 @@ class DeliveryNoteDetails(View):
                 for delivery_note_item in delivery_note.deliverynoteitem_set.all():
                     item_list.append({
                         'sl_no': i,
+                        'id': delivery_note_item.item.id,
                         'item_name': delivery_note_item.item.name,
                         'item_code': delivery_note_item.item.code,
                         'barcode': delivery_note_item.item.barcode,
@@ -913,7 +914,6 @@ class QuotationDeliverynoteSales(View):
     def post(self, request, *args, **kwargs):
 
         sales_dict = ast.literal_eval(request.POST['sales'])
-        print sales_dict
         delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
         sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'], delivery_note=delivery_note)
         sales.sales_invoice_number = sales_dict['sales_invoice_number']
@@ -921,15 +921,16 @@ class QuotationDeliverynoteSales(View):
 
         customer = Customer.objects.get(customer_name = sales_dict['customer'])
         not_completed_selling = []
-        for d_item in delivery_note.deliverynoteitem_set.all():
-    
-            for item_data in sales_dict['sales_items']:
-                d_item.quantity_sold = d_item.quantity_sold + int(item_data['qty'])
-                d_item.save()
-            if d_item.total_quantity == d_item.quantity_sold:
-                d_item.is_completed = True
-            if not d_item.is_completed:
-                not_completed_selling.append(d_item.id)
+        for item_data in sales_dict['sales_items']:
+            for d_item in delivery_note.deliverynoteitem_set.all():
+                if d_item.item.id == item_data['id']:
+                    if int(d_item.quantity_sold) != int(item_data['qty']):
+                        d_item.quantity_sold = d_item.quantity_sold + int(item_data['qty'])
+                        d_item.save()
+                    if d_item.total_quantity == d_item.quantity_sold:
+                        d_item.is_completed = True
+                    if not d_item.is_completed:
+                        not_completed_selling.append(d_item.id)
         if len(not_completed_selling) == 0:
             delivery_note.is_pending = False
             delivery_note.save()
@@ -1397,7 +1398,6 @@ class DirectDeliveryNote(View):
             res = {
                 'result': 'ok',
             }
-            print res
 
             response = simplejson.dumps(res)
 
