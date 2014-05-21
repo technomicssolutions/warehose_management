@@ -88,7 +88,12 @@
 		</tr>
 	</table>
 {% else %}
-	<div class="message"><p>No {{user_type}}s</p></div>
+	{% if user_type == 'Salesman' %}
+		<div class="message"><p>No Salesmen</p></div>
+	{% else %}
+		<div class="message"><p>No {{user_type}}s</p></div>
+	{% endif %}
+
 {% endif %}
 
 {% endblock content %}

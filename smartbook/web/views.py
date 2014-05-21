@@ -4,6 +4,7 @@ import sys
 import simplejson
 import os
 import shutil
+import re
 
 from django.db import IntegrityError
 from django.core.management import call_command
@@ -162,6 +163,7 @@ class RegisterUser(View):
         user_type = kwargs['user_type']
         message = ''
         template = 'register_user.html'
+        email_validation = (re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", request.POST['email']) )
         if request.POST['name'] == '':
             message = "Please enter name"
         if user_type == "Salesman":
@@ -171,6 +173,18 @@ class RegisterUser(View):
                 message = "Please enter password"
             elif request.POST['email'] == '':
                 message = "Please enter email"
+            elif email_validation == None:
+                message = "Please enter a valid email id"
+        elif user_type == "vendor":
+            if request.POST['name'] == '':
+                message = "Please enter Vendor Name"
+            elif request.POST['contact_person'] == '':
+                message = "Please enter Contact Person"
+            elif request.POST['mobile'] == '':
+                message = "Please enter Mobile Number"
+            elif request.POST['email'] != '':
+                if email_validation == None:                    
+                    message = "Please enter a valid Email Id"
         if message:
             context = {
                 'error_message': message,
@@ -222,7 +236,7 @@ class RegisterUser(View):
                     if request.is_ajax():
                         res = {
                             'result': 'error',
-                            'message': 'Designation Already exists'
+                            'message': message
                         }
                         response = simplejson.dumps(res)
                         return HttpResponse(response, status = 500, mimetype="application/json")
@@ -252,10 +266,9 @@ class RegisterUser(View):
                         'user_type': user_type
                     }
                     context.update(request.POST)
-            
-            userprofile = UserProfile()
+
+            userprofile , created= UserProfile.objects.get_or_create(user=user)
             userprofile.user_type=user_type
-            userprofile.user = user
             userprofile.house_name =request.POST['house']
             userprofile.street = request.POST['street']
             userprofile.city = request.POST['city']
@@ -285,7 +298,6 @@ class EditUser(View):
                 return render(request, 'edit_user.html',{
                     'user_type': user_type,
                     'profile': userprofile
-
                 })
 
     def post(self, request, *args, **kwargs):
@@ -326,13 +338,37 @@ class EditUser(View):
                 'profile': customer
             }
             return render(request, 'edit_user.html',context)
-        else:
+
+        else:          
             user = User.objects.get(id= kwargs['user_id'])
-            user.first_name = post_dict['name']
-            
+            userprofile, created = UserProfile.objects.get_or_create(user = user)
+            email_validation = (re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", request.POST['email']) )
+            if user_type == "Salesman":
+                if email_validation == None:
+                    message = "Please enter a valid email id"
+                    context = {
+                        'message': message,
+                        'user_type': user_type,
+                        'profile': userprofile
+                    }
+                    context.update(request.POST)
+                    return render(request, 'edit_user.html',context)   
+
+            elif request.POST['email'] != '':
+                if email_validation == None:                    
+                    message = "Please enter a valid Email Id"  
+                    context = {
+                        'message': message,
+                        'user_type': user_type,
+                        'profile': userprofile
+                    }
+                    context.update(request.POST)
+                    return render(request, 'edit_user.html',context)     
+
+            user.first_name = post_dict['name']            
             user.email = post_dict['email']
             user.save()
-            userprofile, created = UserProfile.objects.get_or_create(user = user)
+            
             userprofile.user_type=user_type
             userprofile.user = user
             userprofile.house_name =request.POST['house']

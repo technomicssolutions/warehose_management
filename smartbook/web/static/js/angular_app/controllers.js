@@ -324,51 +324,76 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         }
     }
 
+    $scope.validate_add_vendor = function() {
+        $scope.validation_error = '';
+
+        if($scope.vendor_name == '' || $scope.vendor_name == undefined) {
+            $scope.validation_error = "Please Enter the Vendor Name" ;
+            return false;
+        } else if($scope.contact_person == '' || $scope.contact_person == undefined) {
+            $scope.validation_error = "Please enter the Contact Person";
+            return false;
+        } else if($scope.mobile == ''|| $scope.mobile == undefined){
+            $scope.validation_error = "Please enter the Mobile Number";
+            return false;
+        } else if(!(Number($scope.mobile))) {            
+            $scope.validation_error = "Please enter a Valid Mobile Number";
+            return false;
+        } else if(($scope.email_id != '' && $scope.email_id != undefined) && (!(validateEmail($scope.email_id)))){
+                $scope.validation_error = "Please enter a Valid Email Id";
+                return false;         
+        } else {
+            return true;
+        }        
+    }
+
     $scope.add_new_vendor = function() {
-        params = { 
-            'name':$scope.vendor_name,
-            'contact_person': $scope.contact_person,
-            'house': $scope.house_name,
-            'street': $scope.street,
-            'city': $scope.city,
-            'district':$scope.district,
-            'pin': $scope.pin,
-            'mobile': $scope.mobile,
-            'phone': $scope.land_line,
-            'email': $scope.email_id,
-            "csrfmiddlewaretoken" : $scope.csrf_token
+        if($scope.validate_add_vendor()) {
+            params = { 
+                'name':$scope.vendor_name,
+                'contact_person': $scope.contact_person,
+                'house': $scope.house_name,
+                'street': $scope.street,
+                'city': $scope.city,
+                'district':$scope.district,
+                'pin': $scope.pin,
+                'mobile': $scope.mobile,
+                'phone': $scope.land_line,
+                'email': $scope.email_id,
+                "csrfmiddlewaretoken" : $scope.csrf_token
+            }
+            $http({
+                method : 'post',
+                url : "/register/vendor/",
+                data : $.param(params),
+                headers : {
+                    'Content-Type' : 'application/x-www-form-urlencoded'
+                }
+            }).success(function(data, status) {
+                
+                if (data.result == 'error'){
+                    $scope.error_flag=true;
+                    $scope.message = data.message;
+                } else {
+                    $scope.popup.hide_popup();                             
+                    $scope.get_vendors();
+                    $scope.purchase.vendor_name = $scope.vendor_name;
+                    $scope.purchase.vendor_name = data.vendor_name;
+                    $scope.vendor_name = '';
+                    $scope.contact_person = '';
+                    $scope.house_name = '';
+                    $scope.street = '';
+                    $scope.city = '';
+                    $scope.district = '';
+                    $scope.pin = '';
+                    $scope.mobile = '';
+                    $scope.land_line = '';
+                    $scope.email_id = '';
+                }
+            }).error(function(data, success){
+                
+            });
         }
-        $http({
-            method : 'post',
-            url : "/register/vendor/",
-            data : $.param(params),
-            headers : {
-                'Content-Type' : 'application/x-www-form-urlencoded'
-            }
-        }).success(function(data, status) {
-            
-            if (data.result == 'error'){
-                $scope.error_flag=true;
-                $scope.message = data.message;
-            } else {
-                $scope.popup.hide_popup();                             
-                $scope.get_vendors();
-                $scope.purchase.vendor_name = $scope.vendor_name;
-                $scope.purchase.vendor_name = data.vendor_name;
-                $scope.vendor_name = '';
-                $scope.contact_person = '';
-                $scope.house_name = '';
-                $scope.street = '';
-                $scope.city = '';
-                $scope.district = '';
-                $scope.pin = '';
-                $scope.mobile = '';
-                $scope.land_line = '';
-                $scope.email_id = '';
-            }
-        }).error(function(data, success){
-            
-        });
     }
 
     $scope.get_brands = function() {
