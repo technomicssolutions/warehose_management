@@ -27,7 +27,7 @@
 
 						<div class="forminput_sales">
 							<input type='text' id="delivery_no" ng-model="delivery_no" ng-change="get_delivery_note_details()"/>
-							<p> [[dn_message]] </p>
+							<p class="error_message"> [[dn_message]] </p>
 						</div>
 						<div class="item_list delivery_note" ng-show='selecting_delivery_note' ng-hide="delivery_note_selected">
 							<div ng-repeat="delivery_note in delivery_notes" ng-click="add_delivery_note(delivery_note)" class="item_list_row">

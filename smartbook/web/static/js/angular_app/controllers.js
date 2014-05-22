@@ -937,6 +937,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         $http.get('/sales/delivery_note_details/?delivery_no='+delivery_no).success(function(data)
         {
             if(data.delivery_notes.length > 0){
+                $scope.dn_message = '';
                $scope.selecting_delivery_note = true;
                 $scope.delivery_note_selected = false;
                 $scope.delivery_notes = data.delivery_notes; 
