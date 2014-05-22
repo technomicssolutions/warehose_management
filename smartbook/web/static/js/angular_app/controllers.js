@@ -1109,9 +1109,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             $scope.validation_error = "";
         }
         if(item.qty != '' && item.unit_price != ''){
-            item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
-            item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-            if(item.qty > item.remaining_qty) {
+            if(item.remaining_qty < 0) {
                 $scope.validation_error = item.item_name+' Not in stock';
                 item.qty_sold = parseInt(item.sold_qty);
                 item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
