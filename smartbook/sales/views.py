@@ -150,7 +150,6 @@ class SalesReturnView(View):
 
     def post(self, request, *args, **kwargs):
 
-
         post_dict = request.POST['sales_return']
 
         post_dict = ast.literal_eval(post_dict)
@@ -163,22 +162,21 @@ class SalesReturnView(View):
         return_items = post_dict['sales_items']
 
         for item in return_items:
-            return_item = Item.objects.get(code=item['item_code'])
+            return_item = InventoryItem.objects.get(code=item['item_code'])
             s_return_item, created = SalesReturnItem.objects.get_or_create(item=return_item, sales_return=sales_return)
             s_return_item.amount = item['returned_amount']
             s_return_item.return_quantity = item['returned_quantity']
             s_return_item.save()
 
-            inventory = Inventory.objects.get(item=return_item)
-            inventory.quantity = inventory.quantity + int(item['returned_quantity'])
-            inventory.save()
+            # inventory = Inventory.objects.get(item=return_item)
+            return_item.quantity = return_item.quantity + int(item['returned_quantity'])
+            return_item.save()
         response = {
                 'result': 'Ok',
             }
         status_code = 200
         return HttpResponse(response, status = status_code, mimetype="application/json")
 
-  	
 class ViewSales(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'sales/view_sales.html',{})
@@ -201,9 +199,9 @@ class SalesDetails(View):
                         'item_code': item.item.code,
                         'item_name': item.item.name,
                         'barcode': item.item.barcode,
-                        'stock': item.item.inventory_set.all()[0].quantity,
-                        'unit_price': item.item.inventory_set.all()[0].selling_price,
-                        'tax': item.item.tax,
+                        'stock': item.item.quantity,
+                        'unit_price': item.item.selling_price,
+                        'tax': item.item.tax if item.item.tax else 0 ,
                         'uom': item.item.uom.uom,
                         'quantity_sold': item.quantity_sold,
                         'discount_given': item.discount_given,
@@ -214,7 +212,7 @@ class SalesDetails(View):
                     'invoice_number': sales.sales_invoice_number,
                     'sales_invoice_date': sales.sales_invoice_date.strftime('%d/%m/%Y'),
                     'customer': sales.customer.customer_name,
-                    'sales_man': sales.salesman.user.first_name,
+                    'sales_man': sales.salesman.first_name,
                     'net_amount': sales.net_amount,
                     'round_off': sales.round_off,
                     'grant_total': sales.grant_total,
