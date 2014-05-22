@@ -122,14 +122,10 @@ class SalesReports(View):
                             invoice_no = item.sales.sales_invoice_number
                             qty = item.quantity_sold
                             item_name = item.item.name
-                            inventorys = item.item.inventory_set.all()
+                            inventorys = item.item
                             selling_price = 0  
                             if item.selling_price:
-                                selling_price = item.selling_price
-                            else:
-                                inventory = inventorys[0]                            
-                                selling_price = inventory.selling_price
-                            	
+                                selling_price = item.selling_price	
 
                             purchases = item.item.purchaseitem_set.all()
                             avg_cp = 0
@@ -151,7 +147,7 @@ class SalesReports(View):
                             avg_cp = math.ceil(avg_cp*100)/100
 
                             y = y - 30
-                            if y <= 270:
+                            if y <= 135:
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d/%m/%y'))
@@ -165,7 +161,7 @@ class SalesReports(View):
                             p.drawString(900, y, str(profit))
                             
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, 'Round Off : '+str(round_off))
@@ -232,7 +228,7 @@ class SalesReports(View):
                 p.drawString(750, 875, "Profit")     
 
                 y = 850       
-                item = Item.objects.get(code=item_code)
+                item = InventoryItem.objects.get(code=item_code)
                 salesitems = SalesItem.objects.filter(sales__sales_invoice_date__gte=start_date, sales__sales_invoice_date__lte=end_date,item=item)
                 # sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
                 # if sales.count()>0:
@@ -245,11 +241,9 @@ class SalesReports(View):
                         total_qty = salesitem.quantity_sold
                         item_name = salesitem.item.name
                         item_code = salesitem.item.code
-                        inventorys = salesitem.item.inventory_set.all()
                         selling_price = 0                            
-                        if inventorys.count()>0:
-                        	inventory = inventorys[0]                            
-                        	selling_price = inventory.selling_price                            
+                        if salesitem.item.selling_price:                       
+                        	selling_price = salesitem.item.selling_price                            
 
                         purchases = salesitem.item.purchaseitem_set.all()
                         avg_cp = 0
@@ -272,7 +266,7 @@ class SalesReports(View):
                         
 
                         y = y - 30
-                        if y <= 270:
+                        if y <= 135:
                             y = 850
                             p.showPage()
                         p.drawString(50, y, str(item_code))
@@ -287,7 +281,7 @@ class SalesReports(View):
                 total_cp = math.ceil(total_cp*100)/100 
 
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -370,11 +364,9 @@ class SalesReports(View):
                             item_name = item.item.name
                             qty = item.quantity_sold
                             discount = item.discount_given
-                            inventorys = item.item.inventory_set.all()
                             selling_price = 0                            
-                            if inventorys.count()>0:
-                            	inventory = inventorys[0]                            
-                            	selling_price = inventory.selling_price
+                            if item.item.selling_price:                        
+                            	selling_price = item.item.selling_price
                             
                             total = selling_price * qty
 
@@ -397,7 +389,7 @@ class SalesReports(View):
                             avg_cp = math.ceil(avg_cp*100)/100
 
                             y = y - 30
-                            if y <= 270:
+                            if y <= 135:
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
@@ -410,7 +402,7 @@ class SalesReports(View):
                             p.drawString(800, y, str(total)) 
                             p.drawString(900, y, str(profit))
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -481,10 +473,8 @@ class SalesReports(View):
                 p.drawString(900, 875, "Profit")
 
                 y = 850
-                
-                
-                desig = Designation.objects.get(title = 'salesman')                
-                salesmen = Staff.objects.filter(designation = desig, user__first_name=salesman_name)                
+                         
+                salesmen = User.objects.filter(first_name=salesman_name)                
                 sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date,salesman=salesmen)
                 
                 if sales.count()>0:                    
@@ -496,11 +486,9 @@ class SalesReports(View):
                             item_name = item.item.name
                             qty = item.quantity_sold
                             discount = item.discount_given
-                            inventorys = item.item.inventory_set.all()
                             selling_price = 0                            
-                            if inventorys.count()>0:
-                            	inventory = inventorys[0]                            
-                            	selling_price = inventory.selling_price
+                            if item.item.selling_price:                          
+                            	selling_price = item.item.selling_price
                             
                             total = selling_price * qty
 
@@ -521,7 +509,7 @@ class SalesReports(View):
 
                             avg_cp = math.ceil(avg_cp*100)/100
                             y = y - 30
-                            if y <= 270:
+                            if y <= 135:
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
@@ -534,7 +522,7 @@ class SalesReports(View):
                             p.drawString(800, y, str(total)) 
                             p.drawString(900, y, str(profit))
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -821,7 +809,7 @@ class DailyReport(View):
             if sales.count()>0:
                 for sale in sales:
                     y = y - 30
-                    if y <= 270:
+                    if y <= 135:
                         y = 850
                         p.showPage()
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
@@ -838,7 +826,7 @@ class DailyReport(View):
                 for expense in expenses:   
                     y = y - 30
 
-                    if y <= 270:
+                    if y <= 135:
                         y = 850
                         p.showPage()
                     
@@ -852,7 +840,7 @@ class DailyReport(View):
             difference = total_income - total_expense
 
             y = y-30
-            if y <= 270:
+            if y <= 135:
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -861,7 +849,7 @@ class DailyReport(View):
             p.drawString(650, y, str(round_off))
 
             y = y-30
-            if y <= 270:
+            if y <= 135:
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -871,7 +859,7 @@ class DailyReport(View):
 
             
             y = y-30
-            if y <= 270:
+            if y <= 135:
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -1230,7 +1218,7 @@ class StockReports(View):
         p = canvas.Canvas(response, pagesize=(1000, 1000))
 
         status_code = 200
-        stocks = Inventory.objects.all()
+        stocks = InventoryItem.objects.all()
         
         p.drawString(400, 900, 'Stock Report')
 
@@ -1249,14 +1237,14 @@ class StockReports(View):
         y = y - 50 
         if len(stocks) > 0:
             for stock in stocks:
-                p.drawString(80, y, stock.item.code)
-                p.drawString(160, y, stock.item.name)
-                p.drawString(280, y, stock.item.barcode)
-                p.drawString(360, y, stock.item.brand.brand)                
+                p.drawString(80, y, stock.code)
+                p.drawString(160, y, stock.name)
+                p.drawString(280, y, stock.barcode)
+                p.drawString(360, y, stock.brand.brand)                
                 p.drawString(480, y, str(stock.quantity))
-                p.drawString(540, y, stock.item.uom.uom)
+                p.drawString(540, y, stock.uom.uom)
                 p.drawString(600, y, str(stock.unit_price))
-                p.drawString(680, y, str(stock.item.tax))
+                p.drawString(680, y, str(stock.tax))
                 p.drawString(760, y, str(stock.discount_permit_percentage))
                 p.drawString(840, y, str(stock.quantity * stock.unit_price))
                 y = y - 30
