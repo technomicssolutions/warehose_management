@@ -185,6 +185,7 @@ class SalesDetails(View):
             invoice_number = request.GET['invoice_no']
             try:
                 sales = Sales.objects.get(sales_invoice_number=invoice_number)
+                sales_return = SalesReturn.objects.filter(sales=sales)
             except:
                 sales = None
             if sales:
@@ -203,7 +204,6 @@ class SalesDetails(View):
                         'uom': item.item.uom.uom,
                         'quantity_sold': item.quantity_sold,
                         'discount_given': item.discount_given,
-
 
                     })
                 sales_dict = {
