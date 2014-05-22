@@ -1900,6 +1900,13 @@ function SalesReportController($scope, $element, $http, $timeout, $location){
             $scope.salesman_name = 'select';
         })
     }
+    $scope.get_items = function(){
+        $http.get('/inventory/items/').success(function(data)
+        {
+            $scope.items = data.items;
+            $scope.item = 'select';
+        })
+    }
     
 }
 

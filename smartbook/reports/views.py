@@ -122,14 +122,10 @@ class SalesReports(View):
                             invoice_no = item.sales.sales_invoice_number
                             qty = item.quantity_sold
                             item_name = item.item.name
-                            inventorys = item.item.inventory_set.all()
+                            inventorys = item.item
                             selling_price = 0  
                             if item.selling_price:
-                                selling_price = item.selling_price
-                            else:
-                                inventory = inventorys[0]                            
-                                selling_price = inventory.selling_price
-                            	
+                                selling_price = item.selling_price	
 
                             purchases = item.item.purchaseitem_set.all()
                             avg_cp = 0
@@ -151,7 +147,7 @@ class SalesReports(View):
                             avg_cp = math.ceil(avg_cp*100)/100
 
                             y = y - 30
-                            if y <= 270:
+                            if y <= 135:
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d/%m/%y'))
@@ -165,7 +161,7 @@ class SalesReports(View):
                             p.drawString(900, y, str(profit))
                             
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, 'Round Off : '+str(round_off))
@@ -232,7 +228,7 @@ class SalesReports(View):
                 p.drawString(750, 875, "Profit")     
 
                 y = 850       
-                item = Item.objects.get(code=item_code)
+                item = InventoryItem.objects.get(code=item_code)
                 salesitems = SalesItem.objects.filter(sales__sales_invoice_date__gte=start_date, sales__sales_invoice_date__lte=end_date,item=item)
                 # sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
                 # if sales.count()>0:
@@ -245,11 +241,9 @@ class SalesReports(View):
                         total_qty = salesitem.quantity_sold
                         item_name = salesitem.item.name
                         item_code = salesitem.item.code
-                        inventorys = salesitem.item.inventory_set.all()
                         selling_price = 0                            
-                        if inventorys.count()>0:
-                        	inventory = inventorys[0]                            
-                        	selling_price = inventory.selling_price                            
+                        if salesitem.item.selling_price:                       
+                        	selling_price = salesitem.item.selling_price                            
 
                         purchases = salesitem.item.purchaseitem_set.all()
                         avg_cp = 0
@@ -272,7 +266,7 @@ class SalesReports(View):
                         
 
                         y = y - 30
-                        if y <= 270:
+                        if y <= 135:
                             y = 850
                             p.showPage()
                         p.drawString(50, y, str(item_code))
@@ -287,7 +281,7 @@ class SalesReports(View):
                 total_cp = math.ceil(total_cp*100)/100 
 
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -370,11 +364,9 @@ class SalesReports(View):
                             item_name = item.item.name
                             qty = item.quantity_sold
                             discount = item.discount_given
-                            inventorys = item.item.inventory_set.all()
                             selling_price = 0                            
-                            if inventorys.count()>0:
-                            	inventory = inventorys[0]                            
-                            	selling_price = inventory.selling_price
+                            if item.item.selling_price:                        
+                            	selling_price = item.item.selling_price
                             
                             total = selling_price * qty
 
@@ -397,7 +389,7 @@ class SalesReports(View):
                             avg_cp = math.ceil(avg_cp*100)/100
 
                             y = y - 30
-                            if y <= 270:
+                            if y <= 135:
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
@@ -410,7 +402,7 @@ class SalesReports(View):
                             p.drawString(800, y, str(total)) 
                             p.drawString(900, y, str(profit))
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -481,10 +473,8 @@ class SalesReports(View):
                 p.drawString(900, 875, "Profit")
 
                 y = 850
-                
-                
-                desig = Designation.objects.get(title = 'salesman')                
-                salesmen = Staff.objects.filter(designation = desig, user__first_name=salesman_name)                
+                         
+                salesmen = User.objects.filter(first_name=salesman_name)                
                 sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date,salesman=salesmen)
                 
                 if sales.count()>0:                    
@@ -496,11 +486,9 @@ class SalesReports(View):
                             item_name = item.item.name
                             qty = item.quantity_sold
                             discount = item.discount_given
-                            inventorys = item.item.inventory_set.all()
                             selling_price = 0                            
-                            if inventorys.count()>0:
-                            	inventory = inventorys[0]                            
-                            	selling_price = inventory.selling_price
+                            if item.item.selling_price:                          
+                            	selling_price = item.item.selling_price
                             
                             total = selling_price * qty
 
@@ -521,7 +509,7 @@ class SalesReports(View):
 
                             avg_cp = math.ceil(avg_cp*100)/100
                             y = y - 30
-                            if y <= 270:
+                            if y <= 135:
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
@@ -534,7 +522,7 @@ class SalesReports(View):
                             p.drawString(800, y, str(total)) 
                             p.drawString(900, y, str(profit))
                 y = y - 30
-                if y <= 270:
+                if y <= 135:
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
