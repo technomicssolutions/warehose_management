@@ -1286,40 +1286,34 @@ class SalesmanStockReports(View):
                 }
                 return render(request, 'reports/salesman_stock_report.html', context) 
             salesman = User.objects.get(first_name=salesman_name)
-            stocks = SalesmanStock.objects.filter(salesman=salesman)
+            delivery_notes = DeliveryNote.objects.filter(salesman=salesman)
         
         
         p.drawString(400, 900, 'Salesman Stock Report')
 
         y = 850
-        p.drawString(80, y, 'Item Code')
-        p.drawString(160, y, 'Item Name')
-        p.drawString(280, y, 'Barcode')
-        p.drawString(360, y, 'Brand Name')    
-        p.drawString(480, y, 'UOM')
-        p.drawString(540, y, 'Stock')
-        p.drawString(600, y, 'Unit Price')
-        p.drawString(680, y, 'Tax')
-        p.drawString(760, y, 'Discount')
-        p.drawString(840, y, 'Stock By value')
+        p.drawString(80, y, 'Delivery Note No')
+        p.drawString(190, y, 'Item Code')
+        p.drawString(280, y, 'Item Name')
+        p.drawString(610, y, 'Total Quantity')    
+        p.drawString(700, y, 'Sold Quantity')
+        p.drawString(790, y, 'Pending')
         
         y = y - 50 
-        if len(stocks) > 0:
-            for stock in stocks:
-                p.drawString(80, y, stock.item.code)
-                p.drawString(160, y, stock.item.name)
-                p.drawString(280, y, stock.item.barcode)
-                p.drawString(360, y, stock.item.brand.brand)                
-                p.drawString(480, y, stock.item.uom.uom)
-                p.drawString(540, y, str(stock.quantity))
-                p.drawString(600, y, str(stock.unit_price))
-                p.drawString(680, y, str(stock.item.tax))
-                p.drawString(760, y, str(stock.discount_permit_percentage))
-                p.drawString(840, y, str(stock.quantity * stock.unit_price))
-                y = y - 30
-                if y <= 270:
-                    y = 850
-                    p.showPage()
+        if len(delivery_notes) > 0:
+            for delivery_note in delivery_notes:
+                if delivery_note.deliverynoteitem_set.all().count() > 0:
+                    for d_item in delivery_note.deliverynoteitem_set.all():
+                        p.drawString(80, y, delivery_note.delivery_note_number)
+                        p.drawString(190, y, d_item.item.code)
+                        p.drawString(280, y, d_item.item.name)
+                        p.drawString(610, y, str(d_item.total_quantity))
+                        p.drawString(700, y, str(d_item.quantity_sold))
+                        p.drawString(790, y, str(int(d_item.total_quantity) - int(d_item.quantity_sold)))
+                        y = y - 30
+                        if y <= 270:
+                            y = 850
+                            p.showPage()
 
         p.showPage()
         p.save()

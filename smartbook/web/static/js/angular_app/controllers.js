@@ -1019,10 +1019,8 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
                     'remaining_qty': delivery_note.items[i].remaining_qty,
                     'qty': 0,
                     'id': delivery_note.items[i].id,
+                    'sold_qty': delivery_note.items[i].sold_qty,
                 }
-                // $scope.calculate_tax_amount_sale(selected_item);
-                // $scope.calculate_discount_amount_sale(selected_item);
-                // $scope.calculate_unit_cost_sale(selected_item);
                 $scope.sales.sales_items.push(selected_item);
                 $scope.calculate_grant_total_sale();
                 $scope.calculate_net_discount_sale();
@@ -1091,7 +1089,8 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             'net_amount': 0,
             'qty': 0,
             'remaining_qty':0,
-            'id': ''
+            'id': '',
+            'sold_qty': '',
         }
         $scope.calculate_tax_amount_sale(selected_item);
         $scope.calculate_discount_amount_sale(selected_item);
@@ -1102,6 +1101,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
     
     
     $scope.calculate_net_amount_sale = function(item) {
+
         if(parseInt(item.qty_sold) > parseInt(item.current_stock)) {
             $scope.validation_error = "Qauntity not in stock";
             return false;
@@ -1109,10 +1109,24 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             $scope.validation_error = "";
         }
         if(item.qty != '' && item.unit_price != ''){
-            item.qty_sold = parseInt(item.qty_sold) + parseInt(item.qty);
-            item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
-            item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-            $scope.calculate_net_discount_sale();
+            if(item.qty > item.remaining_qty) {
+                $scope.validation_error = item.item_name+' Not in stock';
+            } else {
+                $scope.validation_error = '';
+                if (parseInt(item.qty) == 0) {
+                    console.log('in if');
+                    item.qty_sold = parseInt(item.sold_qty);
+                    item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+                } else {
+                    console.log('in else');
+                    item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
+                    item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+                }
+                
+                item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
+                
+                $scope.calculate_net_discount_sale();
+            }
         }
         $scope.calculate_net_total_sale();
     }

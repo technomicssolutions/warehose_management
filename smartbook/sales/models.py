@@ -188,14 +188,13 @@ class ReceiptVoucher(models.Model):
     sales_invoice = models.ForeignKey(SalesInvoice, null=True, blank=True)
     receipt_voucher_no = models.CharField('Receipt Voucher No', null=True, blank=True, max_length=30)
     date = models.DateField('Date', null=True, blank=True)
-    customer = models.ForeignKey(Customer, null=True, blank=True)
-    sum_of = models.DecimalField('Sum of', max_digits=14, decimal_places=2, default=0)
+    total_amount = models.DecimalField('Total Amount', max_digits=14, decimal_places=2, default=0)
+    paid_amount = models.DecimalField('Paid Amount', max_digits=14, decimal_places=2, default=0)
     cheque_no = models.CharField('Check Number', null=True, blank=True, max_length=50)
     bank = models.CharField('Bank', null=True, blank=True, max_length=100)
     dated = models.DateField('Dated', null=True, blank=True)
     payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=40, choices=PAYMENT_MODE)
-    prefix = models.CharField('Prefix', null=True, blank=True, max_length=20, default='RV')
-
+    
     def __unicode__(self):
 
         return str(self.sales_invoice.invoice_no)
@@ -204,3 +203,22 @@ class ReceiptVoucher(models.Model):
 
         verbose_name = 'Receipt Voucher'
         verbose_name_plural = 'Receipt Voucher'
+
+class CustomerAccount(models.Model):
+
+    invoice_no = models.ForeignKey(SalesInvoice, null=True, blank=True)
+    customer = models.ForeignKey(Customer, null=True, blank=True)
+    total_amount = models.DecimalField('Total amount', max_digits=14, decimal_places=2, default=0)
+    paid = models.DecimalField('Paid', max_digits=14, decimal_places=2, default=0)
+    balance = models.DecimalField('Balance', max_digits=14, decimal_places=2, default=0)
+    is_complted = models.BooleanField('Is Completed', default=False)
+
+
+    class Meta:
+
+        verbose_name = 'Customer Account'
+        verbose_name_plural = 'Customer Account'
+
+    def __unicode__(self):
+
+        return str(self.invoice_no.sales_invoice.invoice_no)
