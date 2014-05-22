@@ -854,7 +854,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
     }
 
     $scope.add_customer = function() {
-        console.log($scope.customer_name);
+        console.log($scope.custmer_name);
         if($scope.custmer_name == 'other') {
 
             $scope.popup = new DialogueModelWindow({
@@ -869,8 +869,8 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             $scope.popup.set_overlay_height(height);
             $scope.popup.show_content();
         } else {
-            $scope.custmer_name =$scope.customer_name; 
-            $scope.sales.customer = $scope.customer_name;
+            $scope.custmer_name = $scope.custmer_name; 
+            $scope.sales.customer = $scope.custmer_name;
         }
     }
 
@@ -888,13 +888,8 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         if(payment_mode == 'cheque') {
             $scope.payment_mode_selection = true;
             $scope.payment_mode_selection_check = false;
-            
-        }
-        else if(payment_mode == 'card'){
-            $scope.payment_mode_selection = false;
-            $scope.payment_mode_selection_check = false;
-        }
-        else {
+            $scope.sales.bank_name = '';
+        } else {
             $scope.payment_mode_selection = true;
             $scope.payment_mode_selection_check = true;
         }
@@ -913,19 +908,22 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         } else if($scope.sales.lpo_number == '') {
             $scope.validation_error = "Enter LPO Number" ;
             return false;
+        } else if( $scope.sales.payment_mode == 'cheque' && ($scope.sales.bank_name == '' || $scope.sales.bank_name == undefined || $scope.sales.bank_name == null)) {
+            $scope.validation_error = 'Please Enter Bank Name';
+            return false;
         } else if($scope.sales.sales_items.length == 0){
             $scope.validation_error = "Choose Item";
             return false;
         } else if($scope.sales.sales_items.length > 0){
             for (var i=0; i < $scope.sales.sales_items.length; i++){
-                if (parseInt($scope.sales.sales_items[i].current_stock) < parseInt($scope.sales.sales_items[i].qty_sold)){
+                if ($scope.sales.sales_items[i].remaining_qty < 0 ){
                     $scope.validation_error = "Quantity not in stock for item "+$scope.sales.sales_items[i].item_name;
+                    return false;
+                } else if ($scope.sales.sales_items[i].qty == 0) {
+                    $scope.validation_error = "Please enter quantity for the item "+$scope.sales.sales_items[i].item_name;
                     return false;
                 }
             }
-        } else if( $scope.sales.payment_mode == 'cheque' && ($scope.sales.bank_name == '' || $scope.sales.bank_name == undefined)) {
-            $scope.validation_error = 'Please Enter Bank Name';
-            return false;
         } 
         return true;       
     }
@@ -1179,7 +1177,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         $scope.sales.balance = $scope.sales.grant_total - $scope.sales.paid;
     }
     $scope.save_sales = function() {
-        $scope.sales.customer = $scope.customer_name;
+        $scope.sales.customer = $scope.custmer_name;
         if($scope.validate_sales()){
             $scope.sales.sales_invoice_date = $$('#sales_invoice_date')[0].get('value');
             console.log($scope.sales);
@@ -3185,6 +3183,9 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             for (var i=0; i < $scope.delivery_note.sales_items.length; i++){
                 if (parseInt($scope.delivery_note.sales_items[i].current_stock) < parseInt($scope.delivery_note.sales_items[i].qty_sold)){
                     $scope.validation_error = "Quantity not in stock for item "+$scope.delivery_note.sales_items[i].item_name;
+                    return false;
+                } else if ($scope.delivery_note.sales_items[i].qty_sold == 0) {
+                    $scope.validation_error = "Please enter quantity for the item "+$scope.delivery_note.sales_items[i].item_name;
                     return false;
                 }
             }
