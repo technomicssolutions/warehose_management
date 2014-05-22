@@ -221,4 +221,4 @@ class CustomerAccount(models.Model):
 
     def __unicode__(self):
 
-        return str(self.invoice_no.sales_invoice.invoice_no)
+        return str(self.invoice_no.invoice_no)

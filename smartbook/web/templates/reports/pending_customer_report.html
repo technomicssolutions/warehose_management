@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Pending Customer Report{% endblock title %}
+{% block body_id %}pending_customer_stock{% endblock %}
+
+{% block controller %}
+	ng-controller="PendingCustomerReportController" ng-init="init('{{csrf_token}}')"   
+{% endblock controller %}
+
+{% block content %}
+<div class="main-title">		
+	<div class="alert alert-info" align="Center" >Pending Customer Reports</div>
+</div>
+<div class="message">
+	<p>{{msg}}</p>
+</div>
+
+<form name="purchase_form" method="get" action="{% url 'pending_customer_report' %}">
+	{% if message %}
+		<p class="error_message">{{message}}</p>
+	{% endif %}
+	<div class="reporttext">
+		<label> Customer</label> 
+	</div>
+	<div class="reportinput">			
+		<select name="customer_name" ng-model="customer_name" value="{{customer_name}}">
+			 	<option value="select" >Select Customer</option>
+			 	<option ng-repeat="customer in customers" value="[[customer.customer_name]]">[[customer.customer_name]]</option>
+			</select>	
+	</div>
+	
+	<div class="reporttext">
+		<input type="submit" value="View Report" class="btn btn-info report_button " style="border-top-width: 0px; margin-top: 3px;">
+	</div>
+
+</form>	
+
+
+{% endblock content %}

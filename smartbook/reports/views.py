@@ -1371,6 +1371,54 @@ class PendingSalesmanReport(View):
         p.save()
         return response
 
+class PendingCustomerReport(View):
+
+    def get(self, request, *args, **kwargs):
+
+        response = HttpResponse(content_type='application/pdf')
+        p = canvas.Canvas(response, pagesize=(1000, 1000))
+
+        status_code = 200
+        customer_name = request.GET.get('customer_name')
+        
+        if customer_name is None:
+            return render(request, 'reports/pending_customer_report.html', {})
+        if customer_name:
+            if customer_name == 'select':
+                context = {
+                    'message': 'Please Choose Customer'
+                }
+                return render(request, 'reports/pending_customer_report.html', context) 
+            customer = Customer.objects.get(customer_name=customer_name)
+            customer_accounts = CustomerAccount.objects.filter(customer=customer, is_complted=False)
+        
+        p.drawString(400, 900, 'Pending Customer Report')
+
+        y = 850
+        p.drawString(80, y, 'Customer Name')
+        p.drawString(190, y, 'Invoice No')
+        p.drawString(280, y, 'Total Amount')
+        p.drawString(610, y, 'Paid') 
+        p.drawString(700, y, 'Balance') 
+        
+        y = y - 50 
+        if len(customer_accounts) > 0:
+            for customer_account in customer_accounts:
+                
+                p.drawString(80, y, customer_account.customer.customer_name)
+                p.drawString(190, y, customer_account.invoice_no.invoice_no)
+                p.drawString(280, y, customer_account.total_amount)
+                p.drawString(610, y, customer_account.paid)
+                p.drawString(700, y, customer_account.balance)
+                y = y - 30
+                if y <= 270:
+                    y = 850
+                    p.showPage()
+
+        p.showPage()
+        p.save()
+        return response
+
 
 
 
