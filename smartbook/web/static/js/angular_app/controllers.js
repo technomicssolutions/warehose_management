@@ -2941,6 +2941,11 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             return false;             
         } 
 
+        if ($scope.receiptvoucher.paid_amount != Number($scope.receiptvoucher.paid_amount) || $scope.receiptvoucher.paid_amount == '') {
+            $scope.validation_error = "Enter the Amount";
+            return false;  
+        }
+
         if($scope.receiptvoucher.payment_mode == 'cash') {
             $scope.receiptvoucher.bank_name = '';
             $scope.receiptvoucher.cheque_no = '';
