@@ -25,4 +25,5 @@ urlpatterns = patterns('',
 	url(r'^edit_sales_invoice/$', EditSalesInvoice.as_view(), name='edit_sales_invoice'),
 	url(r'^edit_quotation/$', EditQuotation.as_view(), name='edit_quotation'),
 	url(r'^edit_delivery_note/$', EditDeliveryNote.as_view(), name='edit_delivery_note'),
+	url(r'^pending_deliverynote/list/(?P<salesman_name>[\w-]+)/$', PendingDeliveryNoteList.as_view(), name='pending_deliverynotes'),
 )

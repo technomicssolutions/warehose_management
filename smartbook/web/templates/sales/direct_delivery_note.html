@@ -44,7 +44,7 @@
 							<label for="customer">Salesman Name</label>
 						</div>
 						<div class="forminput_sales">
-							<select name="customer" ng-model="delivery_note.salesman">
+							<select name="customer" ng-model="delivery_note.salesman" ng-change="get_pending_deliverynotes()">
 								<option value="select">Select</option>
 								<option ng-repeat="salesman in salesmen" value="[[salesman.salesman_name]]" ng-selected="salesman.salesman_name == delivery_note.salesman">[[salesman.salesman_name]]
 								</option>

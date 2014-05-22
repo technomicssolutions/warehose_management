@@ -3198,6 +3198,23 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         $scope.calculate_net_total_amount();
     }
 
+    $scope.get_pending_deliverynotes = function() {
+        var salesman_name = $scope.delivery_note.salesman.replace(/\s+/g, '_');
+        var delivery_note_no = '';
+         $http.get('/sales/pending_deliverynote/list/'+salesman_name+'/').success(function(data)
+        {
+
+            if (data.pending_list.length > 0) {
+                for (var i=0; i< data.pending_list.length; i++) {
+                    delivery_note_no = delivery_note_no + data.pending_list[i] +',';
+                }
+                delivery_note_no = delivery_note_no.replace(/,(?=[^,]*$)/, '')
+                var message = salesman_name+' have the following delivery notes pending '+delivery_note_no;
+                alert(message);
+            }
+        })
+    }
+
     $scope.create_delivery_note = function() {
         $scope.is_valid = $scope.delivery_note_validation();
         if($scope.is_valid) {
