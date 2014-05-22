@@ -921,6 +921,8 @@ class QuotationDeliverynoteSales(View):
         sales.sales_invoice_date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
 
         customer = Customer.objects.get(customer_name = sales_dict['customer'])
+        sales.customer = customer
+        sales.save()
         not_completed_selling = []
         for item_data in sales_dict['sales_items']:
             for d_item in delivery_note.deliverynoteitem_set.all():
@@ -971,7 +973,7 @@ class QuotationDeliverynoteSales(View):
 
         # Creating sales invoice 
 
-        sales_invoice, created = SalesInvoice.objects.get_or_create(sales=sales)
+        sales_invoice, created = SalesInvoice.objects.get_or_create(sales=sales, customer=customer)
         
         if sales_dict['delivery_no'] is not 0:
             delivery_note.processed = True
@@ -1123,9 +1125,8 @@ class ReceiptVoucherCreation(View):
             receiptvoucher = ast.literal_eval(request.POST['receiptvoucher'])
             customer = Customer.objects.get(customer_name=receiptvoucher['customer'])
             sales_invoice_obj = SalesInvoice.objects.get(invoice_no=receiptvoucher['invoice_no'])
-            receipt_voucher, created = ReceiptVoucher.objects.create(sales_invoice=sales_invoice_obj, customer=customer)
-            # sales_invoice_obj.is_processed = True
-            # sales_invoice_obj.save()
+            receipt_voucher = ReceiptVoucher.objects.create(sales_invoice=sales_invoice_obj)
+
             receipt_voucher.date = datetime.strptime(receiptvoucher['date'], '%d/%m/%Y')
             
             receipt_voucher.total_amount = receiptvoucher['amount']
@@ -1143,13 +1144,16 @@ class ReceiptVoucherCreation(View):
                 customer_account.total_amount = receiptvoucher['amount']
                 customer_account.paid = receiptvoucher['paid_amount']
             else:
-                customer_account.paid = customer_account.paid + float(receiptvoucher['paid_amount'])
+                customer_account.total_amount = receiptvoucher['amount']
+                customer_account.paid = float(customer_account.paid) + float(receiptvoucher['paid_amount'])
             customer_account.save()
             customer_account.balance = float(customer_account.total_amount) - float(customer_account.paid)
             customer_account.save()
             if customer_account.balance == 0:
                 customer_account.is_complted = True
                 customer_account.save()
+                sales_invoice_obj.is_processed = True
+                sales_invoice_obj.save()
            
             res = {
                 'result': 'OK',
@@ -1175,11 +1179,14 @@ class InvoiceDetails(View):
         ctx_sales_item  = []
         if sales_invoice_details.count() > 0:
             for sales_invoice in sales_invoice_details:
+                customer = sales_invoice.customer
+                customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales_invoice)
                 ctx_invoice_details.append({
-                    'invoice_no': sales_invoice.invoice_no,
-                    'dated': sales_invoice.date.strftime('%d-%m-%Y'),
-                    'customer': sales_invoice.customer.customer_name,
-                    'amount': sales_invoice.sales.quotation.net_total if sales_invoice.sales.quotation else sales_invoice.sales.net_amount
+                    'invoice_no': sales_invoice.invoice_no if sales_invoice.invoice_no else '',
+                    'dated': sales_invoice.date.strftime('%d-%m-%Y') if sales_invoice.date else '',
+                    'customer': sales_invoice.customer.customer_name if sales_invoice.customer else '',
+                    'amount': sales_invoice.sales.net_amount if sales_invoice.sales else '',
+                    'paid_amount': customer_account.paid if customer_account.paid else 0,
                 })
         i = 0
         i = i + 1
@@ -1197,9 +1204,9 @@ class InvoiceDetails(View):
                         'qty_sold': sale.quantity_sold,
                         'tax': sale.item.tax,
                         'uom': sale.item.uom.uom,
-                        'current_stock': sale.item.inventory_set.all()[0].quantity if sale.item.inventory_set.count() > 0  else 0 ,
+                        'current_stock': sale.item.quantity if sale.item else 0 ,
                         'selling_price': sale.selling_price,
-                        'discount_permit': sale.item.inventory_set.all()[0].discount_permit_percentage if sale.item.inventory_set.count() > 0 else 0,
+                        'discount_permit': sale.item.discount_permit_percentage if sale.item else 0,
                         'net_amount': net_amount,
                         'discount_given': sale.discount_given,
 
@@ -1208,13 +1215,12 @@ class InvoiceDetails(View):
                     i = i + 1
                 ctx_sales_invoices.append({
                     'invoice_no': sales_invoice.invoice_no,
-                    'reference_no': sales_invoice.quotation.reference_id if sales_invoice.quotation else 0,
                     'date': sales_invoice.date.strftime('%d/%m/%Y'),
-                    'customer': sales_invoice.customer.customer_name,
-                    'delivery_note_no': sales_invoice.delivery_note.delivery_note_number if sales_invoice.delivery_note else 0,
-                    'lpo_number': sales_invoice.delivery_note.lpo_number if sales_invoice.delivery_note else sales_invoice.sales.lpo_number,
+                    'customer': sales_invoice.customer.customer_name if sales_invoice.customer else '',
+                    'delivery_note_no': sales_invoice.sales.delivery_note.delivery_note_number if sales_invoice.sales.delivery_note else '',
+                    'lpo_number': sales_invoice.sales.delivery_note.lpo_number if sales_invoice.sales.delivery_note else '',
                     'items': ctx_sales_item,
-                    'salesman': sales_invoice.sales.salesman.user.first_name if sales_invoice.sales.salesman else '',
+                    'salesman': sales_invoice.sales.salesman.first_name if sales_invoice.sales else '',
                     'payment_mode': sales_invoice.sales.payment_mode,
                     'card_number': sales_invoice.sales.card_number,
                     'bank_name': sales_invoice.sales.bank_name,

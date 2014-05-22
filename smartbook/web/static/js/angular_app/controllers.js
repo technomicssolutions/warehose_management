@@ -2905,8 +2905,10 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         'paid_amount': '',
         'invoice_no': '',
         'voucher_no': '',
+        'paid': '',
 
     }
+    $scope.balance = 0;
     $scope.receiptvoucher.customer = '';
     $scope.receiptvoucher.receipt_voucher_date = '';
     $scope.receiptvoucher.cheque_no = '';
@@ -2990,6 +2992,9 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         $scope.receiptvoucher.invoice_no =  $scope.invoice_no;
         $scope.receiptvoucher.customer = invoice.customer;
         $scope.receiptvoucher.amount = invoice.amount;
+        $scope.receiptvoucher.paid = invoice.paid_amount;
+        $scope.balance = parseFloat($scope.receiptvoucher.amount) - parseFloat($scope.receiptvoucher.paid);
+        $scope.receiptvoucher.paid_amount = 0;
 
     }
 
@@ -3005,7 +3010,7 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             }
             $http({
                 method : 'post',
-                url : "/sales/create_receipt_voucher/",
+                url : "/sales/receipt_voucher/",
                 data : $.param(params),
                 headers : {
                     'Content-Type' : 'application/x-www-form-urlencoded'
@@ -3018,7 +3023,7 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
                 } else {
                     $scope.error_flag=false;
                     $scope.message = '';
-                    document.location.href ='/sales/pdf_receipt_voucher/'+data.receiptvoucher_id+'/';
+                    document.location.href ='/sales/receipt_voucher/';
                 }
             }).error(function(data, status){
                 console.log(data);
