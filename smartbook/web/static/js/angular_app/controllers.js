@@ -1142,10 +1142,9 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
                 item.qty_sold = parseInt(item.sold_qty);
                 item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
                 item.net_amount = 0;
+            } else {
+                item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
             }
-            
-            item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
-            
             $scope.calculate_net_discount_sale();
         }
         $scope.calculate_net_total_sale();
