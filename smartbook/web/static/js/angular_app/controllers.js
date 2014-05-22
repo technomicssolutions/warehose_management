@@ -2928,7 +2928,6 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             format: '%d/%m/%Y',
         });
     }
-
     
     $scope.receipt_validation = function(){
 
@@ -3544,10 +3543,8 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     $scope.calculate_unit_cost_sale = function(item) {
         if(item.unit_price != ''){
             item.unit_cost = (parseFloat(item.unit_price)+parseFloat(item.tax_amount)-parseFloat(item.disc_given)).toFixed(2);
-            
         }
     }
-
 }
 
 function EditQuotationController($scope, $element, $http, $timeout, share, $location) {
@@ -3571,6 +3568,7 @@ function EditQuotationController($scope, $element, $http, $timeout, share, $loca
         'delivery': '',
         'payment': '',
     }
+
     $scope.init = function(csrf_token, sales_invoice_number)
     {
         $scope.csrf_token = csrf_token;
@@ -3786,8 +3784,8 @@ function EditQuotationController($scope, $element, $http, $timeout, share, $loca
             });
         }
     }
-
 }
+
 function EditDeliveryController($scope, $element, $http, $timeout, share, $location) {
 
     $scope.items = [];
@@ -3806,10 +3804,12 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
         'lpo_no': '',
         'ref_no': ''
     }
+
     $scope.init = function(csrf_token, sales_invoice_number)
     {
         $scope.csrf_token = csrf_token;
     }
+
     $scope.items = [];
     $scope.selected_item = '';
     $scope.selecting_item = false;
@@ -3870,8 +3870,7 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
             'net_amount': item.net_amount,    
         }
         $scope.delivery_note.sales_items.push(selected_item);
-    }
-    
+    }    
     
     $scope.calculate_net_amount_sale = function(item) {
         $scope.validation_error = "";
@@ -4007,7 +4006,6 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
             });
         }
     }
-
 }
 
 function SalesmanSalesController($scope, $element, $http, $timeout, share, $location) {
@@ -4046,6 +4044,7 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         $scope.get_staff();
          
     }
+
     $scope.payment_mode_change_sales = function(payment_mode) {
         if(payment_mode == 'cheque') {
             $scope.payment_mode_selection = false;
@@ -4062,6 +4061,7 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
             $scope.payment_mode_selection = true;
         }
     }
+
     $scope.validate_sales = function() {
         if($scope.sales.sales_invoice_date == '') {
             $scope.validation_error = "Enter Sales invoice Date" ;
@@ -4085,7 +4085,6 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         } 
         return true;
     }
-
 
     $scope.get_staff = function() {
         $http.get('/Salesman/list/').success(function(data)
@@ -4177,8 +4176,7 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         $scope.sales.sales_items.push(selected_item);
         $scope.calculate_net_total_sale();
         $scope.calculate_grant_total_sale();
-    }
-    
+    }    
     
     $scope.calculate_net_amount_sale = function(item) {
         $scope.validation_error = "";
@@ -4193,17 +4191,19 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
             $scope.calculate_net_total_sale();
         }
     }
+
     $scope.calculate_tax_amount_sale = function(item) {
         if(item.tax != '' && item.unit_price != ''){
             item.tax_amount = (parseFloat(item.unit_price)*parseFloat(item.tax))/100;
         }
     }
+
     $scope.calculate_discount_amount_sale = function(item) {
         if(item.discount_permit != '' && item.unit_price != ''){
-            item.discount_permit_amount = (parseFloat(item.unit_price)*parseFloat(item.discount_permit))/100;
-            
+            item.discount_permit_amount = (parseFloat(item.unit_price)*parseFloat(item.discount_permit))/100;         
         }
     }
+
     $scope.calculate_unit_cost_sale = function(item) {
         if(item.unit_price != ''){
             item.unit_cost = (parseFloat(item.unit_price)+parseFloat(item.tax_amount)-parseFloat(item.disc_given)).toFixed(2);
@@ -4220,6 +4220,7 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         $scope.calculate_grant_total_sale();
         
     }
+
     $scope.calculate_net_discount_sale = function(){
         
         var net_discount = 0;
@@ -4228,14 +4229,13 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
             net_discount = net_discount + parseFloat($scope.sales.sales_items[i].disc_given);
 
         }
-        $scope.sales.net_discount = net_discount;
-        
+        $scope.sales.net_discount = net_discount;        
     }
-
 
     $scope.calculate_grant_total_sale = function(){
         $scope.sales.grant_total = $scope.sales.net_total   - $scope.sales.roundoff;
     }
+
     $scope.calculate_balance_sale = function () {
         $scope.sales.balance = $scope.sales.grant_total - $scope.sales.paid;
     }
@@ -4250,7 +4250,7 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
         $scope.sales.payment_mode = $scope.payment_mode;
         if($scope.validate_sales()){
             $scope.sales.sales_invoice_date = $$('#sales_invoice_date')[0].get('value');
-            
+
             params = { 
                 'sales': angular.toJson($scope.sales),
                 "csrfmiddlewaretoken" : $scope.csrf_token
@@ -4267,14 +4267,11 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
             }).error(function(data, success){
                 
             });
-        }   
-        
+        }         
     }
-
 }
 
-function SalesmanStockReportController($scope, $element, $http, $location) {
-      
+function SalesmanStockReportController($scope, $element, $http, $location) {      
     
     $scope.init = function(csrf_token) {
         $scope.csrf_token = csrf_token;
@@ -4282,14 +4279,14 @@ function SalesmanStockReportController($scope, $element, $http, $location) {
         $scope.get_salesman();
 
     }
+
     $scope.get_salesman = function() {
         $http.get('/Salesman/list/').success(function(data)
         {
             $scope.salesmen = data.salesmen;
             $scope.salesman_name = 'select';
         })
-    }
-    
+    }    
 }
 
 function EditItemController($scope, $http, $element, $location, $timeout) {

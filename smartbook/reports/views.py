@@ -1341,7 +1341,7 @@ class PendingSalesmanReport(View):
             salesman = User.objects.get(first_name=salesman_name)
             delivery_notes = DeliveryNote.objects.filter(salesman=salesman, is_pending=True)
         
-        p.drawString(400, 900, 'Pending Salesman Report - ' + salesman_name)
+        p.drawString(400, 900, 'Pending Delivery Note Report - ' + salesman_name)
 
         y = 850
         p.drawString(80, y, 'Delivery Note No')
@@ -1392,7 +1392,7 @@ class PendingCustomerReport(View):
             customer = Customer.objects.get(customer_name=customer_name)
             customer_accounts = CustomerAccount.objects.filter(customer=customer, is_complted=False)
         
-        p.drawString(400, 900, 'Pending Customer Report')
+        p.drawString(400, 900, 'Pending Customer Report - ' + customer_name)
 
         y = 850
         p.drawString(80, y, 'Customer Name')
