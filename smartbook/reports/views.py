@@ -1422,7 +1422,60 @@ class PendingCustomerReport(View):
 class CompletedDNReport(View):
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'reports/completed_DN_report.html', {}) 
 
+        response = HttpResponse(content_type='application/pdf')
+        p = canvas.Canvas(response, pagesize=(1000, 1000))
+
+        status_code = 200
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        if start_date is None:
+            return render(request, 'reports/completed_DN_report.html', {})
+        if not start_date:            
+            ctx = {
+                'msg' : 'Please Select Start Date ',
+                'start_date' : start_date,
+                'end_date' : end_date,
+            }
+            return render(request, 'reports/completed_DN_report.html', ctx)
+        elif not end_date:
+            ctx = {
+                'msg' : 'Please Select End Date',
+                'start_date' : start_date,
+                'end_date' : end_date,
+            }
+            return render(request, 'reports/completed_DN_report.html', ctx)
+
+        else:
+            start = request.GET['start_date']
+            end = request.GET['end_date']                    
+            start_date = datetime.strptime(start, '%d/%m/%Y')
+            end_date = datetime.strptime(end, '%d/%m/%Y')
+            delivery_notes = DeliveryNote.objects.filter(is_pending=False, date__gte=start_date, date__lte=end_date).order_by('date')
+            
+            report_name = 'Completed DN Report ( '+ start +' - '+ end +')'
+            p.drawString(350, 900, report_name )
+            y = 850
+            p.drawString(200, y, 'Date')
+            p.drawString(280, y, 'Delivery Note No')
+            p.drawString(420, y, 'Salesman')
+            p.drawString(550, y, 'Total Amount')
+            
+            y = y - 50 
+            if delivery_notes.count() > 0:
+                for delivery_note in delivery_notes:
+                    p.drawString(200, y, str(delivery_note.date.strftime('%d/%m/%Y')))
+                    p.drawString(280, y, str(delivery_note.delivery_note_number))
+                    p.drawString(420, y, delivery_note.salesman.first_name)
+                    p.drawString(550, y, str(delivery_note.net_total))
+                    y = y - 30
+                    if y <= 270:
+                        y = 850
+                        p.showPage()
+
+
+        p.showPage()
+        p.save()
+        return response
 
 
