@@ -1290,7 +1290,7 @@ class SalesmanStockReports(View):
             delivery_notes = DeliveryNote.objects.filter(salesman=salesman)
         
         
-        p.drawString(400, 900, 'Salesman Stock Report')
+        p.drawString(400, 900, 'Salesman Stock Report - ' + salesman_name)
 
         y = 850
         p.drawString(80, y, 'Delivery Note No')
@@ -1341,7 +1341,7 @@ class PendingSalesmanReport(View):
             salesman = User.objects.get(first_name=salesman_name)
             delivery_notes = DeliveryNote.objects.filter(salesman=salesman, is_pending=True)
         
-        p.drawString(400, 900, 'Pending Salesman Report')
+        p.drawString(400, 900, 'Pending Salesman Report - ' + salesman_name)
 
         y = 850
         p.drawString(80, y, 'Delivery Note No')
