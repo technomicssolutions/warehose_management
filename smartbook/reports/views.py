@@ -821,7 +821,7 @@ class DailyReport(View):
             if sales.count()>0:
                 for sale in sales:
                     y = y - 30
-                    if y <= 270:
+                    if y <= 135:
                         y = 850
                         p.showPage()
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
@@ -838,7 +838,7 @@ class DailyReport(View):
                 for expense in expenses:   
                     y = y - 30
 
-                    if y <= 270:
+                    if y <= 135:
                         y = 850
                         p.showPage()
                     
@@ -852,7 +852,7 @@ class DailyReport(View):
             difference = total_income - total_expense
 
             y = y-30
-            if y <= 270:
+            if y <= 135:
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -861,7 +861,7 @@ class DailyReport(View):
             p.drawString(650, y, str(round_off))
 
             y = y-30
-            if y <= 270:
+            if y <= 135:
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -871,7 +871,7 @@ class DailyReport(View):
 
             
             y = y-30
-            if y <= 270:
+            if y <= 135:
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -1230,7 +1230,7 @@ class StockReports(View):
         p = canvas.Canvas(response, pagesize=(1000, 1000))
 
         status_code = 200
-        stocks = Inventory.objects.all()
+        stocks = InventoryItem.objects.all()
         
         p.drawString(400, 900, 'Stock Report')
 
@@ -1249,14 +1249,14 @@ class StockReports(View):
         y = y - 50 
         if len(stocks) > 0:
             for stock in stocks:
-                p.drawString(80, y, stock.item.code)
-                p.drawString(160, y, stock.item.name)
-                p.drawString(280, y, stock.item.barcode)
-                p.drawString(360, y, stock.item.brand.brand)                
+                p.drawString(80, y, stock.code)
+                p.drawString(160, y, stock.name)
+                p.drawString(280, y, stock.barcode)
+                p.drawString(360, y, stock.brand.brand)                
                 p.drawString(480, y, str(stock.quantity))
-                p.drawString(540, y, stock.item.uom.uom)
+                p.drawString(540, y, stock.uom.uom)
                 p.drawString(600, y, str(stock.unit_price))
-                p.drawString(680, y, str(stock.item.tax))
+                p.drawString(680, y, str(stock.tax))
                 p.drawString(760, y, str(stock.discount_permit_percentage))
                 p.drawString(840, y, str(stock.quantity * stock.unit_price))
                 y = y - 30
