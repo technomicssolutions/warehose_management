@@ -1109,25 +1109,44 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             $scope.validation_error = "";
         }
         if(item.qty != '' && item.unit_price != ''){
+            // if(item.remaining_qty < 0) {
+            //     $scope.validation_error = item.item_name+' Not in stock';
+            //     item.qty_sold = parseInt(item.sold_qty);
+            //     item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+            //     item.net_amount = 0;
+            // } else {
+            //     $scope.validation_error = '';
+            //     if (parseInt(item.qty) == 0) {
+            //         item.qty_sold = parseInt(item.sold_qty);
+            //         item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+            //     } else {
+            //         item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
+            //         item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+            //     }
+                
+            //     item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
+                
+            //     $scope.calculate_net_discount_sale();
+            // }
+             
+            $scope.validation_error = '';
+            if (parseInt(item.qty) == 0) {
+                item.qty_sold = parseInt(item.sold_qty);
+                item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+            } else {
+                item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
+                item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+            }
             if(item.remaining_qty < 0) {
                 $scope.validation_error = item.item_name+' Not in stock';
                 item.qty_sold = parseInt(item.sold_qty);
                 item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
                 item.net_amount = 0;
-            } else {
-                $scope.validation_error = '';
-                if (parseInt(item.qty) == 0) {
-                    item.qty_sold = parseInt(item.sold_qty);
-                    item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-                } else {
-                    item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
-                    item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-                }
-                
-                item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
-                
-                $scope.calculate_net_discount_sale();
             }
+            
+            item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
+            
+            $scope.calculate_net_discount_sale();
         }
         $scope.calculate_net_total_sale();
     }
