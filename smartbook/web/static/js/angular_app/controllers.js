@@ -1114,6 +1114,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
                 item.qty = 0;
                 item.qty_sold = parseInt(item.sold_qty);
                 item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
+                item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
             } else {
                 $scope.validation_error = '';
                 if (parseInt(item.qty) == 0) {
