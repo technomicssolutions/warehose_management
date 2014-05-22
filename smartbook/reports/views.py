@@ -1270,6 +1270,7 @@ class StockReports(View):
 
 
 class SalesmanStockReports(View):
+    
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type='application/pdf')
         p = canvas.Canvas(response, pagesize=(1000, 1000))
@@ -1318,6 +1319,59 @@ class SalesmanStockReports(View):
         p.showPage()
         p.save()
         return response
+
+class PendingSalesmanReport(View):
+
+    def get(self, request, *args, **kwargs):
+
+        response = HttpResponse(content_type='application/pdf')
+        p = canvas.Canvas(response, pagesize=(1000, 1000))
+
+        status_code = 200
+        salesman_name = request.GET.get('salesman_name')
+        
+        if salesman_name is None:
+            return render(request, 'reports/pending_salesman_stock_report.html', {})
+        if salesman_name:
+            if salesman_name == 'select':
+                context = {
+                    'message': 'Please Choose Salesman'
+                }
+                return render(request, 'reports/pending_salesman_stock_report.html', context) 
+            salesman = User.objects.get(first_name=salesman_name)
+            delivery_notes = DeliveryNote.objects.filter(salesman=salesman, is_pending=True)
+        
+        p.drawString(400, 900, 'Pending Salesman Report')
+
+        y = 850
+        p.drawString(80, y, 'Delivery Note No')
+        p.drawString(190, y, 'Item Code')
+        p.drawString(280, y, 'Item Name')
+        p.drawString(610, y, 'Total Quantity')    
+        p.drawString(700, y, 'Sold Quantity')
+        p.drawString(790, y, 'Pending')
+        
+        y = y - 50 
+        if len(delivery_notes) > 0:
+            for delivery_note in delivery_notes:
+                if delivery_note.deliverynoteitem_set.all().count() > 0:
+                    for d_item in delivery_note.deliverynoteitem_set.all():
+                        p.drawString(80, y, delivery_note.delivery_note_number)
+                        p.drawString(190, y, d_item.item.code)
+                        p.drawString(280, y, d_item.item.name)
+                        p.drawString(610, y, str(d_item.total_quantity))
+                        p.drawString(700, y, str(d_item.quantity_sold))
+                        p.drawString(790, y, str(int(d_item.total_quantity) - int(d_item.quantity_sold)))
+                        y = y - 30
+                        if y <= 270:
+                            y = 850
+                            p.showPage()
+
+        p.showPage()
+        p.save()
+        return response
+
+
 
 
 
