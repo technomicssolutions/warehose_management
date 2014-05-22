@@ -899,7 +899,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
     }
     $scope.validate_sales = function() {
         if ($scope.sales.quotation_ref_no == '' && $scope.sales.delivery_no == ''){
-            $scope.validation_error = "Enter Quotation Reference No or Delivery No" ;
+            $scope.validation_error = "Enter Deliverynote No" ;
             return false;
         } else if($scope.sales.sales_invoice_date == '') {
             $scope.validation_error = "Enter Sales invoice Date" ;
@@ -3044,10 +3044,8 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
 
     $scope.items = [];
     $scope.selected_item = '';
-    $scope.customer = 'select';
     $scope.selecting_item = false;
     $scope.item_selected = false;
-    $scope.customer_name = '';
     $scope.delivery_note = {
         'sales_items': [],
         'date': '',
@@ -3071,10 +3069,6 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             $scope.salesmen = data.salesmen;
             $scope.salesman_name = 'select';
         })
-    }
-
-    $scope.close_popup = function(){
-        $scope.popup.hide_popup();
     }
 
     $scope.items = [];
