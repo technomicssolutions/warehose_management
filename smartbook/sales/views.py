@@ -951,8 +951,7 @@ class QuotationDeliverynoteSales(View):
         sales.grant_total = sales_dict['grant_total']
         sales.salesman = salesman
         sales.payment_mode = sales_dict['payment_mode']
-        if sales_dict['payment_mode'] == 'card':
-            sales.card_number = sales_dict['card_number']
+        if sales_dict['payment_mode'] == 'cheque':
             sales.bank_name = sales_dict['bank_name']
         sales.save()
         sales_items = sales_dict['sales_items']
