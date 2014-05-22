@@ -51,6 +51,7 @@ add_new_customer = function($http, $scope) {
                 $scope.popup.hide_popup();
                 $scope.get_customers();
                 $scope.customer = data.customer_name;
+                $scope.custmer_name = data.customer_name;
             }
         }).error(function(data, success){
             
@@ -794,7 +795,7 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
     }
 }
 
-function SalesQNDNController($scope, $element, $http, $timeout, share, $location) {
+function SalesDNController($scope, $element, $http, $timeout, share, $location) {
 
     $scope.items = [];
     $scope.selected_item = '';
@@ -827,7 +828,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         'lpo_number': '', 
     }
     $scope.sales.quotation_ref_no = '';
-    $scope.customer_name = 'select';
+    $scope.custmer_name = 'select';
     $scope.init = function(csrf_token, sales_invoice_number)
     {
         $scope.csrf_token = csrf_token;
@@ -854,7 +855,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
 
     $scope.add_customer = function() {
         console.log($scope.customer_name);
-        if($scope.customer_name == 'other') {
+        if($scope.custmer_name == 'other') {
 
             $scope.popup = new DialogueModelWindow({
                 'dialogue_popup_width': '36%',
@@ -868,6 +869,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
             $scope.popup.set_overlay_height(height);
             $scope.popup.show_content();
         } else {
+            $scope.custmer_name =$scope.customer_name; 
             $scope.sales.customer = $scope.customer_name;
         }
     }
@@ -898,6 +900,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         }
     }
     $scope.validate_sales = function() {
+        console.log($scope.sales.payment_mode, $scope.sales.bank_name);
         if ($scope.sales.quotation_ref_no == '' && $scope.sales.delivery_no == ''){
             $scope.validation_error = "Enter Deliverynote No" ;
             return false;
@@ -920,12 +923,9 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
                     return false;
                 }
             }
-        } else if( $scope.sales.payment_mode == 'card' && ($scope.sales.card_number == '' )) {
-            $scope.validation_error = 'Please Enter Card Number';
-            return false;
-        } else if( $scope.sales.payment_mode == 'card' && ($scope.sales.bank_name == '' )) {   
+        } else if( $scope.sales.payment_mode == 'cheque' && ($scope.sales.bank_name == '' || $scope.sales.bank_name == undefined)) {
             $scope.validation_error = 'Please Enter Bank Name';
-            return false; 
+            return false;
         } 
         return true;       
     }

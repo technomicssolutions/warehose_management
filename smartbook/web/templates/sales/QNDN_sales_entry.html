@@ -2,8 +2,8 @@
 
 {% block body_id %}create_sales{% endblock %}
 
-{% block title %}Sales-Quotation-DeliveryNote {% endblock title %}
-{% block controller %}ng-controller="SalesQNDNController" ng-init="init('{{csrf_token}}', '{{sales_invoice_number}}')" ng-click="hide_sales_details()"{% endblock controller %}
+{% block title %}Sales-DeliveryNote {% endblock title %}
+{% block controller %}ng-controller="SalesDNController" ng-init="init('{{csrf_token}}', '{{sales_invoice_number}}')" ng-click="hide_sales_details()"{% endblock controller %}
 {% block dialogue_popup %}
 	{% include 'add_new_customer.html' %} 
 	              	
@@ -137,7 +137,7 @@
 							<label for="customer">Customer name</label>
 						</div>
 						<div class="forminput_sales">
-							<select name="staff" ng-model="customer_name" ng-change="add_customer()" >
+							<select name="staff" ng-model="custmer_name" ng-change="add_customer()" >
 								<option value="select">Select</option>
 								<option ng-repeat="customer in customers">[[customer.customer_name]]</option>
 								<option value="other">Other</option>
