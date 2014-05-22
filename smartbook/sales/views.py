@@ -1703,6 +1703,37 @@ class EditDeliveryNote(View):
 
             return HttpResponse(response, status=200, mimetype='application/json')
 
+class PendingDeliveryNoteList(View):
+
+    def get(self, request, *args, **kwargs):
+
+        if request.is_ajax():
+            salesman_name = kwargs['salesman_name']
+            name_of_salesman = salesman_name.replace('_', ' ')
+            salesman = User.objects.get(first_name=name_of_salesman)
+            ctx_pendinglist = []
+            pending_deliverynotes = DeliveryNote.objects.filter(salesman=salesman, is_pending=True)
+
+            if pending_deliverynotes.count() > 0:
+                for delivery_note in pending_deliverynotes:
+                    ctx_pendinglist.append(delivery_note.delivery_note_number)
+                res = {
+                    'result': 'ok',
+                    'pending_list': ctx_pendinglist,
+                }
+                status = 200
+            else:
+                res = {
+                    'result': 'error',
+                    'pending_list': ctx_pendinglist,
+                }
+                status = 500
+            response = simplejson.dumps(res)
+
+            return HttpResponse(response, status=status, mimetype='application/json')
+
+
+
 
 
     
