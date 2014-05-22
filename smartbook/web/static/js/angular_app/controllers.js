@@ -2151,7 +2151,7 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
     }
 
     $scope.addSalesReturnItems = function(item) {
-        $scope.calculate_tax_amount_sales_return(item);
+        // $scope.calculate_tax_amount_sales_return(item);
         var ind = $scope.sales_return.sales_items.indexOf(item)
         if(ind >= 0){
             $scope.sales_return.sales_items.splice(ind, 1);
@@ -2161,25 +2161,23 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
         } 
                
     }
-    $scope.calculate_tax_amount_sales_return = function(item) {
+    // $scope.calculate_tax_amount_sales_return = function(item) {
         
         
-        if(item.tax != '' && item.unit_price != ''){
+    //     if(item.tax != '' && item.unit_price != ''){
 
-            item.tax_amount = (parseFloat(item.unit_price)*parseFloat(item.tax))/100;
-        }
-    }
+    //         item.tax_amount = (parseFloat(item.unit_price)*parseFloat(item.tax))/100;
+    //     }
+    // }
     $scope.calculate_return_amount = function(item){
         if($scope.check_return(item)) {
             $scope.validation_error = "";
-            item.returned_amount = parseFloat(item.returned_quantity) * (parseFloat(item.unit_price) + parseFloat(item.tax_amount) - parseFloat(item.discount_given) ) ;
+            item.returned_amount = parseFloat(item.returned_quantity) * (parseFloat(item.unit_price) - parseFloat(item.discount_given) ) ;
             $scope.calculate_net_return_amount();
         }
         else{
                 item.returned_amount= 0;
         }
-
-
     }
     $scope.calculate_net_return_amount = function() {
 
