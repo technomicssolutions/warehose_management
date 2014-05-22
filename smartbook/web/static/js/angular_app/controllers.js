@@ -2947,6 +2947,10 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             $scope.validation_error = "Enter the Amount";
             return false;  
         }
+        if (parseInt($scope.receiptvoucher.paid_amount) > $scope.balance) {
+            $scope.validation_error = "Please enter the correct amount";
+            return false;  
+        }
 
         if($scope.receiptvoucher.payment_mode == 'cash') {
             $scope.receiptvoucher.bank_name = '';

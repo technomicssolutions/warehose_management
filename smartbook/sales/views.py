@@ -50,16 +50,14 @@ class SalesEntry(View):
         
         current_date = dt.datetime.now().date()
 
-        inv_number = SalesInvoice.objects.aggregate(Max('id'))['id__max']
+        inv_number = Sales.objects.aggregate(Max('id'))['id__max']
 
         if not inv_number:
             inv_number = 1
-            prefix = 'INV'
         else:
             inv_number = inv_number + 1
-            prefix = SalesInvoice.objects.latest('id').prefix
         
-        invoice_number = prefix + str(inv_number)
+        invoice_number = 'INV' + str(inv_number)
         return render(request, 'sales/sales_entry.html',{
             'sales_invoice_number': invoice_number,
             'current_date': current_date.strftime('%d/%m/%Y'),
@@ -897,7 +895,7 @@ class QuotationDeliverynoteSales(View):
 
         current_date = dt.datetime.now().date()
 
-        inv_number = SalesInvoice.objects.aggregate(Max('id'))['id__max']
+        inv_number = Sales.objects.aggregate(Max('id'))['id__max']
         
         if not inv_number:
             inv_number = 1
@@ -966,26 +964,15 @@ class QuotationDeliverynoteSales(View):
             s_item.selling_price = sales_item['unit_price']
             # unit price is actually the selling price
             s_item.save()
-
-
-        # Creating sales invoice 
-
-        sales_invoice, created = SalesInvoice.objects.get_or_create(sales=sales, customer=customer)
         
         if sales_dict['delivery_no'] is not 0:
             delivery_note.processed = True
             delivery_note.save()
             sales.delivery_note = delivery_note
-            sales_invoice.delivery_note = delivery_note
-        
-        sales_invoice.date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
-        sales_invoice.invoice_no = sales_dict['sales_invoice_number']
-        sales_invoice.save()
-
                     
         res = {
             'result': 'Ok',
-            'sales_invoice_id': sales_invoice.id,
+            'sales_invoice_id': sales.id,
         }
         response = simplejson.dumps(res)
         status_code = 200
@@ -995,8 +982,8 @@ class CreateSalesInvoicePDF(View):
     def get(self, request, *args, **kwargs):
 
         sales_invoice_id = kwargs['sales_invoice_id']
-        sales_invoice = SalesInvoice.objects.get(id=sales_invoice_id)
-        sales = sales_invoice.sales
+        sales_invoice = Sales.objects.get(id=sales_invoice_id)
+        sales = sales_invoice
 
         response = HttpResponse(content_type='application/pdf')
         p = canvas.Canvas(response, pagesize=(1000, 1200))
@@ -1121,7 +1108,7 @@ class ReceiptVoucherCreation(View):
         if request.is_ajax():
             receiptvoucher = ast.literal_eval(request.POST['receiptvoucher'])
             customer = Customer.objects.get(customer_name=receiptvoucher['customer'])
-            sales_invoice_obj = SalesInvoice.objects.get(invoice_no=receiptvoucher['invoice_no'])
+            sales_invoice_obj = Sales.objects.get(sales_invoice_number=receiptvoucher['invoice_no'])
             receipt_voucher = ReceiptVoucher.objects.create(sales_invoice=sales_invoice_obj)
 
             receipt_voucher.date = datetime.strptime(receiptvoucher['date'], '%d/%m/%Y')
@@ -1169,8 +1156,8 @@ class InvoiceDetails(View):
 
 
         invoice_no = request.GET.get('invoice_no', '')
-        sales_invoice_details = SalesInvoice.objects.filter(invoice_no__istartswith=invoice_no, is_processed=False)
-        invoices = SalesInvoice.objects.filter(invoice_no__istartswith=invoice_no)
+        sales_invoice_details = Sales.objects.filter(sales_invoice_number__istartswith=invoice_no, is_processed=False)
+        invoices = Sales.objects.filter(sales_invoice_number__istartswith=invoice_no)
         ctx_invoice_details = []
         ctx_sales_invoices = []
         ctx_sales_item  = []
@@ -1179,10 +1166,10 @@ class InvoiceDetails(View):
                 customer = sales_invoice.customer
                 customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales_invoice)
                 ctx_invoice_details.append({
-                    'invoice_no': sales_invoice.invoice_no if sales_invoice.invoice_no else '',
-                    'dated': sales_invoice.date.strftime('%d-%m-%Y') if sales_invoice.date else '',
+                    'invoice_no': sales_invoice.sales_invoice_number if sales_invoice.sales_invoice_number else '',
+                    'dated': sales_invoice.sales_invoice_date.strftime('%d-%m-%Y') if sales_invoice.sales_invoice_date else '',
                     'customer': sales_invoice.customer.customer_name if sales_invoice.customer else '',
-                    'amount': sales_invoice.sales.net_amount if sales_invoice.sales else '',
+                    'amount': sales_invoice.net_amount if sales_invoice else '',
                     'paid_amount': customer_account.paid if customer_account.paid else 0,
                 })
         i = 0
@@ -1190,7 +1177,7 @@ class InvoiceDetails(View):
         if invoices.count() > 0:
             for sales_invoice in invoices:
                 net_amount = 0
-                for sale in sales_invoice.sales.salesitem_set.all():
+                for sale in sales_invoice.salesitem_set.all():
                     net_amount = float(sale.selling_price) * int(sale.quantity_sold)
                     ctx_sales_item.append({
                         'sl_no': i,
@@ -1211,20 +1198,20 @@ class InvoiceDetails(View):
                     net_amount = 0
                     i = i + 1
                 ctx_sales_invoices.append({
-                    'invoice_no': sales_invoice.invoice_no,
-                    'date': sales_invoice.date.strftime('%d/%m/%Y'),
+                    'invoice_no': sales_invoice.sales_invoice_number,
+                    'date': sales_invoice.sales_invoice_date.strftime('%d/%m/%Y') if sales_invoice.sales_invoice_date else '',
                     'customer': sales_invoice.customer.customer_name if sales_invoice.customer else '',
-                    'delivery_note_no': sales_invoice.sales.delivery_note.delivery_note_number if sales_invoice.sales.delivery_note else '',
-                    'lpo_number': sales_invoice.sales.delivery_note.lpo_number if sales_invoice.sales.delivery_note else '',
+                    'delivery_note_no': sales_invoice.delivery_note.delivery_note_number if sales_invoice.delivery_note else '',
+                    'lpo_number': sales_invoice.delivery_note.lpo_number if sales_invoice.delivery_note else '',
                     'items': ctx_sales_item,
-                    'salesman': sales_invoice.sales.salesman.first_name if sales_invoice.sales else '',
-                    'payment_mode': sales_invoice.sales.payment_mode,
-                    'card_number': sales_invoice.sales.card_number,
-                    'bank_name': sales_invoice.sales.bank_name,
-                    'net_total': sales_invoice.sales.net_amount,
-                    'round_off': sales_invoice.sales.round_off if sales_invoice.sales.round_off else 0,
-                    'grant_total': sales_invoice.sales.grant_total,
-                    'discount': sales_invoice.sales.discount,
+                    'salesman': sales_invoice.salesman.first_name if sales_invoice.salesman else '',
+                    'payment_mode': sales_invoice.payment_mode,
+                    'card_number': sales_invoice.card_number,
+                    'bank_name': sales_invoice.bank_name,
+                    'net_total': sales_invoice.net_amount,
+                    'round_off': sales_invoice.round_off if sales_invoice.round_off else 0,
+                    'grant_total': sales_invoice.grant_total,
+                    'discount': sales_invoice.discount,
                 })
                 ctx_sales_item = []
         res = {

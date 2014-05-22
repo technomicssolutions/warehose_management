@@ -115,6 +115,7 @@ class Sales(models.Model):
     discount = models.DecimalField('Total Discount',max_digits=14, decimal_places=2, default=0)
     delivery_note = models.ForeignKey(DeliveryNote, null=True, blank=True)
     lpo_number = models.CharField('LPO Number', null=True, blank=True, max_length=30)
+    is_processed = models.BooleanField('Processed', default=False)
 
     def __unicode__(self):
 
@@ -124,25 +125,6 @@ class Sales(models.Model):
 
         verbose_name = 'Sales'
         verbose_name_plural = 'Sales'
-
-
-class SalesInvoice(models.Model):
-
-    sales = models.ForeignKey(Sales)
-    customer = models.ForeignKey(Customer, null=True, blank=True)
-    date = models.DateField('Date', null=True, blank=True)
-    invoice_no = models.CharField('Invoice Number',null=True, blank=True, max_length=20)
-    is_processed = models.BooleanField('Processed', default=False)
-
-
-    def __unicode__(self):
-
-        return str(self.invoice_no)
-
-    class Meta:
-
-        verbose_name = 'Sales Invoice'
-        verbose_name_plural = 'Sales Invoice'
 
 class SalesItem(models.Model):
 
@@ -185,7 +167,7 @@ class SalesReturnItem(models.Model):
 
 class ReceiptVoucher(models.Model):
 
-    sales_invoice = models.ForeignKey(SalesInvoice, null=True, blank=True)
+    sales_invoice = models.ForeignKey(Sales, null=True, blank=True)
     receipt_voucher_no = models.CharField('Receipt Voucher No', null=True, blank=True, max_length=30)
     date = models.DateField('Date', null=True, blank=True)
     total_amount = models.DecimalField('Total Amount', max_digits=14, decimal_places=2, default=0)
@@ -197,7 +179,7 @@ class ReceiptVoucher(models.Model):
     
     def __unicode__(self):
 
-        return str(self.sales_invoice.invoice_no)
+        return str(self.sales_invoice.sales_invoice_number)
 
     class Meta:
 
@@ -206,7 +188,7 @@ class ReceiptVoucher(models.Model):
 
 class CustomerAccount(models.Model):
 
-    invoice_no = models.ForeignKey(SalesInvoice, null=True, blank=True)
+    invoice_no = models.ForeignKey(Sales, null=True, blank=True)
     customer = models.ForeignKey(Customer, null=True, blank=True)
     total_amount = models.DecimalField('Total amount', max_digits=14, decimal_places=2, default=0)
     paid = models.DecimalField('Paid', max_digits=14, decimal_places=2, default=0)
@@ -221,4 +203,4 @@ class CustomerAccount(models.Model):
 
     def __unicode__(self):
 
-        return str(self.invoice_no.invoice_no)
+        return str(self.invoice_no.sales_invoice_number)
