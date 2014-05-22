@@ -1395,21 +1395,21 @@ class PendingCustomerReport(View):
         p.drawString(400, 900, 'Pending Customer Report')
 
         y = 850
-        p.drawString(80, y, 'Customer Name')
-        p.drawString(190, y, 'Invoice No')
-        p.drawString(280, y, 'Total Amount')
-        p.drawString(610, y, 'Paid') 
-        p.drawString(700, y, 'Balance') 
+        p.drawString(200, y, 'Customer Name')
+        p.drawString(320, y, 'Invoice No')
+        p.drawString(420, y, 'Total Amount')
+        p.drawString(550, y, 'Paid') 
+        p.drawString(650, y, 'Balance') 
         
         y = y - 50 
         if len(customer_accounts) > 0:
             for customer_account in customer_accounts:
                 
-                p.drawString(80, y, customer_account.customer.customer_name)
-                p.drawString(190, y, customer_account.invoice_no.invoice_no)
-                p.drawString(280, y, customer_account.total_amount)
-                p.drawString(610, y, customer_account.paid)
-                p.drawString(700, y, customer_account.balance)
+                p.drawString(200, y, customer_account.customer.customer_name)
+                p.drawString(320, y, customer_account.invoice_no.invoice_no)
+                p.drawString(420, y, str(customer_account.total_amount))
+                p.drawString(550, y, str(customer_account.paid))
+                p.drawString(650, y, str(customer_account.balance))
                 y = y - 30
                 if y <= 270:
                     y = 850

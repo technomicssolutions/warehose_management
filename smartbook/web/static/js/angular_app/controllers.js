@@ -4516,3 +4516,28 @@ function EditItemController($scope, $http, $element, $location, $timeout) {
         $scope.popup.hide_popup();
     }
 }
+
+
+function PendingCustomerReportController($scope, $element, $http, $location) {
+      
+    
+    $scope.init = function(csrf_token) {
+        $scope.csrf_token = csrf_token;
+        
+        $scope.get_customers();
+
+    }
+    $scope.get_customers = function() {
+        $http.get('/customer/list/').success(function(data)
+        {   
+
+            $scope.customers = data.customers;
+            $scope.customer_name = 'select';
+
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
+    
+}
