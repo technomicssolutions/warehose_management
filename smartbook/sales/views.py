@@ -1121,13 +1121,15 @@ class ReceiptVoucherCreation(View):
 
         if request.is_ajax():
             receiptvoucher = ast.literal_eval(request.POST['receiptvoucher'])
+            customer = Customer.objects.get(customer_name=receiptvoucher['customer'])
             sales_invoice_obj = SalesInvoice.objects.get(invoice_no=receiptvoucher['invoice_no'])
-            receipt_voucher, created = ReceiptVoucher.objects.get_or_create(sales_invoice=sales_invoice_obj)
-            sales_invoice_obj.is_processed = True
-            sales_invoice_obj.save()
+            receipt_voucher, created = ReceiptVoucher.objects.create(sales_invoice=sales_invoice_obj, customer=customer)
+            # sales_invoice_obj.is_processed = True
+            # sales_invoice_obj.save()
             receipt_voucher.date = datetime.strptime(receiptvoucher['date'], '%d/%m/%Y')
             
-            receipt_voucher.sum_of = receiptvoucher['amount']
+            receipt_voucher.total_amount = receiptvoucher['amount']
+            receipt_voucher.paid_amount = receiptvoucher['paid_amount']
             receipt_voucher.receipt_voucher_no = receiptvoucher['voucher_no']
             receipt_voucher.payment_mode = receiptvoucher['payment_mode']
             receipt_voucher.bank = receiptvoucher['bank_name']
@@ -1135,10 +1137,19 @@ class ReceiptVoucherCreation(View):
             if receiptvoucher['cheque_date']:   
                 receipt_voucher.dated = datetime.strptime(receiptvoucher['cheque_date'], '%d/%m/%Y')
             receipt_voucher.save()
-            customer = Customer.objects.get(customer_name=receiptvoucher['customer'])
-            receipt_voucher.customer = customer
-            receipt_voucher.save()
-
+            customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales_invoice_obj )
+ 
+            if created:
+                customer_account.total_amount = receiptvoucher['amount']
+                customer_account.paid = receiptvoucher['paid_amount']
+            else:
+                customer_account.paid = customer_account.paid + float(receiptvoucher['paid_amount'])
+            customer_account.save()
+            customer_account.balance = float(customer_account.total_amount) - float(customer_account.paid)
+            customer_account.save()
+            if customer_account.balance == 0:
+                customer_account.is_complted = True
+                customer_account.save()
            
             res = {
                 'result': 'OK',

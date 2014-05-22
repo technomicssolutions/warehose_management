@@ -1111,6 +1111,9 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         if(item.qty != '' && item.unit_price != ''){
             if(item.qty > item.remaining_qty) {
                 $scope.validation_error = item.item_name+' Not in stock';
+                item.qty = 0;
+                item.qty_sold = parseInt(item.sold_qty);
+                item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
             } else {
                 $scope.validation_error = '';
                 if (parseInt(item.qty) == 0) {
@@ -2883,7 +2886,7 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         'cheque_no': '',
         'cheque_date': '',
         'amount': '',
-        // 'settlement': '',
+        'paid_amount': '',
         'invoice_no': '',
         'voucher_no': '',
 
