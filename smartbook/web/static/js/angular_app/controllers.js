@@ -899,7 +899,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
     }
     $scope.validate_sales = function() {
         if ($scope.sales.quotation_ref_no == '' && $scope.sales.delivery_no == ''){
-            $scope.validation_error = "Enter Quotation Reference No or Delivery No" ;
+            $scope.validation_error = "Enter Deliverynote No" ;
             return false;
         } else if($scope.sales.sales_invoice_date == '') {
             $scope.validation_error = "Enter Sales invoice Date" ;
@@ -937,6 +937,7 @@ function SalesQNDNController($scope, $element, $http, $timeout, share, $location
         $http.get('/sales/delivery_note_details/?delivery_no='+delivery_no).success(function(data)
         {
             if(data.delivery_notes.length > 0){
+                $scope.dn_message = '';
                $scope.selecting_delivery_note = true;
                 $scope.delivery_note_selected = false;
                 $scope.delivery_notes = data.delivery_notes; 
@@ -3043,10 +3044,8 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
 
     $scope.items = [];
     $scope.selected_item = '';
-    $scope.customer = 'select';
     $scope.selecting_item = false;
     $scope.item_selected = false;
-    $scope.customer_name = '';
     $scope.delivery_note = {
         'sales_items': [],
         'date': '',
@@ -3070,10 +3069,6 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             $scope.salesmen = data.salesmen;
             $scope.salesman_name = 'select';
         })
-    }
-
-    $scope.close_popup = function(){
-        $scope.popup.hide_popup();
     }
 
     $scope.items = [];
@@ -4512,4 +4507,29 @@ function EditItemController($scope, $http, $element, $location, $timeout) {
     $scope.close_popup = function(){
         $scope.popup.hide_popup();
     }
+}
+
+
+function PendingCustomerReportController($scope, $element, $http, $location) {
+      
+    
+    $scope.init = function(csrf_token) {
+        $scope.csrf_token = csrf_token;
+        
+        $scope.get_customers();
+
+    }
+    $scope.get_customers = function() {
+        $http.get('/customer/list/').success(function(data)
+        {   
+
+            $scope.customers = data.customers;
+            $scope.customer_name = 'select';
+
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
+    
 }
