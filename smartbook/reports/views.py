@@ -1419,8 +1419,10 @@ class PendingCustomerReport(View):
         p.save()
         return response
 
+class CompletedDNReport(View):
 
-
+    def get(self, request, *args, **kwargs):
+        return render(request, 'reports/completed_DN_report.html', {}) 
 
 
 
