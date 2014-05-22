@@ -6,7 +6,8 @@
 {% block controller %}ng-controller="DirectDeliveryNoteController" ng-init="init('{{csrf_token}}')"{% endblock controller %}
 
 {% block dialogue_popup %}
-	{% include 'add_new_customer.html' %} 	              	
+	{% include 'add_new_customer.html' %}
+	{% include 'pending_dn_message.html' %} 	              	
 {% endblock %}
 
 {% block content %}

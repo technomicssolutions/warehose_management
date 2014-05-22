@@ -500,7 +500,6 @@ form {
 	padding-bottom: 30px;
 }
 
-
 .search_sales .control {
 	background-color: #ADD8E6;
     float: left;
@@ -813,4 +812,9 @@ a {
 
 #salesman_stock .content p{
 	width: 50%;
+}
+
+.ok_button {
+	text-align: center;
+
 }
