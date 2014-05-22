@@ -65,7 +65,7 @@
 							<label for="customer">Customer Name</label>
 						</div>
 						<div class="forminput_sales">
-							<input type="text" name="customer" id="customer" ng-model="receiptvoucher.customer">
+							<input type="text" name="customer" id="customer" ng-model="receiptvoucher.customer" readonly>
 						</div>
 					</div>
 
@@ -122,6 +122,24 @@
 						</div>
 						<div class="forminput_sales">
 							<input type="text" name="amount" ng-model="receiptvoucher.amount" readonly/>
+						</div>						
+					</div>
+					<div class="formrow_sales">						
+
+						<div class="formtext_sales">
+							<label for="Settlement">Paid</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="Settlement" ng-model="receiptvoucher.paid" readonly>
+						</div>						
+					</div>
+					<div class="formrow_sales">						
+
+						<div class="formtext_sales">
+							<label for="Settlement">Balance</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="Settlement" ng-model="balance" readonly>
 						</div>						
 					</div>
 
