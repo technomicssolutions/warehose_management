@@ -724,7 +724,7 @@ class SalesReturnReport(View):
                             total = salesreturn_item.amount
                             item_name = salesreturn_item.item.name
                             item_code = salesreturn_item.item.code
-                            inventorys = salesreturn_item.item.inventory_set.all()[0]
+                            inventorys = salesreturn_item.item
                             unitprice = inventorys.unit_price
 
                             grant_total = grant_total + total
