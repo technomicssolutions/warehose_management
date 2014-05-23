@@ -89,9 +89,7 @@ class SalesReports(View):
                     'end_date' : end,
                     'report_type' : 'date',
                 }
-                return render(request, 'reports/sales_reports.html', ctx) 
-
-                 
+                return render(request, 'reports/sales_reports.html', ctx)                  
             else:
 
                 start_date = datetime.strptime(start, '%d/%m/%Y')
@@ -724,7 +722,7 @@ class SalesReturnReport(View):
                             total = salesreturn_item.amount
                             item_name = salesreturn_item.item.name
                             item_code = salesreturn_item.item.code
-                            inventorys = salesreturn_item.item.inventory_set.all()[0]
+                            inventorys = salesreturn_item.item
                             unitprice = inventorys.unit_price
 
                             grant_total = grant_total + total
