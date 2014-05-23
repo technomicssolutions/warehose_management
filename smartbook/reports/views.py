@@ -89,9 +89,7 @@ class SalesReports(View):
                     'end_date' : end,
                     'report_type' : 'date',
                 }
-                return render(request, 'reports/sales_reports.html', ctx) 
-
-                 
+                return render(request, 'reports/sales_reports.html', ctx)                  
             else:
 
                 start_date = datetime.strptime(start, '%d/%m/%Y')
