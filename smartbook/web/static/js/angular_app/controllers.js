@@ -2080,7 +2080,7 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
         } else if ($scope.sales_return.sales_items.length > 0) {
             for(var i=0; i< $scope.sales_return.sales_items.length; i++) {
                 if ($scope.sales_return.sales_items[i].returned_quantity > $scope.sales_return.sales_items[i].max_return_qty) {
-                    $scope.validation_error = "entered qty is greater than the sold qty for the item "+$scope.sales_return.sales_items[i].item_name;
+                    $scope.validation_error = "Check Qauntity Entered "+$scope.sales_return.sales_items[i].item_name;
                     return false;
                 }
             }
@@ -2179,8 +2179,7 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
             $scope.validation_error = "";
             item.returned_amount = parseFloat(item.returned_quantity) * (parseFloat(item.unit_price) - parseFloat(item.discount_given) ) ;
             $scope.calculate_net_return_amount();
-        }
-        else{
+        } else{
                 item.returned_amount= 0;
         }
     }
@@ -2195,7 +2194,6 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
     }
     $scope.check_return = function(item) {
 
-        
         if(parseInt(item.returned_quantity) > parseInt(item.quantity_sold)) {
             $scope.validation_error = "Check Qauntity Entered with invoice";
             return false;
