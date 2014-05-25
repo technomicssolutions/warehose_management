@@ -166,9 +166,13 @@ class SalesReturnView(View):
             s_return_item.return_quantity = item['returned_quantity']
             s_return_item.save()
 
-            # inventory = Inventory.objects.get(item=return_item)
             return_item.quantity = return_item.quantity + int(item['returned_quantity'])
             return_item.save()
+            delivery_note = sales.delivery_note
+
+            deliverynote_item = DeliveryNoteItem.objects.get(item=return_item, delivery_note=delivery_note)
+            deliverynote_item.quantity_sold = deliverynote_item.quantity_sold - int(item['returned_quantity'])
+            deliverynote_item.save()
         response = {
                 'result': 'Ok',
             }
@@ -188,12 +192,19 @@ class SalesDetails(View):
                 sales_return = SalesReturn.objects.filter(sales=sales)
             except:
                 sales = None
+                sales_return = None
             if sales:
                 sales_items = SalesItem.objects.filter(sales=sales)
-
                 sl_items = []
 
                 for item in sales_items:
+                    if sales_return:
+                        sales_return = sales_return[0]
+                        for ret_item in sales_return.salesreturnitem_set.all():
+                            if item.item.code == ret_item.item.code:
+                                return_quantity = int(item.quantity_sold) - int(ret_item.return_quantity)
+                    else:
+                        return_quantity = int(item.quantity_sold)
                     sl_items.append({
                         'item_code': item.item.code,
                         'item_name': item.item.name,
@@ -204,7 +215,7 @@ class SalesDetails(View):
                         'uom': item.item.uom.uom,
                         'quantity_sold': item.quantity_sold,
                         'discount_given': item.discount_given,
-
+                        'max_return_qty': return_quantity,
                     })
                 sales_dict = {
                     'invoice_number': sales.sales_invoice_number,

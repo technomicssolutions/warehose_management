@@ -2077,8 +2077,14 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
         } else if($$('#sales_return_date')[0].get('value') == '') {
             $scope.validation_error = "Please enter a Date";
             return false;
-        } 
-        else {
+        } else if ($scope.sales_return.sales_items.length > 0) {
+            for(var i=0; i< $scope.sales_return.sales_items.length; i++) {
+                if ($scope.sales_return.sales_items[i].quantity_sold < $scope.sales_return.sales_items[i].max_return_qty) {
+                    $scope.validation_error = "entered qty is greater than the sold qty for the item "+$scope.sales_return.sales_items[i].item_name;
+                    return false;
+                }
+            }
+        } else {
             return true;
         }        
     }

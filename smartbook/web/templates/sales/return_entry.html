@@ -84,7 +84,7 @@
 							
 							<span> Unit Price </span>
 							<span> Qty Sold </span>
-							<!-- <span> Tax Amt </span> -->
+							<span> Max Qty to return </span>
 							<span> Dis Giv</span>												
 							<span> Quantity </span>
 							<span> Amount </span>
@@ -97,7 +97,7 @@
 							
 							<span>[[item.unit_price]] </span>
 							<span>[[item.quantity_sold]] </span>
-							<!-- <span> [[item.tax]] </span> -->
+							<span> [[item.max_return_qty]] </span>
 							<span> [[item.discount_given]] </span>
 							<span> <input type="text" ng-model="item.returned_quantity" ng-change="calculate_return_amount(item)" />	</span>	
 							<span> [[item.returned_amount]] </span>							 
