@@ -154,7 +154,7 @@ class SalesReturnView(View):
         sales = Sales.objects.get(sales_invoice_number=post_dict['sales_invoice_number'])
         sales_return, created = SalesReturn.objects.get_or_create(sales=sales, return_invoice_number = post_dict['invoice_number'])
         sales_return.date = datetime.strptime(post_dict['sales_return_date'], '%d/%m/%Y')
-        sales_return.net_amount = post_dict['net_return_total']
+        sales_return.net_amount = float(sales_return.net_amount) + float(post_dict['net_return_total'])
         sales_return.save()        
 
         return_items = post_dict['sales_items']
@@ -162,7 +162,7 @@ class SalesReturnView(View):
         for item in return_items:
             return_item = InventoryItem.objects.get(code=item['item_code'])
             s_return_item, created = SalesReturnItem.objects.get_or_create(item=return_item, sales_return=sales_return)
-            s_return_item.amount = item['returned_amount']
+            s_return_item.amount = float(s_return_item.amount) + float(item['returned_amount'])
             s_return_item.return_quantity = item['returned_quantity']
             s_return_item.save()
 
@@ -189,20 +189,21 @@ class SalesDetails(View):
             invoice_number = request.GET['invoice_no']
             try:
                 sales = Sales.objects.get(sales_invoice_number=invoice_number)
-                sales_return = SalesReturn.objects.filter(sales=sales)
+                sales_return_obj = SalesReturn.objects.filter(sales=sales)
             except:
                 sales = None
-                sales_return = None
+                sales_return_obj = []
             if sales:
                 sales_items = SalesItem.objects.filter(sales=sales)
                 sl_items = []
 
                 for item in sales_items:
-                    if sales_return:
-                        sales_return = sales_return[0]
-                        for ret_item in sales_return.salesreturnitem_set.all():
-                            if item.item.code == ret_item.item.code:
-                                return_quantity = int(item.quantity_sold) - int(ret_item.return_quantity)
+                    if sales_return_obj:
+                        sales_return_items = SalesReturnItem.objects.filter(sales_return__sales=sales, item=item.item)
+                        total_return_quantity = 0
+                        for ret_item in sales_return_items:
+                            total_return_quantity = total_return_quantity + int(ret_item.return_quantity)
+                        return_quantity = int(item.quantity_sold) - int(total_return_quantity)
                     else:
                         return_quantity = int(item.quantity_sold)
                     sl_items.append({
