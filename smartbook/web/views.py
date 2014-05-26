@@ -206,8 +206,8 @@ class RegisterUser(View):
                     
                 except Exception as ex:
                     print "in Exception == ", str(ex)
-                    user, created = User.objects.get_or_create(username = request.POST['username'])
-                    if not created:
+                    user, salesman_created = User.objects.get_or_create(username = request.POST['username'])
+                    if not salesman_created:
                         message = "Salesman with this name already exists"
                         context = {
                             'error_message': message,
@@ -277,6 +277,13 @@ class RegisterUser(View):
             userprofile.land_line = request.POST['phone']
             userprofile.email_id = request.POST['email']
             userprofile.save()
+            if user_type == 'Salesman' and salesman_created:
+
+                users = UserProfile.objects.filter(user_type='Salesman')
+                return render(request, 'user_list.html',{
+                    'users': users,
+                    'user_type': user_type
+                })
 
             return render(request, 'register_user.html',context)
             
