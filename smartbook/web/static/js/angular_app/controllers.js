@@ -3283,6 +3283,8 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
  
     $scope.get_pending_deliverynotes = function() {
         var salesman_name = $scope.delivery_note.salesman.replace(/\s+/g, '_');
+        if(salesman_name == 'select')
+            return false;
         var delivery_note_no = '';
         $http.get('/sales/pending_deliverynote/list/'+salesman_name+'/').success(function(data)
         {
