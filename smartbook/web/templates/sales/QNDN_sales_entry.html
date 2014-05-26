@@ -60,8 +60,9 @@
 							<label for="sales_invoice_number">Invoice Number </label>
 						</div>
 						<div class="forminput_sales">
-							<input type="text" name="sales_invoice_number"  ng-model="sales.sales_invoice_number"  readonly / >
+							<input type="text" name="sales_invoice_number"  ng-model="sales.sales_invoice_number" ng-change="is_sales_invoice_exists()" / >
 						</div>
+						<p class="error_message">[[existance_message]]</p>
 					</div>	
 
 					<div class="formrow_sales">

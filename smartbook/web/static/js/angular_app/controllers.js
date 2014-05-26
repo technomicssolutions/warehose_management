@@ -803,6 +803,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
     $scope.staff = '';
     $scope.selecting_item = false;
     $scope.item_selected = false;
+    $scope.sales_invoice_existing = false;
     $scope.payment_mode = 'cash';
     $scope.payment_mode_selection = true;
     $scope.payment_mode_selection_check = true;
@@ -890,6 +891,21 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
            
     }
 
+    $scope.is_sales_invoice_exists = function() {
+        var sales_invoice_no = $scope.sales.sales_invoice_number;
+        $http.get('/sales/check_invoice_no_existence/?invoice_no='+sales_invoice_no).success(function(data)
+        {
+            if(data.result == 'error') {
+                $scope.existance_message = 'Sales Invoice with this no already exists';
+                $scope.sales_invoice_existing = true;
+            } else {
+                $scope.existance_message = '';
+                $scope.sales_invoice_existing = false;
+                console.log($scope.sales_invoice_existing);
+            }  
+        });
+    }
+
     $scope.payment_mode_change_sales = function(payment_mode) {
         if(payment_mode == 'cheque') {
             $scope.payment_mode_selection = true;
@@ -902,8 +918,11 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
     }
     $scope.validate_sales = function() {
         $scope.sales.sales_invoice_date = $$('#sales_invoice_date')[0].get('value');
-        if ($scope.sales.quotation_ref_no == '' && $scope.sales.delivery_no == ''){
+        if ($scope.sales.delivery_no == ''){
             $scope.validation_error = "Enter Deliverynote No" ;
+            return false;
+        } else if ($scope.sales_invoice_existing) { 
+            $scope.validation_error = "Sales invoice with this invoice no is already exists" ;
             return false;
         } else if($scope.sales.sales_invoice_date == '') {
             $scope.validation_error = "Enter Sales invoice Date" ;
@@ -3269,6 +3288,7 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         }  
         return true;
     }
+
     $scope.remove_from_item_list = function(item) {
         var index = $scope.delivery_note.sales_items.indexOf(item);
         $scope.delivery_note.sales_items.splice(index, 1);

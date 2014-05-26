@@ -1728,7 +1728,28 @@ class CheckDeliverynoteExistence(View):
 
         delivery_no = request.GET.get('delivery_no', '')
         try:
-            delivery_note_details = DeliveryNote.objects.get(delivery_note_number=delivery_no)
+            delivery_note = DeliveryNote.objects.get(delivery_note_number=delivery_no)
+            res = {
+                'result': 'error',
+            }
+            print "Matching Query exists"
+        except Exception as ex:
+            print "Exception == ", str(ex)
+
+            res = {
+                'result': 'ok',
+            }
+
+        response = simplejson.dumps(res)
+        return HttpResponse(response, status=200, mimetype='application/json')
+
+class CheckInvoiceExistence(View):
+
+    def get(self, request, *args, **kwargs):
+
+        invoice_no = request.GET.get('invoice_no', '')
+        try:
+            invoice = Sales.objects.get(sales_invoice_number=invoice_no)
             res = {
                 'result': 'error',
             }
