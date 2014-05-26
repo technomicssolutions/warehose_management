@@ -718,14 +718,8 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         } else if($scope.purchase.purchase_invoice_date == ''){
             $scope.validation_error = "Please enter purchase invoice date";
             return false;
-        } else if($scope.purchase.brand == 'select') {
-            $scope.validation_error = "Please select brand";            
-            return false;
         } else if($scope.purchase.vendor_name == 'select') {
             $scope.validation_error = "Please select vendor";
-            return false;
-        } else if($scope.purchase.transport == 'select') {
-            $scope.validation_error = "Please select Transportation company";
             return false;
         } else if($scope.payment_mode == '') {
             $scope.validation_error = "Please choose Payment mode";

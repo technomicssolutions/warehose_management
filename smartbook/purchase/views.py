@@ -115,8 +115,12 @@ class PurchaseEntry(View):
         purchase.vendor_do_number = purchase_dict['vendor_do_number']
         purchase.vendor_invoice_date = datetime.strptime(purchase_dict['vendor_invoice_date'], '%d/%m/%Y')
         purchase.purchase_invoice_date = datetime.strptime(purchase_dict['purchase_invoice_date'], '%d/%m/%Y')
-        brand = Brand.objects.get(brand=purchase_dict['brand'])
-        purchase.brand = brand
+        if purchase_dict['brand'] != 'select' or purchase_dict['brand'] != 'other' or purchase_dict['brand'] != '':
+            try:
+                brand = Brand.objects.get(brand=purchase_dict['brand'])
+                purchase.brand = brand
+            except:
+                pass
         purchase.payment_mode = purchase_dict['payment_mode']
         if purchase_dict['bank_name']:
             purchase.bank_name = purchase_dict['bank_name']
@@ -125,9 +129,12 @@ class PurchaseEntry(View):
         if purchase_dict['cheque_date']:
             purchase.cheque_date = datetime.strptime(purchase_dict['cheque_date'], '%d/%m/%Y')
         vendor = Vendor.objects.get(user__first_name=purchase_dict['vendor_name']) 
-        if purchase_dict['transport'] != 'other' or purchase_dict['transport'] != 'select' or purchase_dict['transport'] != '':      
-            transport = TransportationCompany.objects.get(company_name=purchase_dict['transport'])
-            purchase.transportation_company = transport
+        if purchase_dict['transport'] != 'other' or purchase_dict['transport'] != 'select' or purchase_dict['transport'] != '': 
+            try:     
+                transport = TransportationCompany.objects.get(company_name=purchase_dict['transport'])
+                purchase.transportation_company = transport
+            except:
+                pass
         purchase.vendor = vendor
         
         if purchase_dict['discount']:
