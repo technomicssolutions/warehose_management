@@ -4740,3 +4740,23 @@ function PendingCustomerReportController($scope, $element, $http, $location) {
     }
     
 }
+
+
+function VendorReportController($http, $scope, $location, $element) {
+
+    $scope.init = function(csrf_token) {
+        $scope.csrf_token = csrf_token;
+        $scope.get_vendors()
+    }
+    $scope.get_vendors = function() {
+        $http.get('/vendor/list/').success(function(data)
+        {
+            $scope.vendors = data.vendors;
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+        $scope.vendor_name = 'select';
+    }
+
+}
