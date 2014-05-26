@@ -68,20 +68,6 @@
 						</div>
 					</div>
 
-
-					<div class="formrow_purchase">
-						<div class="formtext_purchase">
-							<label for="brand">Brand</label>
-						</div>
-						<div class="forminput">
-							<select name="brand" ng-model="purchase.brand" ng-change="add_brand()">
-								<option value="select">Select</option>
-								<option ng-repeat="brand in brands" value="[[brand.brand_name]]" ng-selected="brand.brand_name == purchase.brand">[[brand.brand_name]]</option>
-								<option value="other">Other</option>
-							</select>
-						</div>
-					</div>
-
 					<div class="formrow_purchase">
 						<div class="formtext_purchase">
 							<label for="vendor">Vendor</label>

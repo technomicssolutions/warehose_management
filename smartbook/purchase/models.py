@@ -21,7 +21,6 @@ class Purchase(models.Model):
     vendor_do_number = models.CharField('Vendor DO Number', default='1', max_length = 10)
     vendor_invoice_date = models.DateField('Vendor Invoice Date', null=True, blank=True)
     purchase_invoice_date = models.DateField('Purchase Invoice Date', null=True, blank=True)
-    brand = models.ForeignKey(Brand, null=True, blank=True)
     vendor = models.ForeignKey(Vendor, null=True, blank=True)
     payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=25, choices=PAYMENT_MODE)
     bank_name = models.CharField('Bank Name',max_length=50,null=True, blank=True)

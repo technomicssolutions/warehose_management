@@ -238,7 +238,6 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         'vendor_do_number': '',
         'vendor_invoice_date': '',
         'purchase_invoice_date': '',
-        'brand': '',
         'vendor_name': '',
         'transport': '',
         'discount': 0,
@@ -253,7 +252,6 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         'cheque_date': '',
     }
     $scope.purchase.vendor_name = 'select';
-    $scope.purchase.brand = 'select';
     $scope.purchase.transport = 'select';
     $scope.item_name = '';
     $scope.item_code = '';
@@ -280,7 +278,6 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         });
 
         $scope.get_vendors();
-        $scope.get_brands();
         $scope.get_companies();
 
     }
@@ -395,60 +392,6 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
                 
             });
         }
-    }
-
-    $scope.get_brands = function() {
-        $http.get('/inventory/brand_list/').success(function(data)
-        {
-            $scope.brands = data.brands;
-        }).error(function(data, status)
-        {
-            console.log(data || "Request failed");
-        });
-    }
-    $scope.add_brand = function() {
-        if($scope.purchase.brand == 'other') {
-            $scope.popup = new DialogueModelWindow({
-                'dialogue_popup_width': '27%',
-                'message_padding': '0px',
-                'left': '28%',
-                'top': '150px',
-                'height': '115px',
-                'content_div': '#add_brand'
-            });
-            var height = $(document).height();
-            $scope.popup.set_overlay_height(height);
-            $scope.popup.show_content();
-        }
-    }
-
-    $scope.add_new_brand = function() {
-        params = { 
-            'brand_name':$scope.brand_name,
-            "csrfmiddlewaretoken" : $scope.csrf_token
-        }
-        $http({
-            method : 'post',
-            url : "/inventory/add/brand/",
-            data : $.param(params),
-            headers : {
-                'Content-Type' : 'application/x-www-form-urlencoded'
-            }
-        }).success(function(data, status) {
-            
-            if (data.result == 'error'){
-                $scope.error_flag=true;
-                $scope.message = data.message;
-            } else {
-                $scope.error_flag=false;
-                $scope.message = '';
-                $scope.popup.hide_popup();
-                $scope.get_brands();
-                $scope.purchase.brand = $scope.brand_name;                
-            }
-        }).error(function(data, success){
-            
-        });
     }
 
     $scope.get_companies = function() {
@@ -2456,23 +2399,7 @@ function AddItemController($scope, $http, $element, $location, $timeout) {
             $scope.error_flag=true;
             $scope.message = 'Item name cannot be null';
             return false;
-        } else if($scope.uom_value == '' || $scope.uom_value == undefined || $scope.uom_value == 'select' || $scope.uom_value == 'other') {
-            $scope.error_flag=true;
-            $scope.message = 'Please choose Uom';
-            return false;
-        } else if($scope.brand_value == '' || $scope.brand_value == undefined || $scope.brand_value == 'select' || $scope.brand_value == 'other') {
-            $scope.error_flag=true;
-            $scope.message = 'Please choose Brand';
-            return false;
-        }else if($scope.bar_code == '' || $scope.bar_code == undefined) {
-            $scope.error_flag=true;
-            $scope.message = 'Barcode cannot be null';
-            return false;
-        } else if($scope.tax == '' || $scope.tax == undefined) {
-            $scope.error_flag=true;
-            $scope.message = 'Tax cannot be null';
-            return false;
-        }
+        } 
         return true;
     }
     $scope.save_item = function() {

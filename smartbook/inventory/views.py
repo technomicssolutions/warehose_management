@@ -23,9 +23,8 @@ class ItemAdd(View):
 
         if request.is_ajax():
             try:
-                uom = UnitOfMeasure.objects.get(uom = request.POST['uom'])
-                brand = Brand.objects.get(brand = request.POST['brand'])
-                item, created = InventoryItem.objects.get_or_create(code=request.POST['code'], brand=brand, uom=uom, name=request.POST['name'])
+                
+                item, created = InventoryItem.objects.get_or_create(code=request.POST['code'], name=request.POST['name'])
                 if not created:
                     res = {
                         'result': 'error',
@@ -34,9 +33,20 @@ class ItemAdd(View):
                     status_code = 500
                 else:
                     item.name=request.POST['name']
-                    item.description=request.POST['description']
-                    item.barcode=request.POST['barcode']
-                    item.tax=request.POST['tax']
+                    
+                    
+                    try:
+                        if request.POST['barcode']:
+                            item.barcode = request.POST['barcode']
+                        if request.POST['tax']:
+                            item.tax = request.POST['tax']
+                        uom = UnitOfMeasure.objects.get(uom = request.POST['uom'])
+                        brand = Brand.objects.get(brand = request.POST['brand'])
+                        item.brand=brand
+                        item.uom=uom 
+                    except Exception as ex:
+                        print str(ex), "Exception ===="
+                        
                     item.save()
                     res = {
                         'result': 'ok',
@@ -44,9 +54,10 @@ class ItemAdd(View):
                     status_code = 200 
                 
             except Exception as ex:
+                print str(ex), "Exception ===="
                 res = {
                         'result': 'error',
-                        'message': 'Item already existing'
+                        'message': 'Item already existing abccc'
                     }
                 status_code = 500
 
@@ -94,10 +105,10 @@ class ItemList(View):
                             'item_code': item.code,
                             'item_name': item.name,
                             'barcode': item.barcode,
-                            'brand': item.brand.brand,
+                            'brand': item.brand.brand if item.brand else '',
                             'description': item.description,
                             'tax': item.tax,
-                            'uom': item.uom.uom,
+                            'uom': item.uom.uom if item.uom else '',
                             'current_stock': item.quantity if item.quantity  else 0 ,
                             'selling_price': item.selling_price if item.selling_price else 0 ,
                             'discount_permit': item.discount_permit_percentage if item.discount_permit_percentage else 0,
