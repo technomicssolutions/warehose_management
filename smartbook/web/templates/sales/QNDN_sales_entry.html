@@ -94,7 +94,7 @@
 							<span class="small_column">[[item.item_code]] </span>
 							<span>[[item.item_name]] </span>
 							<span>[[item.current_stock]] </span>
-							<span>[[item.unit_price]] </span>
+							<span><input type="text" ng-model="item.unit_price" ng-change="calculate_net_amount_sale(item)" /> </span>
 							<span>[[item.qty_sold]]</span>
 							<span>[[item.remaining_qty]]</span> 
 							<span> <input type="text" ng-model="item.qty" ng-change="calculate_net_amount_sale(item)" /> </span>

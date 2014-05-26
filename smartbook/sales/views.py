@@ -211,12 +211,13 @@ class SalesDetails(View):
                         'item_name': item.item.name,
                         'barcode': item.item.barcode,
                         'stock': item.item.quantity,
-                        'unit_price': item.item.selling_price,
+                        'unit_price': item.selling_price,
                         'tax': item.item.tax if item.item.tax else 0 ,
                         'uom': item.item.uom.uom,
                         'quantity_sold': item.quantity_sold,
                         'discount_given': item.discount_given,
                         'max_return_qty': return_quantity,
+                        'returned_amount': 0,
                     })
                 sales_dict = {
                     'invoice_number': sales.sales_invoice_number,
