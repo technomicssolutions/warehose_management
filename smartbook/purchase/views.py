@@ -278,7 +278,7 @@ class VendorAccountDetails(View):
         # vendor_account.total_amount = int(vendor_account_dict['total_amount'])
         vendor_account.paid_amount = vendor_account.paid_amount + vendor_account.amount  #int(vendor_account_dict['amount_paid'])
         vendor_account.balance = vendor_account.balance - vendor_account.amount  #int(vendor_account_dict['balance_amount'])        
-        if vendor_account_dict['cheque_date'] != "null" :
+        if vendor_account_dict['cheque_date']:
             vendor_account.cheque_no = int(vendor_account_dict['cheque_no'])
             vendor_account.cheque_date = datetime.strptime(vendor_account_dict['cheque_date'], '%d/%m/%Y') 
             vendor_account.bank_name = vendor_account_dict['bank_name']

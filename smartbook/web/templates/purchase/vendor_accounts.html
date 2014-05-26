@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block body_id %}Vendor Accounts{% endblock %}
+{% block body_id %}vendor_accounts{% endblock %}
 
 {% block title %}Vendor Accounts{% endblock title %}
 {% block controller %}ng-controller="VendorAccountController" ng-init="init('{{csrf_token}}')" {% endblock controller %}
@@ -20,6 +20,7 @@
 						</div>
 						<div class="forminput_purchase">
 							<select name="vendor" ng-model="vendor_account.vendor" ng-change="get_vendor_account_details();">
+								<option value="">Select</option>
 								{% for vendor in vendors %}					
 									<option value="{{vendor.user.first_name}}">{{vendor.user.first_name}}</option>
 								{% endfor %}
@@ -74,25 +75,14 @@
 					</div>
 
 					<div class="formrow_purchase">
-						<div class="formtext_purchase">
+						<div class="formtext_purchase" id="radio">
 							<label for="payment">Payment Mode</label>
 						</div>
-						<div class="forminput_purchase">
-							<input type="radio" name="payment_mode" value="cash" ng-model="vendor_account.payment_mode" ng-click="select_payment_mode()" /> Cash
-							<input type="radio" name="payment_mode" value="cheque" ng-model="vendor_account.payment_mode" ng-click="select_payment_mode()" /> Cheque							
+						<div class="forminput_purchase" id="radio_input">
+							<input type="radio" name="payment_mode" value="cash" ng-model="vendor_account.payment_mode" ng-click="select_payment_mode()" /> <label>Cash</label>
+							<input type="radio" name="payment_mode" value="cheque" ng-model="vendor_account.payment_mode" ng-click="select_payment_mode()" /> <label>Cheque</label>							
 						</div>
 					</div>
-
-					<div class="formrow_purchase">
-						<div class="formtext_purchase">
-							<label for="cheque_no">Cheque No</label>
-						</div>
-						<div class="forminput_purchase">
-							<input type="text" name="cheque_no" ng-model="vendor_account.cheque_no" ng-readonly="cash"/>						
-						</div>
-					</div>
-					
-
 					<div class="formrow_purchase">
 						<div class="formtext_purchase">
 							<label for="narration">Narration</label>
@@ -103,12 +93,22 @@
 					</div>
 					<div class="formrow_purchase">
 						<div class="formtext_purchase">
+							<label for="cheque_no">Cheque No</label>
+						</div>
+						<div class="forminput_purchase">
+							<input type="text" name="cheque_no" ng-model="vendor_account.cheque_no" ng-readonly="cash"/>						
+						</div>
+					</div>
+					
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
 							<label for="cheque_date">Cheque date</label>
 						</div>
 						<div class="forminput_purchase">
 							<input type="text" name="cheque_date" id="cheque_date" ng-model="vendor_account.cheque_date" ng-readonly="cash"/>						
 						</div>
 					</div>
+
 					<div class="formrow_purchase">
 						<div class="formtext_purchase">
 							<label for="bank">Bank Name</label>
@@ -128,9 +128,11 @@
 						</div> 
 					</div>
 
+					
+
 					<div class="formrow_purchase">
 						<p class="error_message"> [[validation_error]] </p>
-						<div class="formrow_purchase">
+						<div class="formrow_purchase" id="button_alignment">
 							<input type="button" name="submit" value="Submit" ng-click="save_vendor_account()" class="btn btn-info"/>
 							<a href='/'><input type="button" name="submit" value="Cancel" ng-click=""class="btn btn-info" /></a>
 						</div>

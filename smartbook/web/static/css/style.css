@@ -827,3 +827,14 @@ a {
 .align_left {
 	float: left;
 }
+
+#vendor_accounts #radio_input {
+	width: 38%;
+}
+#vendor_accounts .formtext_purchase {
+    width: 36%;
+}
+#vendor_accounts #button_alignment {
+	float: right;
+	margin-top: 35px;
+}
