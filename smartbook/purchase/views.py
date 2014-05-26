@@ -124,10 +124,12 @@ class PurchaseEntry(View):
             purchase.cheque_no = purchase_dict['cheque_no']
         if purchase_dict['cheque_date']:
             purchase.cheque_date = datetime.strptime(purchase_dict['cheque_date'], '%d/%m/%Y')
-        vendor = Vendor.objects.get(user__first_name=purchase_dict['vendor_name'])       
-        transport = TransportationCompany.objects.get(company_name=purchase_dict['transport'])
+        vendor = Vendor.objects.get(user__first_name=purchase_dict['vendor_name']) 
+        if purchase_dict['transport'] != 'other' or purchase_dict['transport'] != 'select' or purchase_dict['transport'] != '':      
+            transport = TransportationCompany.objects.get(company_name=purchase_dict['transport'])
+            purchase.transportation_company = transport
         purchase.vendor = vendor
-        purchase.transportation_company = transport
+        
         if purchase_dict['discount']:
             purchase.discount = purchase_dict['discount']
         else:

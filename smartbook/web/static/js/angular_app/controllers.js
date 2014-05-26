@@ -515,15 +515,15 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
             var param = $scope.item_name;
         else if (parameter == 'barcode')
             var param = $scope.barcode;
-        if($scope.purchase.brand == 'select'){
-            $scope.validation_error = 'Please select brand';
-            return false;
-        }
+        // if($scope.purchase.brand == 'select'){
+        //     $scope.validation_error = 'Please select brand';
+        //     return false;
+        // }
         if($scope.item_code == '' && $scope.item_name == '' && $scope.barcode == '') {
             $scope.items = [];
             return false;
         }
-        $http.get('/inventory/items/?'+parameter+'='+param+'&brand='+$scope.purchase.brand).success(function(data)
+        $http.get('/inventory/items/?'+parameter+'='+param).success(function(data)
         {
             $scope.selecting_item = true;
             $scope.item_selected = false;
@@ -746,13 +746,20 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
             
             $scope.validation_error = "Please enter a number as purchase invoice number";
             return false;
-        }
-        else if(!(Number($scope.purchase.discount) == $scope.purchase.discount)) {
+        } else if(!(Number($scope.purchase.discount) == $scope.purchase.discount)) {
             $scope.validation_error = "Please enter a number as discount";
+        } else if ($scope.purchase.purchase_items.length > 0) {
+            for(i=0; i<$scope.purchase.purchase_items.length; i++){
+                if ($scope.purchase.purchase_items[i].selling_price == 0 || $scope.purchase.purchase_items[i].selling_price == '') {
+                    $scope.validation_error = "Enter selling price for the item with code "+$scope.purchase.purchase_items[i].item_code;
+                    return false;
+                } else if ($scope.purchase.purchase_items[i].unit_price == 0 || $scope.purchase.purchase_items[i].unit_price == '') {
+                    $scope.validation_error = "Enter unit price for the item with code "+$scope.purchase.purchase_items[i].item_code;
+                    return false;
+                }
+            }
         }
-        else {
-            return true;
-        }        
+        return true;
     }
 
     $scope.save_purchase = function() {
