@@ -1482,29 +1482,53 @@ class VendorReport(View):
                     'message': 'Please Choose Vendor'
                 }
                 return render(request, 'reports/pending_vendor_report.html', context) 
-            vendor = Vendor.objects.get(user__first_name=vendor_name)
-            vendor_accounts = VendorAccount.objects.filter(vendor=vendor)
+            elif vendor_name == 'all':
+                vendors = Vendor.objects.all()
+            else:
+                vendor = Vendor.objects.get(user__first_name=vendor_name)
+                vendor_accounts = VendorAccount.objects.filter(vendor=vendor)
         
         p.drawString(400, 900, 'Vendor Report - ' + vendor_name)
 
         y = 850
-        p.drawString(200, y, 'Total Amount')
-        p.drawString(320, y, 'Paid')
-        p.drawString(420, y, 'Balance')
-        p.drawString(550, y, 'Payment Mode') 
         
-        y = y - 50 
-        if len(vendor_accounts) > 0:
-            for vendor_account in vendor_accounts:
-                
-                p.drawString(200, y, str(vendor_account.total_amount))
-                p.drawString(320, y, str(vendor_account.paid_amount))
-                p.drawString(420, y, str(vendor_account.balance))
-                p.drawString(550, y, str(vendor_account.payment_mode))
-                y = y - 30
-                if y <= 270:
-                    y = 850
-                    p.showPage()
+        
+        if vendor_name == 'all':
+            p.drawString(200, y, 'Vendor Name')
+            p.drawString(320, y, 'Total Amount')
+            p.drawString(420, y, 'Paid')
+            p.drawString(550, y, 'Balance')
+            p.drawString(650, y, 'Payment Mode') 
+            y = y - 50 
+            if vendors.count() > 0:
+                for vendor in vendors:
+                    vendor_account = VendorAccount.objects.get(vendor=vendor)
+                    p.drawString(200, y, str(vendor.user.first_name))
+                    p.drawString(320, y, str(vendor_account.total_amount))
+                    p.drawString(420, y, str(vendor_account.paid_amount))
+                    p.drawString(550, y, str(vendor_account.balance))
+                    p.drawString(650, y, str(vendor_account.payment_mode))
+                    y = y - 30
+                    if y <= 270:
+                        y = 850
+                        p.showPage()
+        else:
+            p.drawString(200, y, 'Total Amount')
+            p.drawString(320, y, 'Paid')
+            p.drawString(420, y, 'Balance')
+            p.drawString(550, y, 'Payment Mode') 
+            y = y - 50 
+            if len(vendor_accounts) > 0:
+                for vendor_account in vendor_accounts:
+                    
+                    p.drawString(200, y, str(vendor_account.total_amount))
+                    p.drawString(320, y, str(vendor_account.paid_amount))
+                    p.drawString(420, y, str(vendor_account.balance))
+                    p.drawString(550, y, str(vendor_account.payment_mode))
+                    y = y - 30
+                    if y <= 270:
+                        y = 850
+                        p.showPage()
 
         p.showPage()
         p.save()
