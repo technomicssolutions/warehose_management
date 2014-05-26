@@ -2118,6 +2118,7 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
         'tax_amount':0,
         'sales_items': [],
     }
+    $scope.sales_return_existing = false;
     $scope.init = function(csrf_token, invoice_number){
         $scope.csrf_token = csrf_token;
         $scope.sales_return.invoice_number = invoice_number;
@@ -2135,6 +2136,9 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
             
             $scope.validation_error = "Please Choose an invoice number" ;
             return false;
+        } else if ($scope.sales_return_existing) {
+            $scope.validation_error = "Sales return with this return invoice no is already exists" ;
+            return false;
         } else if($$('#sales_return_date')[0].get('value') == '') {
             $scope.validation_error = "Please enter a Date";
             return false;
@@ -2147,6 +2151,20 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
             }
         }
         return true;
+    }
+    $scope.is_sales_return_exists = function() {
+        var return_invoice_no = $scope.sales_return.invoice_number;
+        $http.get('/sales/check_return_invoice_no_existence/?return_invoice_no='+return_invoice_no).success(function(data)
+        {
+            if(data.result == 'error') {
+                $scope.existance_message = 'Sales Return with this no already exists';
+                $scope.sales_return_existing = true;
+            } else {
+                $scope.existance_message = '';
+                $scope.sales_return_existing = false;
+                console.log($scope.sales_return_existing);
+            }  
+        });
     }
     $scope.getItems = function(parameter) {
         $scope.items = [];

@@ -27,8 +27,9 @@
 							<label for="sales_return_invoice_number">Sales Return Invoice Number</label>
 						</div>
 						<div class="forminput">
-							<input type="text" name="sales_return_invoice_number" ng-model="sales_return.invoice_number"  readonly /> 
+							<input type="text" name="sales_return_invoice_number" ng-model="sales_return.invoice_number" ng-change="is_sales_return_exists()" /> 
 						</div>
+						<p class="error_message align_left">[[existance_message]]</p>
 					</div>
 					<div class="formrow_purchase">
 						<div class="formtext_purchase">

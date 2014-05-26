@@ -823,3 +823,7 @@ a {
 	width: 96.7%;
 	border: 1px solid #ADD8E6;
 }
+
+.align_left {
+	float: left;
+}
