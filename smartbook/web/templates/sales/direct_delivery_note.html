@@ -3,7 +3,7 @@
 {% block body_id %}direct_delivery_note{% endblock %}
 
 {% block title %}Direct Delivery Note{% endblock title %}
-{% block controller %}ng-controller="DirectDeliveryNoteController" ng-init="init('{{csrf_token}}')"{% endblock controller %}
+{% block controller %}ng-controller="DirectDeliveryNoteController" ng-init="init('{{csrf_token}}', '{{delivery_no}}')"{% endblock controller %}
 
 {% block dialogue_popup %}
 	{% include 'add_new_customer.html' %}
@@ -36,8 +36,9 @@
 							<label for="delivery_no">Delivery Note No </label>
 						</div>
 						<div class="forminput_sales">
-							<input type="text" name="delivery_note_no" id="delivery_note_no" value="{{delivery_no}}" readonly / >
+							<input type="text" name="delivery_note_no" ng-model="delivery_note.delivery_note_no" ng-change="is_delivery_note_exists()" / >
 						</div>
+						<p class="error_message">[[existance_message]]</p>
 					</div>	
 
 					<div class="formrow_sales">

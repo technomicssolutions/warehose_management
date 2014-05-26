@@ -3110,6 +3110,7 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
     $scope.selected_item = '';
     $scope.selecting_item = false;
     $scope.item_selected = false;
+    $scope.delivery_note_existing = false;
     $scope.delivery_note = {
         'sales_items': [],
         'date': '',
@@ -3119,8 +3120,9 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         'delivery_note_no': '',
         
     }
+    $scope.delivery_note_no = '';
     $scope.delivery_note.salesman = 'select';
-    $scope.init = function(csrf_token, sales_invoice_number)
+    $scope.init = function(csrf_token, delivery_note_number)
     {
         $scope.csrf_token = csrf_token;
         $scope.popup = '';
@@ -3131,7 +3133,9 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             pickerClass: 'datepicker_bootstrap',
             useFadeInOut: !Browser.ie,
             format: '%d/%m/%Y',
-        });          
+        });   
+        $scope.delivery_note.delivery_note_no = delivery_note_number;
+        $scope.delivery_no = delivery_note_number; 
     }
 
     $scope.get_salesman = function() {
@@ -3230,10 +3234,15 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
     $scope.delivery_note_validation = function(){
 
         $scope.delivery_note.date = $$('#delivery_date')[0].get('value');
-        $scope.delivery_note.delivery_note_no = $$('#delivery_note_no')[0].get('value');
         $scope.delivery_note.customer = $scope.customer; 
         if ($scope.delivery_note.date == '' || $scope.delivery_note.date == undefined) {
             $scope.validation_error = "Enter Delivery Date" ;
+            return false;
+        } else if ($scope.delivery_note_existing) {
+            $scope.validation_error = "Delivery Note with this delivery note no is already existing" ;
+            return false;
+        } else if ($scope.delivery_note.delivery_note_no == '' || $scope.delivery_note.delivery_note_no == undefined) { 
+            $scope.validation_error = "Enter Delivery Note No" ;
             return false;
         } else if ($scope.delivery_note.salesman == 'select') {
             $scope.validation_error = "Enter Salesman Name";
@@ -3265,7 +3274,21 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         $scope.delivery_note.sales_items.splice(index, 1);
         $scope.calculate_net_total_amount();
     }
-
+    $scope.is_delivery_note_exists = function() {
+        var delivery_note_no = $scope.delivery_note.delivery_note_no;
+        $http.get('/sales/check_delivery_note_no_existence/?delivery_no='+delivery_note_no).success(function(data)
+        {
+            if(data.result == 'error') {
+                $scope.existance_message = 'Delivery Note with this no already exists';
+                $scope.delivery_note_existing = true;
+            } else {
+                $scope.existance_message = '';
+                $scope.delivery_note_existing = false;
+                console.log($scope.delivery_note_existing);
+            }  
+        });
+    }
+ 
     $scope.get_pending_deliverynotes = function() {
         var salesman_name = $scope.delivery_note.salesman.replace(/\s+/g, '_');
         var delivery_note_no = '';

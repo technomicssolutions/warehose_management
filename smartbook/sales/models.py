@@ -63,7 +63,7 @@ class DeliveryNote(models.Model):
 
     quotation = models.ForeignKey(Quotation, null=True, blank=True)
     salesman = models.ForeignKey(User, null=True, blank=True)
-    delivery_note_number = models.CharField('Delivery Note Serial number', max_length=50, null=True, blank=True)
+    delivery_note_number = models.CharField('Delivery Note Serial number', max_length=50, null=True, blank=True, unique=True)
     date = models.DateField('Date', null=True, blank=True)
     lpo_number = models.CharField('LPO Number', null=True, blank=True, max_length=20)
     net_total = models.DecimalField('Net Total',max_digits=14, decimal_places=2, default=0)
@@ -102,7 +102,7 @@ class DeliveryNoteItem(models.Model):
 
 class Sales(models.Model): 
 
-    sales_invoice_number = models.CharField('Sales Invoice Number', null=True, blank=True, max_length=10)
+    sales_invoice_number = models.CharField('Sales Invoice Number', null=True, blank=True, max_length=10, unique=True)
     sales_invoice_date = models.DateField('Sales Invoice Date', null=True, blank=True)
     customer = models.ForeignKey(Customer, null=True, blank=True)
     salesman = models.ForeignKey(User, null=True, blank=True)
@@ -169,7 +169,7 @@ class SalesReturnItem(models.Model):
 class ReceiptVoucher(models.Model):
 
     sales_invoice = models.ForeignKey(Sales, null=True, blank=True)
-    receipt_voucher_no = models.CharField('Receipt Voucher No', null=True, blank=True, max_length=30)
+    receipt_voucher_no = models.CharField('Receipt Voucher No', null=True, blank=True, max_length=30, unique=True)
     date = models.DateField('Date', null=True, blank=True)
     total_amount = models.DecimalField('Total Amount', max_digits=14, decimal_places=2, default=0)
     paid_amount = models.DecimalField('Paid Amount', max_digits=14, decimal_places=2, default=0)

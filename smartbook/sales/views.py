@@ -1722,10 +1722,23 @@ class PendingDeliveryNoteList(View):
 
             return HttpResponse(response, status=status, mimetype='application/json')
 
+class CheckDeliverynoteExistence(View):
 
+    def get(self, request, *args, **kwargs):
 
+        delivery_no = request.GET.get('delivery_no', '')
+        try:
+            delivery_note_details = DeliveryNote.objects.get(delivery_note_number=delivery_no)
+            res = {
+                'result': 'error',
+            }
+            print "Matching Query exists"
+        except Exception as ex:
+            print "Exception == ", str(ex)
 
+            res = {
+                'result': 'ok',
+            }
 
-    
-
-
+        response = simplejson.dumps(res)
+        return HttpResponse(response, status=200, mimetype='application/json')
