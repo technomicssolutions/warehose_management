@@ -1763,3 +1763,50 @@ class CheckInvoiceExistence(View):
 
         response = simplejson.dumps(res)
         return HttpResponse(response, status=200, mimetype='application/json')
+
+class CheckReturnInvoiceExistence(View):
+
+    def get(self, request, *args, **kwargs):
+
+        return_invoice_no = request.GET.get('return_invoice_no', '')
+        try:
+            return_invoice = SalesReturn.objects.get(return_invoice_number=return_invoice_no)
+            res = {
+                'result': 'error',
+            }
+            print "Matching Query exists"
+        except Exception as ex:
+            print "Exception == ", str(ex)
+
+            res = {
+                'result': 'ok',
+            }
+
+        response = simplejson.dumps(res)
+        return HttpResponse(response, status=200, mimetype='application/json')
+
+
+
+class CheckReceiptVoucherExistence(View):
+
+    def get(self, request, *args, **kwargs):
+
+        rv_no = request.GET.get('rv_no', '')
+        try:
+            receiptvoucher = ReceiptVoucher.objects.get(receipt_voucher_no=rv_no)
+            res = {
+                'result': 'error',
+            }
+            print "Matching Query exists"
+        except Exception as ex:
+            print "Exception == ", str(ex)
+
+            res = {
+                'result': 'ok',
+            }
+
+        response = simplejson.dumps(res)
+        return HttpResponse(response, status=200, mimetype='application/json')
+
+
+

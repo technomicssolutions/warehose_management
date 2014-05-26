@@ -30,5 +30,6 @@ urlpatterns = patterns('',
 	url(r'^pending_deliverynote/list/(?P<salesman_name>[\w-]+)/$', login_required(PendingDeliveryNoteList.as_view()), name='pending_deliverynotes'),
 	url(r'^check_delivery_note_no_existence/$', login_required(CheckDeliverynoteExistence.as_view()), name='dn_exists'),
 	url(r'^check_invoice_no_existence/$', login_required(CheckInvoiceExistence.as_view()), name='invoice_exists'),
-
+	url(r'^check_return_invoice_no_existence/$', login_required(CheckReturnInvoiceExistence.as_view()), name='return_invoice_exists'),
+	url(r'^check_receipt_voucher_existence/$', login_required(CheckReceiptVoucherExistence.as_view()), name='rv_exists'),
 )

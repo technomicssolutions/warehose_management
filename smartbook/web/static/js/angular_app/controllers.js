@@ -2983,9 +2983,10 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
     $scope.receiptvoucher.cheque_date = '';
     // $scope.receiptvoucher.settlement = '';
     $scope.receiptvoucher.payment_mode = 'cash';
+    $scope.rv_existing = false;
     $scope.cash = 'true';
 
-    $scope.init = function(csrf_token) {
+    $scope.init = function(csrf_token, rv_no) {
         $scope.csrf_token = csrf_token;
 
         $scope.date_picker_cheque = new Picker.Date($$('#cheque_date'), {
@@ -3002,19 +3003,22 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             useFadeInOut: !Browser.ie,
             format: '%d/%m/%Y',
         });
+        $scope.receiptvoucher.voucher_no =  rv_no;
     }
     
     $scope.receipt_validation = function(){
 
         $scope.receiptvoucher.date = $$('#receipt_voucher_date')[0].get('value');
-        $scope.receiptvoucher.voucher_no = $$('#voucher_no')[0].get('value');
-        
+         
         if ($scope.receiptvoucher.date == '' || $scope.receiptvoucher.date == undefined) {
             $scope.validation_error = "Enter the Sales Invoice date.";
             return false;             
         } else if ($scope.receiptvoucher.invoice_no == '' || $scope.receiptvoucher.invoice_no == undefined) {
             $scope.validation_error = "Enter the Sales Invoice no.";
             return false;             
+        } else if ($scope.rv_existing) {
+            $scope.validation_error = "Receipt Voucher with this voucher no already exists";
+            return false
         } else if ($scope.receiptvoucher.paid_amount != Number($scope.receiptvoucher.paid_amount) || $scope.receiptvoucher.paid_amount == '') {
             $scope.validation_error = "Enter the Amount";
             return false;  
@@ -3065,6 +3069,21 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         }).error(function(data, status)
         {
             console.log(data || "Request failed");
+        });
+    }
+
+    $scope.is_rv_exists = function() {
+        var rv_no = $scope.receiptvoucher.voucher_no;
+        $http.get('/sales/check_receipt_voucher_existence/?rv_no='+rv_no).success(function(data)
+        {
+            if(data.result == 'error') {
+                $scope.existance_message = 'Receipt Voucher with this no already exists';
+                $scope.rv_existing = true;
+            } else {
+                $scope.existance_message = '';
+                $scope.rv_existing = false;
+                console.log($scope.rv_existing);
+            }  
         });
     }
 

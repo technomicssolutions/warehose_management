@@ -3,7 +3,7 @@
 {% block body_id %}create_receipt_voucher{% endblock %}
 
 {% block title %}Receipt Voucher{% endblock title %}
-{% block controller %} ng-controller="ReceiptVoucherController" ng-init="init('{{csrf_token}}')"{% endblock controller %}
+{% block controller %} ng-controller="ReceiptVoucherController" ng-init="init('{{csrf_token}}', '{{voucher_no}}')"{% endblock controller %}
 
 {% block content %}
 
@@ -22,8 +22,9 @@
 							<label for="voucher_no">Receipt Voucher No.</label>
 						</div>
 						<div class="forminput_sales">
-							<input type="text" name="voucher_no" value="{{voucher_no}}" id="voucher_no" readonly/>
-						</div>						
+							<input type="text" name="voucher_no" value="" ng-model="receiptvoucher.voucher_no" ng-change="is_rv_exists()"/>
+						</div>	
+						<p class="error_message">[[existance_message]]</p>					
 					</div>
 
 					<div class="formrow_sales">
