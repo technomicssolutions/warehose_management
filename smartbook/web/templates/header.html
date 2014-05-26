@@ -66,18 +66,34 @@
 				<li class="menu last"> <a href=""> Reports </a>
 					<ul>
 						<li><a href="{% url 'daily_report' %}"> Daily Reports </a> </li>
-						<li><a href="{% url 'sales_reports' %}"> Sales </a> </li>
-						<li><a href="{% url 'sales_return_report' %}"> Sales Return</a> </li>
+						<li><a href=""> Sales </a> 
+							<ul class="sub_submenu">								
+								<li><a href="{% url 'sales_reports' %}"> Sales </a></li>
+								<li><a href="{% url 'sales_return_report' %}"> Sales Return</a> </li>
+								<li><a href="{% url 'salesman_stock_report' %}"> Salesman Stock </a> </li>
+								<li><a href="{% url 'pending_customer_report' %}">Outstanding Customer</a> </li>
+							</ul>
+						</li>
+						
 						<li><a href="{% url 'stock_reports' %}"> Stock </a> </li>
-						<li><a href="{% url 'salesman_stock_report' %}"> Salesman Stock </a> </li>
-						<li><a href="{% url 'completed_dn_report' %}"> Completed DN </a> </li>
-						<li><a href="{% url 'pending_salesman_report' %}"> Pending DN </a> </li>
-						<li><a href="{% url 'pending_customer_report' %}"> Outstanding Customers </a> </li>
-						<li><a href="{% url 'vendor_report' %}"> Vendor </a> </li>
-						<li><a href="{% url 'purchase_reports' %}"> Purchase </a> </li>
-						<li><a href="{% url 'purchase_return_report' %}"> Purchase Return </a> </li>
+						
+						<li><a href="{% url 'completed_dn_report' %}"> Delivery Note </a> 
+							<ul class="sub_submenu">								
+								<li><a href="{% url 'sales_reports' %}"> Completed DN </a></li>
+								<li><a href="{% url 'pending_salesman_report' %}"> Pending DN </a> </li>
+							</ul>
+						</li>
+						
+						<li><a href=""> Purchase </a> 
+							<ul class="sub_submenu">
+								<li><a href="{% url 'purchase_reports' %}"> Purchase </a> </li>
+								<li><a href="{% url 'vendor_accounts_report' %}"> Vendor Accounts </a> </li>
+								<li><a href="{% url 'vendor_report' %}"> Vendor </a> </li>
+							</ul>
+						</li>
+						<!-- <li><a href="{% url 'purchase_return_report' %}"> Purchase Return </a> </li> -->
 						<li><a href="{% url 'expense_report' %}"> Expense Report </a> </li>
-						<li><a href="{% url 'vendor_accounts_report' %}"> Vendor Accounts </a> </li>
+						
 					</ul>
 				</li>
 			</ul>
