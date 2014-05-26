@@ -670,6 +670,7 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         if((item.permit_disc_amt != '' || item.permit_disc_amt != '') && (item.selling_price != '' || item.selling_price != 0)) {
             item.permit_disc_percent = (parseFloat(item.permit_disc_amt)/parseFloat(item.selling_price))*100;
         }
+        console.log( item.permit_disc_percent);
     }
 
     $scope.calculate_vendor_amount = function() {
@@ -835,7 +836,13 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         $scope.sales.sales_invoice_number = sales_invoice_number;
         $scope.popup = '';
         
-        
+        new Picker.Date($$('#sales_invoice_date'), {
+            timePicker: false,
+            positionOffset: {x: 5, y: 0},
+            pickerClass: 'datepicker_bootstrap',
+            useFadeInOut: !Browser.ie,
+            format:'%d/%m/%Y',
+        });
         $scope.get_customers();
             
     }
@@ -895,7 +902,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         }
     }
     $scope.validate_sales = function() {
-        console.log($scope.sales.payment_mode, $scope.sales.bank_name);
+        $scope.sales.sales_invoice_date = $$('#sales_invoice_date')[0].get('value');
         if ($scope.sales.quotation_ref_no == '' && $scope.sales.delivery_no == ''){
             $scope.validation_error = "Enter Deliverynote No" ;
             return false;
@@ -2080,7 +2087,7 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
         } else if ($scope.sales_return.sales_items.length > 0) {
             for(var i=0; i< $scope.sales_return.sales_items.length; i++) {
                 if ($scope.sales_return.sales_items[i].returned_quantity > $scope.sales_return.sales_items[i].max_return_qty) {
-                    $scope.validation_error = "Check Qauntity Entered "+$scope.sales_return.sales_items[i].item_name;
+                    $scope.validation_error = "Check Quantity Entered "+$scope.sales_return.sales_items[i].item_name;
                     return false;
                 }
             }
@@ -2934,6 +2941,13 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             useFadeInOut: !Browser.ie,
             format: '%d/%m/%Y',
         });
+        new Picker.Date($$('#receipt_voucher_date'), {
+            timePicker: false,
+            positionOffset: {x: 5, y: 0},
+            pickerClass: 'datepicker_bootstrap',
+            useFadeInOut: !Browser.ie,
+            format: '%d/%m/%Y',
+        });
     }
     
     $scope.receipt_validation = function(){
@@ -2941,16 +2955,16 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         $scope.receiptvoucher.date = $$('#receipt_voucher_date')[0].get('value');
         $scope.receiptvoucher.voucher_no = $$('#voucher_no')[0].get('value');
         
-        if ($scope.receiptvoucher.invoice_no == '' || $scope.receiptvoucher.invoice_no == undefined) {
+        if ($scope.receiptvoucher.date == '' || $scope.receiptvoucher.date == undefined) {
+            $scope.validation_error = "Enter the Sales Invoice date.";
+            return false;             
+        } else if ($scope.receiptvoucher.invoice_no == '' || $scope.receiptvoucher.invoice_no == undefined) {
             $scope.validation_error = "Enter the Sales Invoice no.";
             return false;             
-        } 
-
-        if ($scope.receiptvoucher.paid_amount != Number($scope.receiptvoucher.paid_amount) || $scope.receiptvoucher.paid_amount == '') {
+        } else if ($scope.receiptvoucher.paid_amount != Number($scope.receiptvoucher.paid_amount) || $scope.receiptvoucher.paid_amount == '') {
             $scope.validation_error = "Enter the Amount";
             return false;  
-        }
-        if (parseInt($scope.receiptvoucher.paid_amount) > $scope.balance) {
+        } else if (parseInt($scope.receiptvoucher.paid_amount) > $scope.balance) {
             $scope.validation_error = "Please enter the correct amount";
             return false;  
         }
@@ -3075,7 +3089,14 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
     {
         $scope.csrf_token = csrf_token;
         $scope.popup = '';
-        $scope.get_salesman();             
+        $scope.get_salesman();   
+        $scope.delivery_date = new Picker.Date($$('#delivery_date'), {
+            timePicker: false,
+            positionOffset: {x: 5, y: 0},
+            pickerClass: 'datepicker_bootstrap',
+            useFadeInOut: !Browser.ie,
+            format: '%d/%m/%Y',
+        });          
     }
 
     $scope.get_salesman = function() {

@@ -905,8 +905,6 @@ class QuotationDeliverynoteSales(View):
 
     def get(self, request, *args, **kwargs):
 
-        current_date = dt.datetime.now().date()
-
         inv_number = Sales.objects.aggregate(Max('id'))['id__max']
         
         if not inv_number:
@@ -917,7 +915,6 @@ class QuotationDeliverynoteSales(View):
 
         return render(request, 'sales/QNDN_sales_entry.html',{
             'sales_invoice_number': invoice_number,
-            'current_date': current_date.strftime('%d/%m/%Y'),
         })
 
     def post(self, request, *args, **kwargs):
@@ -935,7 +932,6 @@ class QuotationDeliverynoteSales(View):
         for item_data in sales_dict['sales_items']:
             for d_item in delivery_note.deliverynoteitem_set.all():
                 if d_item.item.id == item_data['id']:
-                    print d_item.quantity_sold, item_data['qty']
                     if int(d_item.quantity_sold) != int(item_data['qty_sold']):
                         d_item.quantity_sold = d_item.quantity_sold + int(item_data['qty'])
                         d_item.save()
@@ -1101,7 +1097,6 @@ class ReceiptVoucherCreation(View):
 
     def get(self, request, *args, **kwargs):
 
-        current_date = dt.datetime.now().date()
         voucher_no = ReceiptVoucher.objects.aggregate(Max('id'))['id__max']
         
         if not voucher_no:
@@ -1111,7 +1106,6 @@ class ReceiptVoucherCreation(View):
         voucher_no = 'RV' + str(voucher_no)
 
         return render(request, 'sales/create_receipt_voucher.html',{
-            'current_date': current_date.strftime('%d/%m/%Y'),
             'voucher_no': voucher_no,
         })
 
@@ -1369,8 +1363,6 @@ class DirectDeliveryNote(View):
 
     def get(self, request, *args, **kwargs):
 
-        current_date = dt.datetime.now().date()
-
         ref_number = DeliveryNote.objects.aggregate(Max('id'))['id__max']
         
         if not ref_number:
@@ -1380,7 +1372,6 @@ class DirectDeliveryNote(View):
         delivery_no = 'DN' + str(ref_number)
 
         context = {
-            'current_date': current_date.strftime('%d-%m-%Y'),
             'delivery_no': delivery_no,
         }
 
@@ -1392,7 +1383,7 @@ class DirectDeliveryNote(View):
             delivery_note_details = ast.literal_eval(request.POST['delivery_note'])
             salesman = User.objects.get(first_name=delivery_note_details['salesman'])
             delivery_note = DeliveryNote.objects.create(salesman=salesman)
-            delivery_note.date = datetime.strptime(delivery_note_details['date'], '%d-%m-%Y')
+            delivery_note.date = datetime.strptime(delivery_note_details['date'], '%d/%m/%Y')
             delivery_note.lpo_number = delivery_note_details['lpo_no']
             delivery_note.delivery_note_number = delivery_note_details['delivery_note_no']
             delivery_note.net_total = delivery_note_details['net_total']
@@ -1604,9 +1595,7 @@ class EditDeliveryNote(View):
             delivery_note.save()
 
             if delivery_note.quotation:
-                print "in if"
                 quotation = delivery_note.quotation
-                print quotation
                 for d_item in delivery_note.quotation.quotationitem_set.all():
                     q_stored_item_names.append(d_item.item.name)
                 

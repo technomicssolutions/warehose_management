@@ -1,4 +1,6 @@
 from django.conf.urls import patterns, include, url
+from django.contrib.auth.decorators import login_required
+
 
 from sales.views import *
 
@@ -18,12 +20,12 @@ urlpatterns = patterns('',
 	url(r'^delivery_note_pdf/(?P<delivery_note_id>\d+)/$', DeliveryNotePDF.as_view(), name='delivery_note_pdf'),
 	url(r'^sales_invoice_pdf/(?P<sales_invoice_id>\d+)/$', CreateSalesInvoicePDF.as_view(), name='sales_invoice_pdf'),
 	url(r'^pdf_receipt_voucher/(?P<receipt_voucher_id>\d+)/$', PrintReceiptVoucher.as_view(), name="pdf_receipt_voucher"),
-	url(r'^receipt_voucher/$', ReceiptVoucherCreation.as_view(), name='receipt_voucher'),
+	url(r'^receipt_voucher/$', login_required(ReceiptVoucherCreation.as_view()), name='receipt_voucher'),
 	url(r'^invoice_details/$', InvoiceDetails.as_view(), name='invoice_details'),
-	url(r'^direct_delivery_note/$', DirectDeliveryNote.as_view(), name='direct_delivery_note'),
-	url(r'^latest_sales_details/$', LatestSalesDetails.as_view(), name='latest_sales_details'),
-	url(r'^edit_sales_invoice/$', EditSalesInvoice.as_view(), name='edit_sales_invoice'),
-	url(r'^edit_quotation/$', EditQuotation.as_view(), name='edit_quotation'),
-	url(r'^edit_delivery_note/$', EditDeliveryNote.as_view(), name='edit_delivery_note'),
-	url(r'^pending_deliverynote/list/(?P<salesman_name>[\w-]+)/$', PendingDeliveryNoteList.as_view(), name='pending_deliverynotes'),
+	url(r'^direct_delivery_note/$', login_required(DirectDeliveryNote.as_view()), name='direct_delivery_note'),
+	url(r'^latest_sales_details/$', login_required(LatestSalesDetails.as_view()), name='latest_sales_details'),
+	url(r'^edit_sales_invoice/$', login_required(EditSalesInvoice.as_view()), name='edit_sales_invoice'),
+	url(r'^edit_quotation/$', login_required(EditQuotation.as_view()), name='edit_quotation'),
+	url(r'^edit_delivery_note/$', login_required(EditDeliveryNote.as_view()), name='edit_delivery_note'),
+	url(r'^pending_deliverynote/list/(?P<salesman_name>[\w-]+)/$', login_required(PendingDeliveryNoteList.as_view()), name='pending_deliverynotes'),
 )

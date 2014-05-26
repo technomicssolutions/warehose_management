@@ -178,6 +178,8 @@ LOGGING = {
         },
     }
 }
+LOGIN_URL = '/'
+
 
 
 try:
