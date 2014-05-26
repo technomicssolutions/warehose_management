@@ -215,7 +215,7 @@ class SalesDetails(View):
                         'tax': item.item.tax if item.item.tax else 0 ,
                         'uom': item.item.uom.uom,
                         'quantity_sold': item.quantity_sold,
-                        'discount_given': item.discount_given,
+                        'discount_given': item.discount_amount,
                         'max_return_qty': return_quantity,
                         'returned_amount': 0,
                     })
@@ -883,6 +883,8 @@ class DeliveryNoteDetails(View):
                         'net_amount': delivery_note_item.net_amount,
                         'discount_given': delivery_note_item.discount,
                         'remaining_qty': int(delivery_note_item.total_quantity - delivery_note_item.quantity_sold) if delivery_note_item else 0,
+                        'dis_amt': 0,
+                        'dis_percentage': 0,
                     })
                     i = i + 1
                         
@@ -968,7 +970,8 @@ class QuotationDeliverynoteSales(View):
             s_item.sales = sales
             s_item.item = item
             s_item.quantity_sold = sales_item['qty']
-            s_item.discount_given = sales_item['disc_given']
+            s_item.discount_amount = sales_item['dis_amt']
+            s_item.discount_percentage = sales_item['dis_percentage']
             s_item.net_amount = sales_item['net_amount']
             s_item.selling_price = sales_item['unit_price']
             # unit price is actually the selling price
@@ -1199,7 +1202,7 @@ class InvoiceDetails(View):
                         'selling_price': sale.selling_price,
                         'discount_permit': sale.item.discount_permit_percentage if sale.item else 0,
                         'net_amount': net_amount,
-                        'discount_given': sale.discount_given,
+                        'discount_given': sale.discount_amount if sale.discount_amount else 0,
 
                     }) 
                     net_amount = 0

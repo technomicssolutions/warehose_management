@@ -419,7 +419,6 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
             var height = $(document).height();
             $scope.popup.set_overlay_height(height);
             $scope.popup.show_content();
-
         }
     }
 
@@ -1026,6 +1025,8 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                     'qty': 0,
                     'id': delivery_note.items[i].id,
                     'sold_qty': delivery_note.items[i].sold_qty,
+                    'dis_amt': 0,
+                    'dis_percentage': 0,
                 }
                 $scope.sales.sales_items.push(selected_item);
                 $scope.calculate_grant_total_sale();
@@ -1149,8 +1150,10 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                 item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
                 item.net_amount = 0;
             } else {
-                item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
+                item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
             }
+            // $scope.calculate_discount_amt(item);
+            $scope.calculate_discount_percent(item);
             $scope.calculate_net_discount_sale();
         }
         $scope.calculate_net_total_sale();
@@ -1159,8 +1162,9 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
     $scope.calculate_net_total_sale = function(){
         var net_total = 0;
         for(i=0; i<$scope.sales.sales_items.length; i++){
-            net_total = net_total + parseFloat($scope.sales.sales_items[i].net_amount);
+            net_total = net_total + (parseFloat($scope.sales.sales_items[i].net_amount));
         }
+        console.log(net_total);
         $scope.sales.net_total = net_total;
         $scope.calculate_grant_total_sale();
         
@@ -1174,6 +1178,37 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
 
         }
         $scope.sales.net_discount = net_discount;
+    }
+
+    $scope.calculate_discount_amt = function(item) {
+        if(item.unit_price == '' || item.unit_price != Number(item.unit_price)) {
+            item.unit_price = 0;
+        } 
+        if(item.dis_amt == '' || item.dis_amt != Number(item.dis_amt)){
+            item.dis_amt = 0;
+        }
+        if((item.dis_percentage != '' || item.dis_percentage != 0) && (item.unit_price != '' || item.unit_price != 0)) {
+            item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
+            item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            // $scope.calculate_net_amount_sale(item);
+        }
+        $scope.calculate_net_total_sale();
+    }
+
+    $scope.calculate_discount_percent = function(item) {
+        if(item.unit_price == '' || item.unit_price != Number(item.unit_price)) {
+            item.unit_price = 0;
+        }
+        if(item.dis_percentage == '' || item.dis_percentage != Number(item.dis_percentage)){
+            item.dis_percentage = 0;
+        }
+        if((item.dis_amt != '' || item.dis_amt != '') && (item.unit_price != '' || item.unit_price != 0)) {
+            item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
+            item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            // $scope.calculate_net_amount_sale(item);
+        }
+        console.log( item.dis_percentage);
+        $scope.calculate_net_total_sale();
     }
 
 

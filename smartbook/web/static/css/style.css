@@ -784,7 +784,7 @@ a {
 
 #create_sales .purchase_item_list .item_list_row span {
 
-	width: 9.5%;
+	width: 8.5%;
 }
 
 #latest_sales_details span {
@@ -817,4 +817,9 @@ a {
 .ok_button {
     width: 8%;
     margin: auto;
+}
+
+#purchase .item_list {
+	width: 96.7%;
+	border: 1px solid #ADD8E6;
 }

@@ -131,7 +131,8 @@ class SalesItem(models.Model):
     item = models.ForeignKey(InventoryItem)
     sales = models.ForeignKey(Sales)
     quantity_sold = models.IntegerField('Quantity Sold', default=0)
-    discount_given = models.DecimalField('Discount Given',max_digits=14, decimal_places=2, default=0)  
+    discount_amount = models.DecimalField('Discount amount',max_digits=14, decimal_places=2, default=0)  
+    discount_percentage = models.DecimalField('Discount percentage',max_digits=14, decimal_places=2, default=0) 
     selling_price = models.DecimalField('Selling Price', max_digits=14, decimal_places=2, default=0) 
     net_amount = models.DecimalField('Sold Net Amount', max_digits=14, decimal_places=2, default=0)
     

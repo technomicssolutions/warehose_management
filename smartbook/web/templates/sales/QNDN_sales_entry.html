@@ -87,6 +87,9 @@
 							<span> Qty Sold </span>
 							<span> Remaining </span>
 							<span> Qty </span>	
+							<span> Dis Amt</span>
+							<span> Dis(%) </span>
+							
 							<span> Net Amount </span>
 							<span> &nbsp;&nbsp; </span>
 						</div>
@@ -98,6 +101,8 @@
 							<span>[[item.qty_sold]]</span>
 							<span>[[item.remaining_qty]]</span> 
 							<span> <input type="text" ng-model="item.qty" ng-change="calculate_net_amount_sale(item)" /> </span>
+							<span> <input type="text" ng-model="item.dis_amt" ng-change="calculate_discount_percent(item)" /> </span>
+							<span> <input type="text" ng-model="item.dis_percentage" ng-change="calculate_discount_amt(item)" /> </span>
 							<span>[[item.net_amount]] </span>
 							<span><a href="" ng-click="remove_from_item_list(item)">X</a> </span>
 							 
