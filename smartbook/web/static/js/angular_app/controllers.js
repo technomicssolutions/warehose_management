@@ -1168,7 +1168,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         var net_discount = 0;
         for(i=0; i<$scope.sales.sales_items.length; i++){
            
-            net_discount = net_discount + parseFloat($scope.sales.sales_items[i].disc_given);
+            net_discount = net_discount + parseFloat($scope.sales.sales_items[i].dis_amt);
 
         }
         $scope.sales.net_discount = net_discount;
