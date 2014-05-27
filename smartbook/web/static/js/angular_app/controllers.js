@@ -104,8 +104,16 @@ function ExpenseController($scope, $element, $http, $timeout, $location) {
     {
         $scope.csrf_token = csrf_token;
         $scope.get_expense_head_list();
+        $scope.get_salesman();
         
     }
+    $scope.get_salesman = function() {
+        $http.get('/Salesman/list/').success(function(data)
+        {
+            $scope.salesmen = data.salesmen;
+            $scope.salesman_name = '';
+        })
+    }    
     $scope.get_expense_head_list = function() {
     	$http.get('/expenses/expense_head_list/').success(function(data)
         {
@@ -194,6 +202,7 @@ function ExpenseController($scope, $element, $http, $timeout, $location) {
                 'bank_name': $scope.bank_name,
                 'branch': $scope.branch,
                 'narration': $scope.narration,
+                'salesman': $scope.salesman_name,
                 "csrfmiddlewaretoken" : $scope.csrf_token
             }
             $http({

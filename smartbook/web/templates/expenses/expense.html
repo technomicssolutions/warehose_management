@@ -47,6 +47,18 @@
 					</div>
 					<div class="formrow">
 						<div class="formtext">
+							<label for="expense_head">Salesman :</label>
+						</div>
+						<div class="forminput">
+							<select name="salesman_name" ng-model="salesman_name" value="{{salesman_name}}">
+							 	<option value="" >Select Salesman</option>
+							 	<option ng-repeat="salesman in salesmen" value="[[salesman.salesman_name]]">[[salesman.salesman_name]]</option>
+							</select>	
+						</div>
+					</div>
+					
+					<div class="formrow">
+						<div class="formtext">
 							<label for="amount">Amount :</label>
 						</div>
 						<div class="forminput">

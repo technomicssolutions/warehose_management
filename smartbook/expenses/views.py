@@ -49,6 +49,9 @@ class Expenses(View):
             expense.cheque_date = datetime.strptime(post_dict['cheque_date'], '%d/%m/%Y')
             expense.bank_name = post_dict['bank_name']
             expense.branch = post_dict['branch']
+        if post_dict['salesman']:
+            salesman = User.objects.get(first_name=post_dict['salesman'])
+            expense.salesman = salesman
         expense.save()
         res = {
             'result': 'ok'

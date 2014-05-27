@@ -15,7 +15,7 @@ class ExpenseHead(models.Model):
 
 class  Expense(models.Model):
 	created_by = models.ForeignKey(User)
-
+	salesman = models.ForeignKey(User, null=True, blank=True, related_name='Salesman')
 	expense_head = models.ForeignKey(ExpenseHead, null=True, blank=True)
 	voucher_no = models.IntegerField('Voucher No', unique=True)
 	date = models.DateField('Date', null=True, blank=True)
