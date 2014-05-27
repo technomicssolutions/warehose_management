@@ -98,10 +98,10 @@ class SalesReports(View):
                 p.drawString(350, 900, 'Date Wise Sales Report')
                 p.setFontSize(13)
                 p.drawString(50, 875, "Date")
-                p.drawString(150, 875, "Invoice Number")
-                p.drawString(250, 875, "Item Name")
-                p.drawString(350, 875, "Quantity")
-                p.drawString(450, 875, "Discount")
+                p.drawString(110, 875, "Invoice Number")
+                p.drawString(210, 875, "Item Name")
+                p.drawString(420, 875, "Quantity")
+                p.drawString(490, 875, "Discount")
                 p.drawString(550, 875, "Selling Price")
                 p.drawString(650,875, "Average Cost Price")
                 p.drawString(800, 875, "Total")
@@ -115,7 +115,7 @@ class SalesReports(View):
                         round_off = round_off + sale.round_off
                         items = sale.salesitem_set.all()
                         for item in items:
-                            discount = item.discount_given                         
+                            discount = item.discount_amount                         
                             dates = item.sales.sales_invoice_date
                             invoice_no = item.sales.sales_invoice_number
                             qty = item.quantity_sold
@@ -149,11 +149,11 @@ class SalesReports(View):
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d/%m/%y'))
-                            p.drawString(150, y, str(invoice_no))
-                            p.drawString(250, y, item_name)
-                            p.drawString(350, y, str(qty))
-                            p.drawString(450, y, str(discount))
-                            p.drawString(550, y, str(selling_price))
+                            p.drawString(120, y, str(invoice_no))
+                            p.drawString(200, y, item_name)
+                            p.drawString(450, y, str(qty))
+                            p.drawString(500, y, str(discount))
+                            p.drawString(570, y, str(selling_price))
                             p.drawString(650,y,str(avg_cp))
                             p.drawString(800, y, str(total))
                             p.drawString(900, y, str(profit))
@@ -166,7 +166,7 @@ class SalesReports(View):
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
                 p.drawString(350, y, '')
-                p.drawString(450, y, str(total_discount))
+                p.drawString(500, y, str(total_discount))
                 p.drawString(550, y, '')
                 p.drawString(800, y, str(grant_total))
                 p.drawString(900, y, str(total_profit))
@@ -217,13 +217,13 @@ class SalesReports(View):
                 p.drawString(325, 900, 'Item Wise Sales Report')
                 p.setFontSize(13)
                 p.drawString(50, 875, "Item Code")
-                p.drawString(150, 875, "Item Name")
-                p.drawString(250, 875, "Total Quantity")
-                p.drawString(350, 875, "Discount")
-                p.drawString(450, 875, "Cost Price")
-                p.drawString(550, 875, "Selling Price")
-                p.drawString(650,875, "Total") 
-                p.drawString(750, 875, "Profit")     
+                p.drawString(120, 875, "Item Name")
+                p.drawString(350, 875, "Total Quantity")
+                p.drawString(450, 875, "Discount")
+                p.drawString(550, 875, "Cost Price")
+                p.drawString(650, 875, "Selling Price")
+                p.drawString(750,875, "Total") 
+                p.drawString(850, 875, "Profit")     
 
                 y = 850       
                 item = InventoryItem.objects.get(code=item_code)
@@ -235,7 +235,7 @@ class SalesReports(View):
                 if salesitems.count()>0:
 
                     for salesitem in salesitems:
-                        discount = salesitem.discount_given                         
+                        discount = salesitem.discount_amount                         
                         total_qty = salesitem.quantity_sold
                         item_name = salesitem.item.name
                         item_code = salesitem.item.code
@@ -268,13 +268,13 @@ class SalesReports(View):
                             y = 850
                             p.showPage()
                         p.drawString(50, y, str(item_code))
-                        p.drawString(150, y, item_name)
-                        p.drawString(250, y, str(total_qty))
-                        p.drawString(350, y, str(discount))
-                        p.drawString(450, y, str(avg_cp))
-                        p.drawString(550, y, str(selling_price))
-                        p.drawString(650,y, str(total)) 
-                        p.drawString(750, y, str(profit))
+                        p.drawString(120, y, item_name)
+                        p.drawString(400, y, str(total_qty))
+                        p.drawString(450, y, str(discount))
+                        p.drawString(550, y, str(avg_cp))
+                        p.drawString(650, y, str(selling_price))
+                        p.drawString(750,y, str(total)) 
+                        p.drawString(850, y, str(profit))
 
                 total_cp = math.ceil(total_cp*100)/100 
 
@@ -285,12 +285,12 @@ class SalesReports(View):
                 p.drawString(50, y, '')
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
-                p.drawString(350, y, str(total_discount))
-                p.drawString(450, y, str(total_cp))
-                p.drawString(550, y, str(total_sp))
+                p.drawString(450, y, str(total_discount))
+                p.drawString(550, y, str(total_cp))
+                p.drawString(650, y, str(total_sp))
 
-                p.drawString(650, y, str(grant_total))
-                p.drawString(750, y, str(total_profit)) 
+                p.drawString(750, y, str(grant_total))
+                p.drawString(850, y, str(total_profit)) 
 
                 p.showPage()
                 p.save()
@@ -339,10 +339,10 @@ class SalesReports(View):
                 p.drawString(350, 900, 'Customer Wise Sales Report')
                 p.setFontSize(13)
                 p.drawString(50, 875, "Date")
-                p.drawString(150, 875, "Invoice Number")
+                p.drawString(110, 875, "Invoice Number")
                 p.drawString(250, 875, "Item Name")
-                p.drawString(350, 875, "Quantity")
-                p.drawString(450, 875, "Discount")
+                p.drawString(430, 875, "Quantity")
+                p.drawString(490, 875, "Discount")
                 p.drawString(550, 875, "Average Cost Price")
                 p.drawString(700, 875, "Selling Price")
                 p.drawString(800, 875, "Total") 
@@ -361,7 +361,7 @@ class SalesReports(View):
                             invoice_no = item.sales.sales_invoice_number
                             item_name = item.item.name
                             qty = item.quantity_sold
-                            discount = item.discount_given
+                            discount = item.discount_amount
                             selling_price = 0                            
                             if item.item.selling_price:                        
                             	selling_price = item.item.selling_price
@@ -391,10 +391,10 @@ class SalesReports(View):
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
-                            p.drawString(150, y, str(invoice_no))
-                            p.drawString(250, y, item_name)
-                            p.drawString(350, y, str(qty))
-                            p.drawString(450, y, str(discount))
+                            p.drawString(140, y, str(invoice_no))
+                            p.drawString(200, y, item_name)
+                            p.drawString(450, y, str(qty))
+                            p.drawString(500, y, str(discount))
                             p.drawString(550, y, str(avg_cp))
                             p.drawString(700, y, str(selling_price))
                             p.drawString(800, y, str(total)) 
@@ -407,7 +407,7 @@ class SalesReports(View):
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
                 p.drawString(350, y, '')
-                p.drawString(450, y, str(total_discount))
+                p.drawString(500, y, str(total_discount))
                 p.drawString(700, y, str(total_sp))
                 p.drawString(800, y, str(grant_total)) 
                 p.drawString(900, y, str(total_profit))
@@ -460,12 +460,12 @@ class SalesReports(View):
 
                 p.drawString(425, 900, 'Salesman Wise Sales Report')
                 p.setFontSize(13)
-                p.drawString(50, 875, "Date")
-                p.drawString(150, 875, "Invoice Number")
-                p.drawString(250, 875, "Item Name")
-                p.drawString(350, 875, "Quantity")
-                p.drawString(450, 875, "Discount")
-                p.drawString(550,875, "Average Cost Price")
+                p.drawString(30, 875, "Date")
+                p.drawString(100, 875, "Invoice Number")
+                p.drawString(200, 875, "Item Name")
+                p.drawString(420, 875, "Quantity")
+                p.drawString(500, 875, "Discount")
+                p.drawString(570,875, "Average Cost Price")
                 p.drawString(700, 875, "Selling Price")
                 p.drawString(800, 875, "Total") 
                 p.drawString(900, 875, "Profit")
@@ -483,7 +483,7 @@ class SalesReports(View):
                             invoice_no = item.sales.sales_invoice_number
                             item_name = item.item.name
                             qty = item.quantity_sold
-                            discount = item.discount_given
+                            discount = item.discount_amount
                             selling_price = 0                            
                             if item.item.selling_price:                          
                             	selling_price = item.item.selling_price
@@ -510,12 +510,12 @@ class SalesReports(View):
                             if y <= 135:
                                 y = 850
                                 p.showPage()
-                            p.drawString(50, y, dates.strftime('%d-%m-%Y'))
-                            p.drawString(150, y, str(invoice_no))
-                            p.drawString(250, y, item_name)
-                            p.drawString(350, y, str(qty))
-                            p.drawString(450, y, str(discount))
-                            p.drawString(550, y, str(avg_cp))
+                            p.drawString(30, y, dates.strftime('%d-%m-%Y'))
+                            p.drawString(120, y, str(invoice_no))
+                            p.drawString(200, y, item_name)
+                            p.drawString(450, y, str(qty))
+                            p.drawString(510, y, str(discount))
+                            p.drawString(580, y, str(avg_cp))
                             p.drawString(700, y, str(selling_price))
                             p.drawString(800, y, str(total)) 
                             p.drawString(900, y, str(profit))
@@ -526,8 +526,8 @@ class SalesReports(View):
                 p.drawString(50, y, '')
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
-                p.drawString(350, y, '')
-                p.drawString(450, y, str(total_discount))
+                p.drawString(450, y, '')
+                p.drawString(510, y, str(total_discount))
                 p.drawString(700, y, str(total_sp))
                 p.drawString(800, y, str(grant_total)) 
                 p.drawString(900, y, str(total_profit))
@@ -581,13 +581,13 @@ class PurchaseReports(View):
             purchases = Purchase.objects.filter(purchase_invoice_date__gte=start_date, purchase_invoice_date__lte=end_date).order_by('purchase_invoice_date')
             p.setFontSize(13)
             p.drawString(50, 850, "Date")
-            p.drawString(150, 850, "Invoice No")
-            p.drawString(250, 850, "Vendor Invoice")
-            p.drawString(350, 850, "Item code")
-            p.drawString(450, 850, "Item name")
-            p.drawString(550, 850, "Unit Cost price")
-            p.drawString(650, 850, "Quantity")
-            p.drawString(750, 850, "Amount")
+            p.drawString(120, 850, "Invoice No")
+            p.drawString(200, 850, "Vendor Invoice")
+            p.drawString(300, 850, "Item code")
+            p.drawString(380, 850, "Item name")
+            p.drawString(650, 850, "Unit Cost price")
+            p.drawString(750, 850, "Quantity")
+            p.drawString(850, 850, "Amount")
 
             y = 820
             p.setFontSize(12)
@@ -600,20 +600,20 @@ class PurchaseReports(View):
                         y = 850
                         p.showPage()
                     p.drawString(50, y, purchase_item.purchase.purchase_invoice_date.strftime('%d/%m/%y'))
-                    p.drawString(150, y, str(purchase_item.purchase.purchase_invoice_number))
-                    p.drawString(250, y, str(purchase_item.purchase.vendor_invoice_number))
-                    p.drawString(350, y, purchase_item.item.code)
-                    p.drawString(450, y, purchase_item.item.name)
-                    p.drawString(550, y, str(purchase_item.cost_price))
-                    p.drawString(650, y, str(purchase_item.quantity_purchased))
-                    p.drawString(750, y, str(purchase_item.net_amount))
+                    p.drawString(120, y, str(purchase_item.purchase.purchase_invoice_number))
+                    p.drawString(200, y, str(purchase_item.purchase.vendor_invoice_number))
+                    p.drawString(300, y, purchase_item.item.code)
+                    p.drawString(380, y, purchase_item.item.name)
+                    p.drawString(650, y, str(purchase_item.cost_price))
+                    p.drawString(750, y, str(purchase_item.quantity_purchased))
+                    p.drawString(850, y, str(purchase_item.net_amount))
                     total_amount = total_amount + purchase_item.net_amount
             y = y - 30
             if y <= 270:
                 y = 850
                 p.showPage()
-            p.drawString(650, y, 'Total:')
-            p.drawString(750, y, str(total_amount))
+            p.drawString(750, y, 'Total:')
+            p.drawString(850, y, str(total_amount))
             p.showPage()
             p.save()
         elif report_type == 'vendor':
@@ -698,10 +698,10 @@ class SalesReturnReport(View):
             p.drawString(150, 875, "Invoice Number")
             p.drawString(250, 875, "Item Code")
             p.drawString(350, 875, "Item Name")
-            p.drawString(450, 875, "Quantity")
-            p.drawString(550, 875, "Unit Price")
+            p.drawString(650, 875, "Quantity")
+            p.drawString(750, 875, "Unit Price")
             # p.drawString(650, 875, "Selling Price")
-            p.drawString(650, 875, "Total")
+            p.drawString(850, 875, "Total")
                 
 
             y = 850       
@@ -736,10 +736,10 @@ class SalesReturnReport(View):
                             p.drawString(150, y, str(invoice_no))
                             p.drawString(250, y, str(item_code))
                             p.drawString(350, y, item_name)
-                            p.drawString(450, y, str(qty))
-                            p.drawString(550, y, str(unitprice))
+                            p.drawString(650, y, str(qty))
+                            p.drawString(750, y, str(unitprice))
                             # p.drawString(650, y, str(selling_price))
-                            p.drawString(650, y, str(total))
+                            p.drawString(850, y, str(total))
             
             y= y - 30
             if y <= 270:
@@ -749,9 +749,9 @@ class SalesReturnReport(View):
             p.drawString(150, y, '')
             p.drawString(250, y, '')
             p.drawString(350, y, '')
-            p.drawString(450, y, '')
-            p.drawString(550, y, '')
-            p.drawString(650, y, str(grant_total))
+            p.drawString(650, y, '')
+            p.drawString(750, y, '')
+            p.drawString(850, y, str(grant_total))
 
             p.showPage()
             p.save()
@@ -1222,8 +1222,8 @@ class StockReports(View):
 
         y = 850
         p.drawString(80, y, 'Item Code')
-        p.drawString(160, y, 'Item Name')
-        p.drawString(280, y, 'Barcode')
+        p.drawString(150, y, 'Item Name')
+        p.drawString(300, y, 'Barcode')
         p.drawString(360, y, 'Brand Name')    
         p.drawString(480, y, 'Stock')
         p.drawString(540, y, 'UOM')
@@ -1236,11 +1236,11 @@ class StockReports(View):
         if len(stocks) > 0:
             for stock in stocks:
                 p.drawString(80, y, stock.code)
-                p.drawString(160, y, stock.name)
-                p.drawString(280, y, stock.barcode)
-                p.drawString(360, y, stock.brand.brand)                
+                p.drawString(150, y, stock.name)
+                p.drawString(300, y, str(stock.barcode))
+                p.drawString(360, y, str(stock.brand.brand) if stock.brand else '')                
                 p.drawString(480, y, str(stock.quantity))
-                p.drawString(540, y, stock.uom.uom)
+                p.drawString(540, y, str(stock.uom.uom) if stock.uom else '')
                 p.drawString(600, y, str(stock.unit_price))
                 p.drawString(680, y, str(stock.tax))
                 p.drawString(760, y, str(stock.discount_permit_percentage))
@@ -1392,7 +1392,7 @@ class PendingCustomerReport(View):
             for customer_account in customer_accounts:
                 
                 p.drawString(200, y, customer_account.customer.customer_name)
-                p.drawString(320, y, customer_account.invoice_no.invoice_no)
+                p.drawString(320, y, customer_account.invoice_no.sales_invoice_number)
                 p.drawString(420, y, str(customer_account.total_amount))
                 p.drawString(550, y, str(customer_account.paid))
                 p.drawString(650, y, str(customer_account.balance))
