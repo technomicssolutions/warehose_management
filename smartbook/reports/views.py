@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from sales.models import *
-from expenses.models import Expense
+from expenses.models import Expense, ExpenseHead
 from inventory.models import *
 from purchase.models import PurchaseItem
 from django.core.files import File
@@ -1047,15 +1047,33 @@ class ExpenseReport(View):
             end_date = request.GET['end_date']
             start_date = datetime.strptime(start_date, '%d/%m/%Y')
             end_date = datetime.strptime(end_date, '%d/%m/%Y')
-            p.drawString(370, 900, 'Date Wise Expense Report')
+            p.drawString(410, 900, 'Expense Report')
 
             p.drawString(200, 870, "Date")
             p.drawString(300, 870, "Particulars")
-            p.drawString(550, 870, "Narration")
-            p.drawString(650, 870, "Amount") 
+            p.drawString(450, 870, "Narration")
+            p.drawString(650, 870, "Salesman") 
+            p.drawString(750, 870, "Amount") 
             y = 850
-
-            expenses = Expense.objects.filter(date__gte=start_date, date__lte=end_date).order_by('date')
+            salesman_name = request.GET['salesman_name']
+            if salesman_name != 'select':
+                salesman = User.objects.get(first_name=salesman_name)
+            else:
+                salesman = None
+            head_name = request.GET['expense_head']
+            if head_name != 'select':
+                expense_head = ExpenseHead.objects.get(expense_head=head_name)
+            else:
+                expense_head = None
+            
+            if salesman and expense_head:
+                expenses = Expense.objects.filter(date__gte=start_date, date__lte=end_date, salesman=salesman,expense_head=expense_head).order_by('date')
+            elif salesman and not expense_head:
+                expenses = Expense.objects.filter(date__gte=start_date, date__lte=end_date, salesman=salesman).order_by('date')
+            elif expense_head and not salesman:
+                expenses = Expense.objects.filter(date__gte=start_date, date__lte=end_date, expense_head=expense_head).order_by('date')
+            else:
+                expenses = Expense.objects.filter(date__gte=start_date, date__lte=end_date).order_by('date')
             if len(expenses) > 0: 
                 for expense in expenses:
                     
@@ -1066,16 +1084,17 @@ class ExpenseReport(View):
 
                     p.drawString(200, y, expense.date.strftime('%d/%m/%Y'))
                     p.drawString(300, y, expense.expense_head.expense_head)
-                    p.drawString(550, y, expense.narration)
-                    p.drawString(650, y, str(expense.amount))
+                    p.drawString(450, y, expense.narration)
+                    p.drawString(650, y, expense.salesman.first_name if expense.salesman else '')
+                    p.drawString(750, y, str(expense.amount))
 
                     total_amount = total_amount + expense.amount
             y = y - 30
 
             p.drawString(50, y, '')
             p.drawString(150, y, '')
-            p.drawString(550, y, 'Total: ')
-            p.drawString(650, y, str(total_amount))
+            p.drawString(650, y, 'Total: ')
+            p.drawString(750, y, str(total_amount))
 
             p.showPage()
             p.save()
