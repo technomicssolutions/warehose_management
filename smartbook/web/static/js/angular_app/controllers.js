@@ -1731,7 +1731,15 @@ function ExpenseReportController($scope, $http, $element, $timeout, $location){
             useFadeInOut: !Browser.ie,
             format:'%d/%m/%Y', 
         });
+        $scope.get_salesman();
     }
+    $scope.get_salesman = function() {
+        $http.get('/Salesman/list/').success(function(data)
+        {
+            $scope.salesmen = data.salesmen;
+            $scope.salesman_name = '';
+        })
+    } 
     
 }
 
