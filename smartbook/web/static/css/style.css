@@ -894,3 +894,8 @@ a {
 	margin-left: 94px !important;
 }
 
+#submit_expense_report {
+	padding-top: 10px;
+	float: right;
+	width: 50% !important;
+}

@@ -27,9 +27,10 @@ from purchase.models import Purchase, VendorAccount, PurchaseReturn
 
 from reportlab.lib.units import cm
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.platypus import Frame, Image, Table, TableStyle
+from reportlab.platypus import Frame, Image, Table, TableStyle, Paragraph
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import ParagraphStyle
 
 try:
     from cStringIO import StringIO
@@ -42,6 +43,32 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 
+
+def header(canvas):
+
+        style = [
+            ('FONTSIZE', (0,0), (-1, -1), 25),
+            ('FONTNAME',(0,0),(-1,-1),'Helvetica-Bold') 
+        ]
+        para_style = ParagraphStyle('fancy')
+        para_style.fontSize = 35
+        para_style.fontName = 'Helvetica-Bold'
+        para = Paragraph('Fine Nuts', para_style)
+
+        data =[['', '', para , '']]
+        
+        table = Table(data, colWidths=[30, 300, 400, 100], rowHeights=50, style=style)
+        table.wrapOn(canvas, 200, 400)
+        table.drawOn(canvas,50, 1000) 
+        canvas.drawString(50, 1000, 'FINE NUTS TRADING LLC')
+        canvas.drawString(50, 985, 'P.O.Box: 68125, Dubai, U.A.E')
+        canvas.drawString(50, 970, 'Email: support@finenutsintl.com')
+        canvas.drawString(50, 955, 'Web: www.finenutsintl.com')
+        canvas.drawString(50, 940, 'Tel.:04 4508879, Fax: 04 4281403')
+        canvas.line(50,925,950,925)
+
+        return canvas
+
 class Reports(View):
 	def get(self, request, *args, **kwarg):
 		return render(request, 'reports/report.html', {})
@@ -50,7 +77,7 @@ class SalesReports(View):
     def get(self, request, *args, **kwarg):        
         status_code = 200
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
         p.setFontSize(15)
 
         round_off = 0
@@ -94,6 +121,7 @@ class SalesReports(View):
 
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
+                p = header(p)
 
                 p.drawString(350, 900, 'Date Wise Sales Report')
                 p.setFontSize(13)
@@ -146,6 +174,7 @@ class SalesReports(View):
 
                             y = y - 30
                             if y <= 135:
+                                p = header(p)
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d/%m/%y'))
@@ -160,6 +189,7 @@ class SalesReports(View):
                             
                 y = y - 30
                 if y <= 135:
+                    p = header(p)
                     y = 850
                     p.showPage()
                 p.drawString(50, y, 'Round Off : '+str(round_off))
@@ -213,6 +243,7 @@ class SalesReports(View):
 
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
+                p = header(p)
 
                 p.drawString(325, 900, 'Item Wise Sales Report')
                 p.setFontSize(13)
@@ -265,6 +296,7 @@ class SalesReports(View):
 
                         y = y - 30
                         if y <= 135:
+                            p = header(p)
                             y = 850
                             p.showPage()
                         p.drawString(50, y, str(item_code))
@@ -280,6 +312,7 @@ class SalesReports(View):
 
                 y = y - 30
                 if y <= 135:
+                    p = header(p)
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -335,6 +368,7 @@ class SalesReports(View):
 
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
+                p = header(p)
 
                 p.drawString(350, 900, 'Customer Wise Sales Report')
                 p.setFontSize(13)
@@ -388,6 +422,7 @@ class SalesReports(View):
 
                             y = y - 30
                             if y <= 135:
+                                p = header(p)
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
@@ -401,6 +436,7 @@ class SalesReports(View):
                             p.drawString(900, y, str(profit))
                 y = y - 30
                 if y <= 135:
+                    p = header(p)
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -457,6 +493,7 @@ class SalesReports(View):
 
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
+                p = header(p)
 
                 p.drawString(425, 900, 'Salesman Wise Sales Report')
                 p.setFontSize(13)
@@ -508,6 +545,7 @@ class SalesReports(View):
                             avg_cp = math.ceil(avg_cp*100)/100
                             y = y - 30
                             if y <= 135:
+                                p = header(p)
                                 y = 850
                                 p.showPage()
                             p.drawString(30, y, dates.strftime('%d-%m-%Y'))
@@ -521,6 +559,7 @@ class SalesReports(View):
                             p.drawString(900, y, str(profit))
                 y = y - 30
                 if y <= 135:
+                    p = header(p)
                     y = 850
                     p.showPage()
                 p.drawString(50, y, '')
@@ -548,7 +587,7 @@ class PurchaseReports(View):
         status_code = 200
         total_amount = 0
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
         p.setFontSize(15)
         report_type = request.GET.get('report_type', '')
 
@@ -557,7 +596,9 @@ class PurchaseReports(View):
                 'report_type' : 'date',
                 })
 
-        if report_type == 'date':               
+        if report_type == 'date':   
+            p = header(p)
+            
             p.drawCentredString(400, 900, 'Purchase Report Date wise')
             start_date = request.GET['start_date']
             end_date = request.GET['end_date']
@@ -610,6 +651,7 @@ class PurchaseReports(View):
                     total_amount = total_amount + purchase_item.net_amount
             y = y - 30
             if y <= 270:
+                p = header(p)
                 y = 850
                 p.showPage()
             p.drawString(750, y, 'Total:')
@@ -629,7 +671,8 @@ class PurchaseReports(View):
 
             vendor = Vendor.objects.get(user__first_name = vendor_name)
             purchases = Purchase.objects.filter(vendor = vendor)
-            
+            p = header(p)
+
             p.drawCentredString(400, 900, 'Purchase Report Vendor wise')
             p.setFontSize(13)
             p.drawString(50, 875, "Date")
@@ -643,6 +686,7 @@ class PurchaseReports(View):
                             
                 y = y - 30
                 if y <= 270:
+                    p = header(p)
                     y = 850
                     p.showPage()
                 p.drawString(50, y, purchase.purchase_invoice_date.strftime('%d/%m/%y'))
@@ -652,6 +696,7 @@ class PurchaseReports(View):
                 total_amount = total_amount + purchase.vendor_amount
             y = y - 30
             if y <= 270:
+                p = header(p)
                 y = 850
                 p.showPage()
             p.drawString(250, y, 'Total:')
@@ -666,7 +711,7 @@ class SalesReturnReport(View):
         
         status_code = 200
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
         if start_date is None:
@@ -690,6 +735,7 @@ class SalesReturnReport(View):
             end = request.GET['end_date']                    
             start_date = datetime.strptime(start, '%d/%m/%Y')
             end_date = datetime.strptime(end, '%d/%m/%Y')
+            p = header(p)
 
             p.drawString(370, 900, 'Sales Return Reports')
     
@@ -729,6 +775,7 @@ class SalesReturnReport(View):
 
                             y = y - 30
                             if y <= 270:
+                                p = header(p)
                                 y = 850
                                 p.showPage()
 
@@ -743,6 +790,7 @@ class SalesReturnReport(View):
             
             y= y - 30
             if y <= 270:
+                p = header(p)
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -763,7 +811,7 @@ class DailyReport(View):
 
         status_code = 200
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
         if start_date is None:
@@ -788,6 +836,9 @@ class DailyReport(View):
             end = request.GET['end_date']                    
             start_date = datetime.strptime(start, '%d/%m/%Y')
             end_date = datetime.strptime(end, '%d/%m/%Y')
+            # header 
+            p = header(p)
+
 
             p.drawString(370, 900, 'Daily Reports')
 
@@ -808,6 +859,7 @@ class DailyReport(View):
                 for sale in sales:
                     y = y - 30
                     if y <= 135:
+                        p = header(p)
                         y = 850
                         p.showPage()
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
@@ -825,6 +877,7 @@ class DailyReport(View):
                     y = y - 30
 
                     if y <= 135:
+                        p = header(p)
                         y = 850
                         p.showPage()
                     
@@ -839,6 +892,7 @@ class DailyReport(View):
 
             y = y-30
             if y <= 135:
+                p = header(p)
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -848,6 +902,7 @@ class DailyReport(View):
 
             y = y-30
             if y <= 135:
+                p = header(p)
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -858,6 +913,7 @@ class DailyReport(View):
             
             y = y-30
             if y <= 135:
+                p = header(p)
                 y = 850
                 p.showPage()
             p.drawString(50, y, '')
@@ -877,7 +933,7 @@ class PurchaseReturnReport(View):
         ctx_purchase_retrun_report = []
         status_code = 200
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
         p.setFontSize(15)
         report_type = request.GET.get('report_type', '')
 
@@ -907,6 +963,7 @@ class PurchaseReturnReport(View):
                 })
             start_date = datetime.strptime(start_date, '%d/%m/%Y')
             end_date = datetime.strptime(end_date, '%d/%m/%Y')
+            p = header(p)
 
             p.drawString(200, 900, 'PurchaseReturn Report Date wise Report')
             
@@ -934,6 +991,7 @@ class PurchaseReturnReport(View):
 
                             y = y - 30
                             if y <= 270:
+                                p = header(p)
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, purchasereturn_item.purchase_return.date.strftime('%d/%m/%Y'))
@@ -961,7 +1019,8 @@ class PurchaseReturnReport(View):
                     'msg' : 'Please Enter Vendor Name',                    
                     'report_type' : 'vendor',
                     })         
-            
+            p = header(p)
+
             p.drawString(200, 900, 'PurchaseReturn Report Vendor wise Report')
 
             p.setFontSize(13)
@@ -987,6 +1046,7 @@ class PurchaseReturnReport(View):
 
                             y = y - 30
                             if y <= 270:
+                                p = header(p)
                                 y = 850
                                 p.showPage()
                             p.drawString(50, y, purchasereturn_item.purchase_return.date.strftime('%d/%m/%Y'))
@@ -1018,7 +1078,7 @@ class ExpenseReport(View):
 
         status_code = 200
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
 
@@ -1047,6 +1107,8 @@ class ExpenseReport(View):
             end_date = request.GET['end_date']
             start_date = datetime.strptime(start_date, '%d/%m/%Y')
             end_date = datetime.strptime(end_date, '%d/%m/%Y')
+            p = header(p)
+
             p.drawString(410, 900, 'Expense Report')
 
             p.drawString(200, 870, "Date")
@@ -1079,6 +1141,7 @@ class ExpenseReport(View):
                     
                     y = y - 30
                     if y <= 270:
+                        p = header(p)
                         y = 850
                         p.showPage()
 
@@ -1107,7 +1170,7 @@ class VendorAccountsReport(View):
 
         status_code = 200
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
         report_type = request.GET.get('report_type', '')
 
         if not report_type:
@@ -1141,6 +1204,7 @@ class VendorAccountsReport(View):
             else:
                 start_date = datetime.strptime(start_date, '%d/%m/%Y')
                 end_date = datetime.strptime(end_date, '%d/%m/%Y')
+                p = header(p)
 
                 p.drawString(350, 900, 'Date Wise Vendor Accounts')
 
@@ -1163,6 +1227,7 @@ class VendorAccountsReport(View):
 
                         y = y - 30
                         if y <= 270:
+                            p = header(p)
                             y = 850
                             p.showPage()
 
@@ -1191,6 +1256,7 @@ class VendorAccountsReport(View):
                 }
                 return render(request, 'reports/vendor_accounts_report.html', ctx)
             else:               
+                p = header(p)
 
                 p.drawString(350, 900, 'Vendor Wise Vendor Accounts')
 
@@ -1213,6 +1279,7 @@ class VendorAccountsReport(View):
 
                         y = y-30
                         if y <= 270:
+                            p = header(p)
                             y = 850
                             p.showPage()
 
@@ -1232,11 +1299,12 @@ class VendorAccountsReport(View):
 class StockReports(View):
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
 
         status_code = 200
         stocks = InventoryItem.objects.all()
-        
+        p = header(p)
+
         p.drawString(400, 900, 'Stock Report')
 
         y = 850
@@ -1266,6 +1334,7 @@ class StockReports(View):
                 p.drawString(840, y, str(stock.quantity * stock.unit_price))
                 y = y - 30
                 if y <= 270:
+                    p = header(p)
                     y = 850
                     p.showPage()
 
@@ -1278,7 +1347,7 @@ class SalesmanStockReports(View):
     
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
 
         status_code = 200
         salesman_name = request.GET.get('salesman_name')
@@ -1294,7 +1363,8 @@ class SalesmanStockReports(View):
             salesman = User.objects.get(first_name=salesman_name)
             delivery_notes = DeliveryNote.objects.filter(salesman=salesman)
         
-        
+        p = header(p)
+
         p.drawString(400, 900, 'Salesman Stock Report - ' + salesman_name)
 
         y = 850
@@ -1318,6 +1388,7 @@ class SalesmanStockReports(View):
                         p.drawString(790, y, str(int(d_item.total_quantity) - int(d_item.quantity_sold)))
                         y = y - 30
                         if y <= 270:
+                            p = header(p)
                             y = 850
                             p.showPage()
 
@@ -1330,7 +1401,7 @@ class PendingSalesmanReport(View):
     def get(self, request, *args, **kwargs):
 
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
 
         status_code = 200
         salesman_name = request.GET.get('salesman_name')
@@ -1345,7 +1416,8 @@ class PendingSalesmanReport(View):
                 return render(request, 'reports/pending_salesman_stock_report.html', context) 
             salesman = User.objects.get(first_name=salesman_name)
             delivery_notes = DeliveryNote.objects.filter(salesman=salesman, is_pending=True)
-        
+        p = header(p)
+
         p.drawString(400, 900, 'Pending Delivery Note Report - ' + salesman_name)
 
         y = 850
@@ -1369,6 +1441,7 @@ class PendingSalesmanReport(View):
                         p.drawString(790, y, str(int(d_item.total_quantity) - int(d_item.quantity_sold)))
                         y = y - 30
                         if y <= 270:
+                            p = header(p)
                             y = 850
                             p.showPage()
 
@@ -1381,7 +1454,7 @@ class PendingCustomerReport(View):
     def get(self, request, *args, **kwargs):
 
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
 
         status_code = 200
         customer_name = request.GET.get('customer_name')
@@ -1399,7 +1472,8 @@ class PendingCustomerReport(View):
             else:
                 customer = Customer.objects.get(customer_name=customer_name)
                 customer_accounts = CustomerAccount.objects.filter(customer=customer, is_complted=False)
-            
+        p = header(p)
+
         p.drawString(400, 900, 'Pending Customer Report - ' + customer_name)
 
         y = 850
@@ -1423,6 +1497,7 @@ class PendingCustomerReport(View):
                             p.drawString(650, y, str(customer_account.balance))
                             y = y - 30
                             if y <= 270:
+                                p = header(p)
                                 y = 850
                                 p.showPage()
         else:
@@ -1436,6 +1511,7 @@ class PendingCustomerReport(View):
                     p.drawString(650, y, str(customer_account.balance))
                     y = y - 30
                     if y <= 270:
+                        p = header(p)
                         y = 850
                         p.showPage()
 
@@ -1448,7 +1524,7 @@ class CompletedDNReport(View):
     def get(self, request, *args, **kwargs):
 
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
 
         status_code = 200
         start_date = request.GET.get('start_date')
@@ -1478,6 +1554,8 @@ class CompletedDNReport(View):
             delivery_notes = DeliveryNote.objects.filter(is_pending=False, date__gte=start_date, date__lte=end_date).order_by('date')
             
             report_name = 'Completed DN Report ( '+ start +' - '+ end +')'
+            p = header(p)
+
             p.drawString(350, 900, report_name )
             y = 850
             p.drawString(200, y, 'Date')
@@ -1494,6 +1572,7 @@ class CompletedDNReport(View):
                     p.drawString(550, y, str(delivery_note.net_total))
                     y = y - 30
                     if y <= 270:
+                        p = header(p)
                         y = 850
                         p.showPage()
 
@@ -1507,7 +1586,7 @@ class VendorReport(View):
     def get(self, request, *args, **kwargs):
 
         response = HttpResponse(content_type='application/pdf')
-        p = canvas.Canvas(response, pagesize=(1000, 1000))
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
 
         status_code = 200
         vendor_name = request.GET.get('vendor_name')
@@ -1525,7 +1604,8 @@ class VendorReport(View):
             else:
                 vendor = Vendor.objects.get(user__first_name=vendor_name)
                 vendor_accounts = VendorAccount.objects.filter(vendor=vendor)
-        
+        p = header(p)
+
         p.drawString(400, 900, 'Vendor Report - ' + vendor_name)
 
         y = 850
@@ -1548,6 +1628,7 @@ class VendorReport(View):
                     p.drawString(650, y, str(vendor_account.payment_mode))
                     y = y - 30
                     if y <= 270:
+                        p = header(p)
                         y = 850
                         p.showPage()
         else:
@@ -1565,6 +1646,7 @@ class VendorReport(View):
                     p.drawString(550, y, str(vendor_account.payment_mode))
                     y = y - 30
                     if y <= 270:
+                        p = header(p)
                         y = 850
                         p.showPage()
 
