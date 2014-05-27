@@ -878,7 +878,7 @@ class DeliveryNoteDetails(View):
                         'tax': delivery_note_item.item.tax if delivery_note_item.item.tax else '',
                         'uom': delivery_note_item.item.uom.uom if delivery_note_item.item.uom else '',
                         'current_stock': delivery_note_item.total_quantity if delivery_note_item.item else 0 ,
-                        'selling_price': delivery_note_item.item.selling_price if delivery_note_item.item else 0 ,
+                        'selling_price': delivery_note_item.selling_price if delivery_note_item.selling_price else delivery_note_item.item.selling_price ,
                         'discount_permit': delivery_note_item.item.discount_permit_percentage if delivery_note_item.item else 0,
                         'net_amount': delivery_note_item.net_amount,
                         'discount_given': delivery_note_item.discount,
@@ -1407,6 +1407,7 @@ class DirectDeliveryNote(View):
                 item.save()
                 delivery_note_item_obj.net_amount = float(delivery_note_item['net_amount'])
                 delivery_note_item_obj.total_quantity = int(delivery_note_item['qty_sold'])
+                delivery_note_item_obj.selling_price = float(delivery_note_item['unit_price'])
                 delivery_note_item_obj.save()
 
             res = {

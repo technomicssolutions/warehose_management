@@ -90,6 +90,7 @@ class DeliveryNoteItem(models.Model):
     discount = models.DecimalField('Total Discount', max_digits=14, decimal_places=2, default=0)
     total_quantity = models.IntegerField('Total Quantity', default=0)
     is_completed = models.BooleanField('Items sold completely', default=False)
+    selling_price = models.DecimalField('Selling Price', max_digits=14, decimal_places=2, default=0) 
 
     def __unicode__(self):
 
