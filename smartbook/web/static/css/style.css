@@ -491,10 +491,12 @@ form {
 }
 
 .return_items {
-	width: 89% !important;
+	/*width: 89% !important;*/
+	width: 99% !important;
 }
 .return_items span {
-	width: 9% !important;
+	/*width: 9% !important;*/
+	width: 10% !important;
 }
 
 /*sales module */
@@ -874,4 +876,8 @@ a {
 #vendor_accounts #button_alignment {
 	float: right;
 	margin-top: 35px;
+}
+
+#return_entry .item_list { 
+	border: 1px solid #ADD8E6;
 }

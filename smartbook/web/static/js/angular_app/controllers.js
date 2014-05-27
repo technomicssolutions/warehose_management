@@ -596,7 +596,7 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
             item.permit_disc_percent = 0;
         }
         if((item.permit_disc_percent != '' || item.permit_disc_percent != 0) && (item.selling_price != '' || item.selling_price != 0)) {
-            item.permit_disc_amt = (parseFloat(item.selling_price)*parseFloat(item.permit_disc_percent))/100;
+            item.permit_disc_amt = ((parseFloat(item.selling_price)*parseFloat(item.permit_disc_percent))/100).toFixed(2);
         }
     }
 
@@ -611,7 +611,7 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
             item.permit_disc_percent = 0;
         }
         if((item.permit_disc_amt != '' || item.permit_disc_amt != '') && (item.selling_price != '' || item.selling_price != 0)) {
-            item.permit_disc_percent = (parseFloat(item.permit_disc_amt)/parseFloat(item.selling_price))*100;
+            item.permit_disc_percent = ((parseFloat(item.permit_disc_amt)/parseFloat(item.selling_price))*100).toFixed(2);
         }
         console.log( item.permit_disc_percent);
     }
