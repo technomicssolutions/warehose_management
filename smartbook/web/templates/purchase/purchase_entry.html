@@ -242,7 +242,15 @@
 							<label for="discount">Discount</label>
 						</div>
 						<div class="forminput">
-							<input type="text" name="discount" ng-model="purchase.discount" ng-change="calculate_grant_total()" />
+							<input type="text" name="discount" ng-model="purchase.discount" ng-change="calculate_discount_percentage()" />
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="discount">Discount Percentage</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="discount_percentage" ng-model="purchase.discount_percentage" ng-change="calculate_discount_amount()"/>
 						</div>
 					</div>
 					<div class="formrow_purchase">

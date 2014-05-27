@@ -961,6 +961,11 @@ class QuotationDeliverynoteSales(View):
         if sales_dict['payment_mode'] == 'cheque':
             sales.bank_name = sales_dict['bank_name']
         sales.save()
+        if sales_dict['payment_mode'] == 'credit':
+            customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales )
+            if created:
+                customer_account.total_amount = sales_dict['grant_total']
+                customer_account.save()
         sales_items = sales_dict['sales_items']
         for sales_item in sales_items:
            
@@ -981,6 +986,7 @@ class QuotationDeliverynoteSales(View):
             delivery_note.processed = True
             delivery_note.save()
             sales.delivery_note = delivery_note
+            sales.save()
                     
         res = {
             'result': 'Ok',
@@ -1166,7 +1172,7 @@ class InvoiceDetails(View):
 
 
         invoice_no = request.GET.get('invoice_no', '')
-        sales_invoice_details = Sales.objects.filter(sales_invoice_number__istartswith=invoice_no, is_processed=False)
+        sales_invoice_details = Sales.objects.filter(sales_invoice_number__istartswith=invoice_no, is_processed=False, payment_mode='credit')
         invoices = Sales.objects.filter(sales_invoice_number__istartswith=invoice_no)
         ctx_invoice_details = []
         ctx_sales_invoices = []

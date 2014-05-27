@@ -250,6 +250,7 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         'bank_name': '',
         'cheque_no': '',
         'cheque_date': '',
+        'discount_percentage': 0,
     }
     $scope.purchase.vendor_name = 'select';
     $scope.purchase.transport = 'select';
@@ -640,7 +641,27 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         }
         $scope.purchase.purchase_expense = purchase_expense;
     }
+    $scope.calculate_discount_percentage = function() {
 
+        if ($scope.purchase.discount == '' || $scope.purchase.discount != Number($scope.purchase.discount)) {
+            $scope.purchase.discount_percentage = 0;
+        }
+        if ($scope.purchase.net_total == '' || $scope.purchase.net_total != Number($scope.purchase.net_total)) {
+            $scope.purchase.discount_percentage = 0;
+        }
+        $scope.purchase.discount_percentage = (parseFloat($scope.purchase.discount)/parseFloat($scope.purchase.net_total))*100;
+        $scope.calculate_grant_total();
+    }
+    $scope.calculate_discount_amount = function() {
+        if ($scope.purchase.discount_percentage == '' || $scope.purchase.discount_percentage != Number($scope.purchase.discount_percentage)) {
+            $scope.purchase.discount = 0;
+        }
+        if ($scope.purchase.net_total == '' || $scope.purchase.net_total != Number($scope.purchase.net_total)) {
+            $scope.purchase.discount = 0;
+        }
+        $scope.purchase.discount = (parseFloat($scope.purchase.discount_percentage) * parseFloat($scope.purchase.net_total))/100;
+        $scope.calculate_grant_total();
+    }
     $scope.calculate_grant_total = function(){
         $scope.purchase.grant_total = $scope.purchase.net_total - $scope.purchase.discount;
     }

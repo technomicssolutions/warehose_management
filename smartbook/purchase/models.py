@@ -28,6 +28,7 @@ class Purchase(models.Model):
     cheque_date = models.DateField('Cheque Date', null=True, blank=True)
     transportation_company = models.ForeignKey(TransportationCompany, null=True, blank=True)
     discount = models.DecimalField('Discount',max_digits=14, decimal_places=3, default=0)
+    discount_percentage = models.DecimalField('Discount Percentage',max_digits=14, decimal_places=3, default=0)
     net_total = models.DecimalField('Net Total',max_digits=14, decimal_places=3, default=0)
     vendor_amount = models.DecimalField('Vendor Amount',max_digits=14, decimal_places=3, default=0)
     grant_total = models.DecimalField('Grant Total', max_digits=14, decimal_places=3, default=0)

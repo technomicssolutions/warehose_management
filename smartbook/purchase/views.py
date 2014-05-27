@@ -136,6 +136,10 @@ class PurchaseEntry(View):
             purchase.discount = purchase_dict['discount']
         else:
             purchase.discount = 0
+        if purchase_dict['discount_percentage']:
+            purchase.discount_percentage = purchase_dict['discount_percentage']
+        else:
+            purchase.discount_percentage = 0
         purchase.net_total = purchase_dict['net_total']
         purchase.purchase_expense = purchase_dict['purchase_expense']
         purchase.grant_total = purchase_dict['grant_total']
