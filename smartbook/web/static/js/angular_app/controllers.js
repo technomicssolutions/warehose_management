@@ -2980,7 +2980,7 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             return false;  
         }
 
-        if($scope.receiptvoucher.payment_mode == 'cash') {
+        if($scope.receiptvoucher.payment_mode == 'cash' || $scope.receiptvoucher.payment_mode == 'credit') {
             $scope.receiptvoucher.bank_name = '';
             $scope.receiptvoucher.cheque_no = '';
             $scope.receiptvoucher.cheque_date = '';

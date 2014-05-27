@@ -13,6 +13,7 @@ from web.models import Customer, UserProfile
 PAYMENT_MODE = (
     ('cash', 'Cash'),
     ('cheque', 'Cheque'),
+    ('credit', 'Credit'),
 )
 
 class Quotation(models.Model):
