@@ -1160,6 +1160,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         console.log(net_total);
         $scope.sales.net_total = net_total;
         $scope.calculate_grant_total_sale();
+        $scope.calculate_net_discount_sale();
         
     }
     $scope.calculate_net_discount_sale = function(){
@@ -2145,7 +2146,7 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
         } else if ($scope.sales_return.sales_items.length > 0) {
             for(var i=0; i< $scope.sales_return.sales_items.length; i++) {
                 if ($scope.sales_return.sales_items[i].returned_quantity > $scope.sales_return.sales_items[i].max_return_qty) {
-                    $scope.validation_error = "Check Quantity Entered "+$scope.sales_return.sales_items[i].item_name;
+                    $scope.validation_error = "Cannot return the entered Quantity for the item - "+$scope.sales_return.sales_items[i].item_name;
                     return false;
                 }
             }
