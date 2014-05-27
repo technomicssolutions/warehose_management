@@ -1240,10 +1240,10 @@ class StockReports(View):
         p.drawString(400, 900, 'Stock Report')
 
         y = 850
-        p.drawString(80, y, 'Item Code')
-        p.drawString(150, y, 'Item Name')
-        p.drawString(300, y, 'Barcode')
-        p.drawString(360, y, 'Brand Name')    
+        p.drawString(40, y, 'Item Code')
+        p.drawString(110, y, 'Item Name')
+        p.drawString(330, y, 'Barcode')
+        p.drawString(380, y, 'Brand Name')    
         p.drawString(480, y, 'Stock')
         p.drawString(540, y, 'UOM')
         p.drawString(600, y, 'Unit Price')
@@ -1254,10 +1254,10 @@ class StockReports(View):
         y = y - 50 
         if len(stocks) > 0:
             for stock in stocks:
-                p.drawString(80, y, stock.code)
-                p.drawString(150, y, stock.name)
-                p.drawString(300, y, str(stock.barcode))
-                p.drawString(360, y, str(stock.brand.brand) if stock.brand else '')                
+                p.drawString(40, y, stock.code)
+                p.drawString(110, y, stock.name)
+                p.drawString(330, y, str(stock.barcode))
+                p.drawString(380, y, str(stock.brand.brand) if stock.brand else '')                
                 p.drawString(480, y, str(stock.quantity))
                 p.drawString(540, y, str(stock.uom.uom) if stock.uom else '')
                 p.drawString(600, y, str(stock.unit_price))
