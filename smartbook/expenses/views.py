@@ -2,6 +2,7 @@
 import sys
 import simplejson
 import datetime as dt
+import ast
 from datetime import datetime
 
 from django.db import IntegrityError
@@ -108,5 +109,65 @@ class ExpenseHeadList(View):
         }
         response = simplejson.dumps(res)
         return HttpResponse(response, status=status_code, mimetype="application/json")
+class ExpenseDetails(View):
 
+    def get(self, request, *args, **kwargs):
+
+        voucher_no = request.GET.get('voucher_no', '')
+        ctx_expense_details = []
+        if voucher_no:
+            expenses = Expense.objects.filter(voucher_no__startswith=voucher_no)
+            for expense in expenses:
+                ctx_expense_details.append({
+                    'voucher_no': expense.voucher_no,
+                    'salesman_name': expense.salesman.first_name if expense.salesman else '',
+                    'expense_head': expense.expense_head.expense_head if expense.expense_head else '',
+                    'date': expense.date.strftime('%d/%m/%Y') if expense.date else '',
+                    'amount': expense.amount if expense.amount else '',
+                    'payment_mode': expense.payment_mode if expense.payment_mode else '',
+                    'narration': expense.narration if expense.narration else '',
+                    'cheque_no': expense.cheque_no if expense.cheque_no else '',
+                    'cheque_date': expense.cheque_date.strftime('%d/%m/%Y') if expense.cheque_date else '',
+                    'bank_name': expense.bank_name if expense.bank_name else '',
+                    'branch': expense.branch if expense.branch else '',
+                })
+
+        res = {
+            'expenses': ctx_expense_details,
+        }
+        response = simplejson.dumps(res)
+        status = 200
+
+        return HttpResponse(response, status=status, mimetype='application/json')
+
+class EditExpense(View):
+
+    def get(self, request, *args, **kwargs):
+
+        return render(request, 'expenses/edit_expense.html', {})
+
+    def post(self, request, *args, **kwargs):
+
+        post_dict = ast.literal_eval(request.POST['expense'])
+        expense = Expense.objects.get(voucher_no=post_dict['voucher_no'])
+        expense.expense_head = ExpenseHead.objects.get(expense_head = post_dict['expense_head'])
+        expense.date = datetime.strptime(post_dict['date'], '%d/%m/%Y')
+        expense.amount = post_dict['amount']
+        expense.payment_mode = post_dict['payment_mode']
+        expense.narration = post_dict['narration']
+        
+        if post_dict['payment_mode'] == 'cheque':
+            expense.cheque_no = post_dict['cheque_no']
+            expense.cheque_date = datetime.strptime(post_dict['cheque_date'], '%d/%m/%Y')
+            expense.bank_name = post_dict['bank_name']
+            expense.branch = post_dict['branch']
+        if post_dict['salesman_name']:
+            salesman = User.objects.get(first_name=post_dict['salesman_name'])
+            expense.salesman = salesman
+        expense.save()
+        res = {
+            'result': 'ok'
+        }
+        response = simplejson.dumps(res)
+        return HttpResponse(response, status=200, mimetype="application/json")
 

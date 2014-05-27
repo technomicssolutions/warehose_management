@@ -935,7 +935,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         {
             if(data.delivery_notes.length > 0){
                 $scope.dn_message = '';
-               $scope.selecting_delivery_note = true;
+                $scope.selecting_delivery_note = true;
                 $scope.delivery_note_selected = false;
                 $scope.delivery_notes = data.delivery_notes; 
             } else {
@@ -4738,4 +4738,146 @@ function VendorReportController($http, $scope, $location, $element) {
         $scope.vendor_name = 'select';
     }
 
+}
+
+
+function EditExpenseController($http, $scope, $element, $location) {
+    $scope.init = function(csrf_token)
+    {
+        $scope.csrf_token = csrf_token;
+        $scope.get_expense_head_list();
+        $scope.get_salesman();
+        
+    }
+    $scope.get_salesman = function() {
+        $http.get('/Salesman/list/').success(function(data)
+        {
+            $scope.salesmen = data.salesmen;
+            $scope.salesman_name = '';
+        })
+    }    
+    $scope.get_expense_head_list = function() {
+        $http.get('/expenses/expense_head_list/').success(function(data)
+        {
+            $scope.expense_heads = data.expense_heads;
+            $scope.expense_head = 'select';
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
+    $scope.payment_mode_change = function(payment_mode) {
+        if(payment_mode == 'cheque') {
+            $scope.payment_mode_selection = false;
+            
+            new Picker.Date($$('#cheque_date'), {
+                timePicker: false,
+                positionOffset: {x: 5, y: 0},
+                pickerClass: 'datepicker_bootstrap',
+                useFadeInOut: !Browser.ie,
+                format:'%d/%m/%Y',
+            });
+        } else {
+            $scope.payment_mode_selection = true;
+        }
+    }
+    $scope.reset = function() {
+        $scope.expense_head = 'select';
+        $scope.amount = '';
+        $scope.payment_mode = 'cash';
+        $scope.payment_mode_selection = true;
+        $scope.narration = '';
+        $scope.cheque_no = '';
+        $scope.cheque_date = '';
+        $scope.branch = '';
+        $scope.bank_name = '';
+        $scope.cheque_date = $$('#cheque_date').set('value', '');
+    }
+    $scope.load_expense_details = function() {
+        var voucher_no = $scope.expense.voucher_no;
+        $http.get('/expenses/expense_details/?voucher_no='+voucher_no).success(function(data)
+        {
+            $scope.expenses = data.expenses;
+            $scope.selecting_expense = true;
+            $scope.expense_selected = false;
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
+    $scope.load_expense = function(expense) {
+        $scope.expense = expense;
+        $scope.expense_selected = true;
+        $scope.expense_head = expense.expense_head;
+        $scope.salesman_name = expense.salesman_name;
+        $scope.payment_mode_change(expense.payment_mode);
+    }
+
+    $scope.form_validation = function(){
+        
+        $scope.expense.cheque_date = $$('#cheque_date')[0].get('value');
+        $scope.expense.expense_head = $scope.expense_head;
+        $scope.expense.salesman_name = $scope.salesman_name;
+        if ($scope.expense.expense_head == '' || $scope.expense.expense_head == undefined || $scope.expense.expense_head == 'select') {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please choose expense head';
+            return false;
+        } else if ($scope.expense.amount == '' || $scope.expense.amount == undefined) {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please enter amount';
+            return false;
+        } else if ($scope.expense.narration == '' || $scope.expense.narration == undefined) {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please add narration';
+            return false;
+        } else if( $scope.expense.payment_mode == 'cheque' && ($scope.expense.cheque_no == '' || $scope.expense.cheque_no == undefined)) {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please add cheque no';
+            return false;
+        } else if( $scope.expense.payment_mode == 'cheque' && ($scope.expense.cheque_date == '' || $scope.expense.cheque_date == undefined)) {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please add cheque date';
+            return false;
+        } else if( $scope.expense.payment_mode == 'cheque' && ($scope.expense.bank_name == '' || $scope.expense.bank_name == undefined)) {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please add bank name';
+            return false;
+        } else if( $scope.expense.payment_mode == 'cheque' && ($scope.expense.branch == '' || $scope.expense.branch == undefined)) {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please add branch';
+            return false;
+        }
+        return true;
+    }
+    $scope.edit_expense = function(){
+        $scope.is_valid = $scope.form_validation();
+        if ($scope.is_valid) {
+            $scope.error_flag = false;
+            $scope.error_message = '';
+            params = { 
+                'expense': angular.toJson($scope.expense),
+                "csrfmiddlewaretoken" : $scope.csrf_token
+            }
+            $http({
+                method : 'post',
+                url : "/expenses/edit_expense/",
+                data : $.param(params),
+                headers : {
+                    'Content-Type' : 'application/x-www-form-urlencoded'
+                }
+            }).success(function(data, status) {
+                
+                if (data.result == 'error'){
+                    $scope.error_flag=true;
+                    $scope.message = data.message;
+                } else {
+                    $scope.error_flag=false;
+                    $scope.message = '';
+                    document.location.href ='/expenses/edit_expense/';
+                }
+            }).error(function(data, status){
+                console.log(data);
+            });
+        }
+    }
 }
