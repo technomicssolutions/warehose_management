@@ -4796,16 +4796,22 @@ function EditExpenseController($http, $scope, $element, $location) {
     $scope.load_expense_details = function() {
         var voucher_no = $scope.expense.voucher_no;
         $http.get('/expenses/expense_details/?voucher_no='+voucher_no).success(function(data)
-        {
-            $scope.expenses = data.expenses;
-            $scope.selecting_expense = true;
-            $scope.expense_selected = false;
+        {   
+            if (data.expenses.length > 0) {
+                $scope.expenses = data.expenses;
+                $scope.selecting_expense = true;
+                $scope.expense_selected = false;
+                $scope.no_voucher = '';
+            } else {
+                $scope.no_voucher = 'No expense with this voucher no.';
+            }
         }).error(function(data, status)
         {
             console.log(data || "Request failed");
         });
     }
     $scope.load_expense = function(expense) {
+        $scope.no_voucher = '';
         $scope.expense = expense;
         $scope.expense_selected = true;
         $scope.expense_head = expense.expense_head;
@@ -4822,7 +4828,7 @@ function EditExpenseController($http, $scope, $element, $location) {
             $scope.error_flag = true;
             $scope.error_message = 'Please choose expense head';
             return false;
-        } else if ($scope.expense.amount == '' || $scope.expense.amount == undefined) {
+        } else if ($scope.expense.amount == '' || $scope.expense.amount == undefined || $scope.expense.amount == 0 || $scope.expense.amount != Number($scope.expense.amount)) {
             $scope.error_flag = true;
             $scope.error_message = 'Please enter amount';
             return false;
