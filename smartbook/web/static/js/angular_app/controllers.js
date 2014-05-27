@@ -1732,14 +1732,25 @@ function ExpenseReportController($scope, $http, $element, $timeout, $location){
             format:'%d/%m/%Y', 
         });
         $scope.get_salesman();
+        $scope.get_expense_head_list();
     }
     $scope.get_salesman = function() {
         $http.get('/Salesman/list/').success(function(data)
         {
             $scope.salesmen = data.salesmen;
-            $scope.salesman_name = '';
+            $scope.salesman_name = 'select';
         })
     } 
+    $scope.get_expense_head_list = function() {
+        $http.get('/expenses/expense_head_list/').success(function(data)
+        {
+            $scope.expense_heads = data.expense_heads;
+            $scope.expense_head = 'select';
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
     
 }
 

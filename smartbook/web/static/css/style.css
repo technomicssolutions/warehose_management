@@ -881,3 +881,11 @@ a {
 #return_entry .item_list { 
 	border: 1px solid #ADD8E6;
 }
+
+#expense_report .report_container {
+	width: 100%;
+}
+#expense_report .reporttext {
+	padding-right: 8px;
+	width: auto;
+}
