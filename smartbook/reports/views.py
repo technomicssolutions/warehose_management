@@ -174,9 +174,9 @@ class SalesReports(View):
 
                             y = y - 30
                             if y <= 135:
-                                p = header(p)
                                 y = 850
                                 p.showPage()
+                                p = header(p)
                             p.drawString(50, y, dates.strftime('%d/%m/%y'))
                             p.drawString(120, y, str(invoice_no))
                             p.drawString(200, y, item_name)
@@ -189,9 +189,9 @@ class SalesReports(View):
                             
                 y = y - 30
                 if y <= 135:
-                    p = header(p)
                     y = 850
                     p.showPage()
+                    p = header(p)
                 p.drawString(50, y, 'Round Off : '+str(round_off))
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
@@ -296,9 +296,9 @@ class SalesReports(View):
 
                         y = y - 30
                         if y <= 135:
-                            p = header(p)
                             y = 850
                             p.showPage()
+                            p = header(p)
                         p.drawString(50, y, str(item_code))
                         p.drawString(120, y, item_name)
                         p.drawString(400, y, str(total_qty))
@@ -312,9 +312,9 @@ class SalesReports(View):
 
                 y = y - 30
                 if y <= 135:
-                    p = header(p)
                     y = 850
                     p.showPage()
+                    p = header(p)
                 p.drawString(50, y, '')
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
@@ -422,9 +422,9 @@ class SalesReports(View):
 
                             y = y - 30
                             if y <= 135:
-                                p = header(p)
                                 y = 850
                                 p.showPage()
+                                p = header(p)
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
                             p.drawString(140, y, str(invoice_no))
                             p.drawString(200, y, item_name)
@@ -436,9 +436,9 @@ class SalesReports(View):
                             p.drawString(900, y, str(profit))
                 y = y - 30
                 if y <= 135:
-                    p = header(p)
                     y = 850
                     p.showPage()
+                    p = header(p)
                 p.drawString(50, y, '')
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
@@ -545,9 +545,9 @@ class SalesReports(View):
                             avg_cp = math.ceil(avg_cp*100)/100
                             y = y - 30
                             if y <= 135:
-                                p = header(p)
                                 y = 850
                                 p.showPage()
+                                p = header(p)
                             p.drawString(30, y, dates.strftime('%d-%m-%Y'))
                             p.drawString(120, y, str(invoice_no))
                             p.drawString(200, y, item_name)
@@ -559,9 +559,9 @@ class SalesReports(View):
                             p.drawString(900, y, str(profit))
                 y = y - 30
                 if y <= 135:
-                    p = header(p)
                     y = 850
                     p.showPage()
+                    p = header(p)
                 p.drawString(50, y, '')
                 p.drawString(150, y, '')
                 p.drawString(250, y, '')
@@ -640,6 +640,7 @@ class PurchaseReports(View):
                     if y <= 270:
                         y = 850
                         p.showPage()
+                        p = header(p)
                     p.drawString(50, y, purchase_item.purchase.purchase_invoice_date.strftime('%d/%m/%y'))
                     p.drawString(120, y, str(purchase_item.purchase.purchase_invoice_number))
                     p.drawString(200, y, str(purchase_item.purchase.vendor_invoice_number))
@@ -651,9 +652,9 @@ class PurchaseReports(View):
                     total_amount = total_amount + purchase_item.net_amount
             y = y - 30
             if y <= 270:
-                p = header(p)
                 y = 850
                 p.showPage()
+                p = header(p)
             p.drawString(750, y, 'Total:')
             p.drawString(850, y, str(total_amount))
             p.showPage()
@@ -686,9 +687,9 @@ class PurchaseReports(View):
                             
                 y = y - 30
                 if y <= 270:
-                    p = header(p)
                     y = 850
                     p.showPage()
+                    p = header(p)
                 p.drawString(50, y, purchase.purchase_invoice_date.strftime('%d/%m/%y'))
                 p.drawString(150, y, str(purchase.purchase_invoice_number))
                 p.drawString(250, y, str(purchase.vendor_invoice_number))
@@ -696,9 +697,9 @@ class PurchaseReports(View):
                 total_amount = total_amount + purchase.vendor_amount
             y = y - 30
             if y <= 270:
-                p = header(p)
                 y = 850
                 p.showPage()
+                p = header(p)
             p.drawString(250, y, 'Total:')
             p.drawString(350, y, str(total_amount))    
             p.showPage()
@@ -775,9 +776,9 @@ class SalesReturnReport(View):
 
                             y = y - 30
                             if y <= 270:
-                                p = header(p)
                                 y = 850
                                 p.showPage()
+                                p = header(p)
 
                             p.drawString(50, y, dates.strftime('%d-%m-%Y'))
                             p.drawString(150, y, str(invoice_no))
@@ -790,9 +791,9 @@ class SalesReturnReport(View):
             
             y= y - 30
             if y <= 270:
-                p = header(p)
                 y = 850
                 p.showPage()
+                p = header(p)
             p.drawString(50, y, '')
             p.drawString(150, y, '')
             p.drawString(250, y, '')
@@ -859,9 +860,9 @@ class DailyReport(View):
                 for sale in sales:
                     y = y - 30
                     if y <= 135:
-                        p = header(p)
                         y = 850
                         p.showPage()
+                        p = header(p)
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By Sales '+str(sale.sales_invoice_number))
                     p.drawString(550, y, str(sale.grant_total))
@@ -877,9 +878,9 @@ class DailyReport(View):
                     y = y - 30
 
                     if y <= 135:
-                        p = header(p)
                         y = 850
                         p.showPage()
+                        p = header(p)
                     
                     p.drawString(50, y, (expense.date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By Voucher '+str(expense.voucher_no)+','+expense.narration)
@@ -892,9 +893,9 @@ class DailyReport(View):
 
             y = y-30
             if y <= 135:
-                p = header(p)
                 y = 850
                 p.showPage()
+                p = header(p)
             p.drawString(50, y, '')
             p.drawString(150, y, 'TotalRoundOff-Sales')
             p.drawString(550, y, '')
@@ -902,9 +903,9 @@ class DailyReport(View):
 
             y = y-30
             if y <= 135:
-                p = header(p)
                 y = 850
                 p.showPage()
+                p = header(p)
             p.drawString(50, y, '')
             p.drawString(150, y, 'TotalDiscount-Sales')
             p.drawString(550, y, '')
@@ -913,9 +914,9 @@ class DailyReport(View):
             
             y = y-30
             if y <= 135:
-                p = header(p)
                 y = 850
                 p.showPage()
+                p = header(p)
             p.drawString(50, y, '')
             p.drawString(150, y, 'Total')
             p.drawString(550, y, str(total_income))
@@ -991,9 +992,9 @@ class PurchaseReturnReport(View):
 
                             y = y - 30
                             if y <= 270:
-                                p = header(p)
                                 y = 850
                                 p.showPage()
+                                p = header(p)
                             p.drawString(50, y, purchasereturn_item.purchase_return.date.strftime('%d/%m/%Y'))
                             p.drawString(150, y, purchasereturn_item.purchase_return.purchase.vendor.user.first_name)
                             p.drawString(250, y, purchasereturn_item.item.name)
@@ -1046,9 +1047,9 @@ class PurchaseReturnReport(View):
 
                             y = y - 30
                             if y <= 270:
-                                p = header(p)
                                 y = 850
                                 p.showPage()
+                                p = header(p)
                             p.drawString(50, y, purchasereturn_item.purchase_return.date.strftime('%d/%m/%Y'))
                             p.drawString(150, y, purchasereturn_item.purchase_return.purchase.vendor.user.first_name)
                             p.drawString(250, y, purchasereturn_item.item.name)
@@ -1141,9 +1142,9 @@ class ExpenseReport(View):
                     
                     y = y - 30
                     if y <= 270:
-                        p = header(p)
                         y = 850
                         p.showPage()
+                        p = header(p)
 
                     p.drawString(200, y, expense.date.strftime('%d/%m/%Y'))
                     p.drawString(300, y, expense.expense_head.expense_head)
@@ -1227,9 +1228,9 @@ class VendorAccountsReport(View):
 
                         y = y - 30
                         if y <= 270:
-                            p = header(p)
                             y = 850
                             p.showPage()
+                            p = header(p)
 
                         p.drawString(50, y, purchase_account.date.strftime('%d/%m/%Y') if purchase_account.date else '')
                         p.drawString(150, y, purchase_account.vendor.user.first_name)
@@ -1279,9 +1280,9 @@ class VendorAccountsReport(View):
 
                         y = y-30
                         if y <= 270:
-                            p = header(p)
                             y = 850
                             p.showPage()
+                            p = header(p)
 
 
                         p.drawString(50, y, purchase_account.date.strftime('%d/%m/%Y') if purchase_account.date else '')
@@ -1334,9 +1335,9 @@ class StockReports(View):
                 p.drawString(840, y, str(stock.quantity * stock.unit_price))
                 y = y - 30
                 if y <= 270:
-                    p = header(p)
                     y = 850
                     p.showPage()
+                    p = header(p)
 
         p.showPage()
         p.save()
@@ -1388,9 +1389,9 @@ class SalesmanStockReports(View):
                         p.drawString(790, y, str(int(d_item.total_quantity) - int(d_item.quantity_sold)))
                         y = y - 30
                         if y <= 270:
-                            p = header(p)
                             y = 850
                             p.showPage()
+                            p = header(p)
 
         p.showPage()
         p.save()
@@ -1441,9 +1442,9 @@ class PendingSalesmanReport(View):
                         p.drawString(790, y, str(int(d_item.total_quantity) - int(d_item.quantity_sold)))
                         y = y - 30
                         if y <= 270:
-                            p = header(p)
                             y = 850
                             p.showPage()
+                            p = header(p)
 
         p.showPage()
         p.save()
@@ -1497,9 +1498,9 @@ class PendingCustomerReport(View):
                             p.drawString(650, y, str(customer_account.balance))
                             y = y - 30
                             if y <= 270:
-                                p = header(p)
                                 y = 850
                                 p.showPage()
+                                p = header(p)
         else:
             if len(customer_accounts) > 0:
                 for customer_account in customer_accounts:
@@ -1511,9 +1512,9 @@ class PendingCustomerReport(View):
                     p.drawString(650, y, str(customer_account.balance))
                     y = y - 30
                     if y <= 270:
-                        p = header(p)
                         y = 850
                         p.showPage()
+                        p = header(p)
 
         p.showPage()
         p.save()
@@ -1572,9 +1573,9 @@ class CompletedDNReport(View):
                     p.drawString(550, y, str(delivery_note.net_total))
                     y = y - 30
                     if y <= 270:
-                        p = header(p)
                         y = 850
                         p.showPage()
+                        p = header(p)
 
 
         p.showPage()
@@ -1628,9 +1629,9 @@ class VendorReport(View):
                     p.drawString(650, y, str(vendor_account.payment_mode))
                     y = y - 30
                     if y <= 270:
-                        p = header(p)
                         y = 850
                         p.showPage()
+                        p = header(p)
         else:
             p.drawString(200, y, 'Total Amount')
             p.drawString(320, y, 'Paid')
@@ -1646,9 +1647,9 @@ class VendorReport(View):
                     p.drawString(550, y, str(vendor_account.payment_mode))
                     y = y - 30
                     if y <= 270:
-                        p = header(p)
                         y = 850
                         p.showPage()
+                        p = header(p)
 
         p.showPage()
         p.save()
