@@ -1469,7 +1469,7 @@ class EditSalesInvoice(View):
 
     def post(self, request, *args, **kwargs):
         sales_invoice_details = ast.literal_eval(request.POST['invoice'])
-        sales_invoice = SalesInvoice.objects.get(invoice_no = sales_invoice_details['invoice_no'])
+        sales_invoice = SalesInvoice.objects.get(id = sales_invoice_details['id'])
         sales = sales_invoice.sales
         stored_item_names = []
         for s_item in sales.salesitem_set.all():
@@ -1666,6 +1666,7 @@ class EditDeliveryNote(View):
                         inventory.save()
                         d_item.delete()
                     else:
+                        print "in else"
                         for item_data in delivery_note_details['sales_items']:
                             if item_data['item_code'] == d_item.item.code:
                                 item = d_item.item
@@ -1674,6 +1675,7 @@ class EditDeliveryNote(View):
                                     item.quantity = (item.quantity) - int(item_data['qty_sold'])      
                                     item.save()
                                     d_item.total_quantity = d_item.total_quantity + int(item_data['qty_sold'])
+                                    d_item.save()
                                 if float(d_item.selling_price) != float(item_data['unit_price']):
                                     d_item.selling_price = float(item_data['unit_price'])
                                     d_item.save()
@@ -1690,6 +1692,17 @@ class EditDeliveryNote(View):
                         d_item.net_amount = item_data['net_amount']
                         d_item.selling_price = item_data['unit_price']
                         d_item.save()
+            not_completed_selling = []
+            for d_item in delivery_note.deliverynoteitem_set.all():
+                
+                if d_item.total_quantity != d_item.quantity_sold:
+                    d_item.is_completed = False
+                    d_item.save()
+                if not d_item.is_completed:
+                    not_completed_selling.append(d_item.id)
+            if len(not_completed_selling) != 0:
+                delivery_note.is_pending = True
+                delivery_note.save()
 
             res = {
                 'result': 'ok',

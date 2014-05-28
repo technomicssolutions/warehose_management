@@ -52,7 +52,12 @@
 								<li><a href="{% url 'edit_delivery_note' %}"> Edit Delivery Note </a> </li>
 							</ul>
 						</li>
-						<li><a href="{% url 'create_sales_entry' %}"> Sales (Qn/ DN)</a></li>
+						<li><a href=""> Sales </a>
+							<ul class="sub_submenu">
+								<li><a href="{% url 'create_sales_entry' %}"> Sales (Qn/ DN)</a></li>
+								<li> <a href="{% url 'edit_sales_invoice' %}"> Edit Sales </a> </li>
+							</ul>
+						</li>
 						<!-- <li> <a href="{% url 'sales' %}"> Direct Sales </a> </li> -->
 						<li> <a href="{% url 'receipt_voucher' %}"> Receipt Voucher</a> </li>
 						<li> <a href="{% url 'return_entry' %}"> Return Entry</a> </li>
