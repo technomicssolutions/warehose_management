@@ -1507,15 +1507,15 @@ class EditSalesInvoice(View):
                         s_item.delete()
             else:
                 for item_data in sales_invoice_details['sales_items']:
-                    if s_item.quantity_sold != item_data['qty_sold']:
+                    if item_data['qty'] != 0:
                         for d_item in delivery_note.deliverynoteitem_set.all():
                             if d_item.item.code == item_data['item_code']:
-                                d_item.quantity_sold = int(d_item.quantity_sold) + int(item_data['qty_sold']) 
+                                d_item.quantity_sold = int(d_item.quantity_sold) + int(item_data['qty']) 
                                 if d_item.quantity_sold == d_item.total_quantity:
                                     d_item.is_completed = True
                                 d_item.save()
                         s_item.sales = sales
-                        s_item.quantity_sold = item_data['qty_sold']
+                        s_item.quantity_sold = int(item_data['qty_sold']) + int(item_data['qty'])
                         s_item.discount_amount = item_data['dis_amt']
                         s_item.discount_percentage = item_data['dis_percentage']
                         s_item.net_amount = item_data['net_amount']
@@ -1549,7 +1549,15 @@ class EditSalesInvoice(View):
             sales.grant_total = sales_invoice_details['grant_total']
         if sales.discount != sales_invoice_details['net_discount']:
             sales.discount != sales_invoice_details['net_discount']
+        if sales_invoice_details['payment_mode'] == 'cash' or sales_invoice_details['payment_mode'] == 'cheque':
+            sales.payment_mode = sales_invoice_details['payment_mode']
+            sales.balance = 0
+            sales.save()
+            customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales)
+            customer_account.balance = sales.balance
+            customer_account.save()
         if sales_invoice_details['payment_mode'] == 'credit':
+            sales.payment_mode = sales_invoice_details['payment_mode']
             if sales.balance != sales_invoice_details['balance']:
                 sales.balance = sales_invoice_details['balance']
                 customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales)

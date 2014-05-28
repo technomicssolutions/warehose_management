@@ -3026,7 +3026,7 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         $scope.receiptvoucher.date = $$('#receipt_voucher_date')[0].get('value');
          
         if ($scope.receiptvoucher.date == '' || $scope.receiptvoucher.date == undefined) {
-            $scope.validation_error = "Enter the Sales Invoice date.";
+            $scope.validation_error = "Enter the date.";
             return false;             
         } else if ($scope.receiptvoucher.invoice_no == '' || $scope.receiptvoucher.invoice_no == undefined) {
             $scope.validation_error = "Enter the Sales Invoice no.";
@@ -3073,15 +3073,12 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         $scope.invoices = []
         $http.get('/sales/invoice_details/?invoice_no='+invoice_no).success(function(data)
         {
-            console.log(data.invoice_details.length);
             if(data.invoice_details.length > 0){
                 $scope.selecting_invoice = true;
                 $scope.invoice_selected = false;
                 $scope.invoices = data.invoice_details; 
-                $scope.message = '';
             } else {
-                console.log($scope.message);
-                $scope.message = "There is no invoice with this number";
+                $scope.invoice_message = "There is no invoice with this number";
             }
             
         }).error(function(data, status)
@@ -3447,11 +3444,12 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         $http.get('/sales/invoice_details/?invoice_no='+invoice_no).success(function(data)
         {
             if(data.sales_invoices.length > 0){
+                 $scope.message = '';
                 $scope.selecting_invoice = true;
                 $scope.invoice_selected = false;
                 $scope.invoices = data.sales_invoices; 
             } else {
-                $scope.invoice_message = "There is no invoice with this number";
+                $scope.message = "There is no invoice with this number";
             }
             
         }).error(function(data, status)
@@ -3532,7 +3530,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     
     $scope.calculate_net_amount_sale = function(item) {
         console.log(item.remaining_qty,item.qty_sold)
-        if(parseInt(item.qty_sold) > parseInt(item.remaining_qty)) {
+        if(parseInt(item.qty) > parseInt(item.remaining_qty)) {
             $scope.validation_error = "Qauntity not in stock";
             return false;
         } else {
@@ -3642,7 +3640,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             return false;
         } else if($scope.invoice_details.sales_items.length > 0){
             for (var i=0; i < $scope.invoice_details.sales_items.length; i++){
-                if (parseInt($scope.invoice_details.sales_items[i].remaining_qty) < parseInt($scope.invoice_details.sales_items[i].qty_sold)){
+                if (parseInt($scope.invoice_details.sales_items[i].remaining_qty) < parseInt($scope.invoice_details.sales_items[i].qty)){
                     $scope.validation_error = "Quantity not in stock for item "+$scope.invoice_details.sales_items[i].item_name;
                     return false;
                 } else if ($scope.invoice_details.sales_items[i].unit_price == 0) {
