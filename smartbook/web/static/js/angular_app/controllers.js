@@ -3611,7 +3611,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             // $scope.calculate_net_amount_sale(item);
         }
         $scope.calculate_net_total_sale();
-        $scope.invoice_details.balance = parseFloat($scope.invoice_details.balance) - parseFloat(item.dis_amt);
+        
     }
 
     $scope.calculate_discount_percent = function(item) {
@@ -3626,8 +3626,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
             // $scope.calculate_net_amount_sale(item);
         }
-        $scope.invoice_details.balance = parseFloat($scope.invoice_details.balance) - parseFloat(item.dis_amt);
-        console.log( item.dis_percentage);
+        
         $scope.calculate_net_total_sale();
     }
     $scope.validate_sales = function() {
