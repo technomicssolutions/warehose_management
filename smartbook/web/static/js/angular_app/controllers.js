@@ -3073,12 +3073,15 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
         $scope.invoices = []
         $http.get('/sales/invoice_details/?invoice_no='+invoice_no).success(function(data)
         {
+            console.log(data.invoice_details.length);
             if(data.invoice_details.length > 0){
                 $scope.selecting_invoice = true;
                 $scope.invoice_selected = false;
                 $scope.invoices = data.invoice_details; 
+                $scope.message = '';
             } else {
-                $scope.invoice_message = "There is no invoice with this number";
+                console.log($scope.message);
+                $scope.message = "There is no invoice with this number";
             }
             
         }).error(function(data, status)
@@ -3428,6 +3431,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         'grant_total': '',
         'paid': 0,
         'balance': 0,
+        'id': '',
     }
     $scope.payment_mode_selection = true;
     $scope.payment_mode_selection_check = true;
@@ -3442,7 +3446,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         $scope.invoices = []
         $http.get('/sales/invoice_details/?invoice_no='+invoice_no).success(function(data)
         {
-            if(data.invoice_details.length > 0){
+            if(data.sales_invoices.length > 0){
                 $scope.selecting_invoice = true;
                 $scope.invoice_selected = false;
                 $scope.invoices = data.sales_invoices; 
@@ -3472,6 +3476,9 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         $scope.invoice_details.net_discount = invoice.discount;
         $scope.invoice_details.roundoff = invoice.round_off;
         $scope.invoice_details.grant_total = invoice.grant_total;
+        $scope.invoice_details.balance = invoice.balance;
+        $scope.invoice_details.id = invoice.id;
+        $scope.payment_mode_change_sales(invoice.payment_mode);
         if(invoice.items.length > 0){
             for(var i=0; i< invoice.items.length; i++){
                 var selected_item = {
@@ -3486,6 +3493,10 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'unit_price': invoice.items[i].selling_price,
                     'current_stock': invoice.items[i].current_stock,
                     'uom': invoice.items[i].uom,
+                    'remaining_qty': invoice.items[i].remaining_qty,
+                    'dis_amt': invoice.items[i].discount,
+                    'dis_percentage': invoice.items[i].dis_percentage,
+                    'qty': invoice.items[i].qty,
                 }
                 $scope.invoice_details.sales_items.push(selected_item);
             }
@@ -3510,29 +3521,9 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     $scope.calculate_net_total_amount = function() {
         var total_amount = 0
         for(var i=0; i< $scope.invoice_details.sales_items.length; i++){
-            total_amount = (parseFloat(total_amount) + parseFloat($scope.invoice_details.sales_items[i].net_amount)).toFixed(2);
+            total_amount = (parseFloat($scope.invoice_details.sales_items[i].net_amount)).toFixed(2);
         }
         $scope.invoice_details.total_amount = total_amount;
-    }
-
-    $scope.get_latest_sales_details = function(item) {
-        var customer_name = $scope.invoice_details.customer;
-        var item_name = item.item_name;
-        $scope.latest_sales = []
-        $http.get('/sales/latest_sales_details/?customer='+customer_name+'&item_name='+item_name).success(function(data)
-        {   
-            
-            if(data.latest_sales_details.length > 0){
-                $scope.sales_deatils = true;
-                $scope.latest_sales = data.latest_sales_details; 
-            } else {
-                $scope.sales_deatils = false;
-            }
-            
-        }).error(function(data, status)
-        {
-            console.log(data || "Request failed");
-        });
     }
 
     $scope.hide_sales_details = function(){
@@ -3540,22 +3531,41 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     }
     
     $scope.calculate_net_amount_sale = function(item) {
-        if(item.qty_sold != '' && item.unit_price != ''){
-            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))-parseFloat(item.disc_given)).toFixed(2);
-            $scope.calculate_net_discount_sale();
-        }
-        $scope.calculate_net_total_sale();
-    }
-
-    $scope.calculate_net_amount_sale_qty = function(item) {
-        if(parseInt(item.qty_sold) > parseInt(item.current_stock)) {
+        console.log(item.remaining_qty,item.qty_sold)
+        if(parseInt(item.qty_sold) > parseInt(item.remaining_qty)) {
             $scope.validation_error = "Qauntity not in stock";
             return false;
         } else {
             $scope.validation_error = "";
         }
         if(item.qty_sold != '' && item.unit_price != ''){
-            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))-parseFloat(item.disc_given)).toFixed(2);
+            var qty = parseInt(item.qty_sold) + parseInt(item.qty);
+            item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
+            item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
+            var amount = ((parseFloat(qty)*parseFloat(item.unit_price))-parseFloat(item.dis_amt)).toFixed(2);
+
+            item.net_amount = parseFloat(amount);
+            
+            
+            $scope.calculate_net_discount_sale();
+        }
+        $scope.calculate_net_total_sale();
+    }
+
+    $scope.calculate_net_amount_sale_qty = function(item) {
+        
+        if(parseInt(item.qty_sold) > parseInt(item.remaining_qty)) {
+            $scope.validation_error = "Qauntity not in stock";
+            return false;
+        } else {
+            $scope.validation_error = "";
+        }
+        if(item.qty_sold != '' && item.unit_price != ''){
+            item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
+            item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
+            var amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))-parseFloat(item.dis_amt)).toFixed(2);
+            item.net_amount = parseFloat(item.net_amount) + parseFloat(amount);
+            $scope.invoice_details.balance = parseFloat($scope.invoice_details.balance) + parseFloat(amount);
             $scope.calculate_net_discount_sale();
         }
         $scope.calculate_net_total_sale();
@@ -3584,12 +3594,44 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         var net_discount = 0;
         for(i=0; i<$scope.invoice_details.sales_items.length; i++){
            
-            net_discount = net_discount + parseFloat($scope.invoice_details.sales_items[i].disc_given);
+            net_discount = net_discount + parseFloat($scope.invoice_details.sales_items[i].dis_amt);
 
         }
         $scope.invoice_details.net_discount = net_discount;
     }
 
+    $scope.calculate_discount_amt = function(item) {
+        if(item.unit_price == '' || item.unit_price != Number(item.unit_price)) {
+            item.unit_price = 0;
+        } 
+        if(item.dis_amt == '' || item.dis_amt != Number(item.dis_amt)){
+            item.dis_amt = 0;
+        }
+        if((item.dis_percentage != '' || item.dis_percentage != 0) && (item.unit_price != '' || item.unit_price != 0)) {
+            item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
+            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            // $scope.calculate_net_amount_sale(item);
+        }
+        $scope.calculate_net_total_sale();
+        $scope.invoice_details.balance = parseFloat($scope.invoice_details.balance) - parseFloat(item.dis_amt);
+    }
+
+    $scope.calculate_discount_percent = function(item) {
+        if(item.unit_price == '' || item.unit_price != Number(item.unit_price)) {
+            item.unit_price = 0;
+        }
+        if(item.dis_percentage == '' || item.dis_percentage != Number(item.dis_percentage)){
+            item.dis_percentage = 0;
+        }
+        if((item.dis_amt != '' || item.dis_amt != '') && (item.unit_price != '' || item.unit_price != 0)) {
+            item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
+            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            // $scope.calculate_net_amount_sale(item);
+        }
+        $scope.invoice_details.balance = parseFloat($scope.invoice_details.balance) - parseFloat(item.dis_amt);
+        console.log( item.dis_percentage);
+        $scope.calculate_net_total_sale();
+    }
     $scope.validate_sales = function() {
 
         if($scope.invoice_details.invoice_no == '') {
@@ -3600,10 +3642,13 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             return false;
         } else if($scope.invoice_details.sales_items.length > 0){
             for (var i=0; i < $scope.invoice_details.sales_items.length; i++){
-                if (parseInt($scope.invoice_details.sales_items[i].current_stock) < parseInt($scope.invoice_details.sales_items[i].qty_sold)){
+                if (parseInt($scope.invoice_details.sales_items[i].remaining_qty) < parseInt($scope.invoice_details.sales_items[i].qty_sold)){
                     $scope.validation_error = "Quantity not in stock for item "+$scope.invoice_details.sales_items[i].item_name;
                     return false;
-                }
+                } else if ($scope.invoice_details.sales_items[i].unit_price == 0) {
+                    $scope.validation_error = "Enter unit price for item "+$scope.invoice_details.sales_items[i].item_name;
+                    return false;
+                } 
             }
         } else if( $scope.invoice_details.payment_mode == 'card' && ($scope.invoice_details.card_number == '' )) {
             $scope.validation_error = 'Please Enter Card Number';
@@ -3617,17 +3662,18 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
 
     $scope.payment_mode_change_sales = function(payment_mode) {
         if(payment_mode == 'cheque') {
-            $scope.payment_mode_selection = true;
             $scope.payment_mode_selection_check = false;
             
-        }
-        else if(payment_mode == 'card'){
-            $scope.payment_mode_selection = false;
-            $scope.payment_mode_selection_check = false;
-        }
-        else {
+            var date_picker = new Picker.Date($$('#sales_invoice_date'), {
+            timePicker: false,
+            positionOffset: {x: 5, y: 0},
+            pickerClass: 'datepicker_bootstrap',
+            useFadeInOut: !Browser.ie,
+            format:'%d/%m/%Y',
+        });
+            
+        } else {
             $scope.payment_mode_selection = true;
-            $scope.payment_mode_selection_check = true;
         }
     }
 
@@ -3654,72 +3700,14 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'Content-Type' : 'application/x-www-form-urlencoded'
                 }
             }).success(function(data, status) {
-                document.location.href = '/sales/sales_invoice_pdf/'+data.sales_invoice_id+'/';               
+                document.location.href = '/sales/edit_sales_invoice/';               
             }).error(function(data, success){
                 
             });
         }  
     }
 
-    $scope.getItems = function(parameter){
-
-        if(parameter == 'item_code')
-            var param = $scope.item_code;
-        else if(parameter == 'item_name')
-            var param = $scope.item_name;
-        else if (parameter == 'barcode')
-            var param = $scope.barcode;
-        $http.get('/inventory/items/?'+parameter+'='+param).success(function(data)
-        {
-            $scope.selecting_item = true;
-            $scope.item_selected = false;
-            $scope.items = data.items;
-        }).error(function(data, status)
-        {
-            console.log(data || "Request failed");
-        });
-    }
-
-    $scope.addSalesItem = function(item) {
-        $scope.selecting_item = false;
-        $scope.item_selected = true;
-        $scope.item_code = '';
-        $scope.item_name = '';
-        $scope.barcode = '';
-
-        $scope.item_select_error = '';
-        
-        if($scope.invoice_details.sales_items.length > 0) {
-            for(var i=0; i< $scope.invoice_details.sales_items.length; i++) {
-                if($scope.invoice_details.sales_items[i].item_code == item.item_code) {
-                    $scope.item_select_error = "Item already selected";
-                    return false;
-                }
-            }
-        } 
-        var selected_item = {
-
-            'item_code': item.item_code,
-            'item_name': item.item_name,
-            'barcode': item.barcode,
-            'current_stock': item.current_stock,
-            'unit_price': item.selling_price,
-            'tax': item.tax,
-            'tax_amount':0,
-            'qty_sold': 0,
-            'uom': item.uom,
-            'discount_permit': item.discount_permit,
-            'discount_permit_amount':0,
-            'disc_given': 0,
-            'unit_cost':0,
-            'net_amount': 0,
-        }
-        $scope.calculate_tax_amount_sale(selected_item);
-        $scope.calculate_discount_amount_sale(selected_item);
-        $scope.calculate_unit_cost_sale(selected_item);
-       
-        $scope.invoice_details.sales_items.push(selected_item);
-    }
+    
 
     $scope.calculate_tax_amount_sale = function(item) {
         if(item.tax != '' && item.unit_price != ''){

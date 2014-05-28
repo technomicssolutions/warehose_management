@@ -118,6 +118,7 @@ class Sales(models.Model):
     delivery_note = models.ForeignKey(DeliveryNote, null=True, blank=True)
     lpo_number = models.CharField('LPO Number', null=True, blank=True, max_length=30)
     is_processed = models.BooleanField('Processed', default=False)
+    balance = models.DecimalField('Balance', null=True, blank=True, decimal_places=2, default=0, max_digits=14)
 
     def __unicode__(self):
 
