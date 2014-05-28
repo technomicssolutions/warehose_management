@@ -105,7 +105,15 @@ function ExpenseController($scope, $element, $http, $timeout, $location) {
         $scope.csrf_token = csrf_token;
         $scope.get_expense_head_list();
         $scope.get_salesman();
-        
+
+        new Picker.Date($$('#date'), {
+            timePicker: false,
+            positionOffset: {x: 5, y: 0},
+            pickerClass: 'datepicker_bootstrap',
+            useFadeInOut: !Browser.ie,
+            format:'%d/%m/%Y',
+        });
+    
     }
     $scope.get_salesman = function() {
         $http.get('/Salesman/list/').success(function(data)
@@ -155,7 +163,11 @@ function ExpenseController($scope, $element, $http, $timeout, $location) {
         $scope.voucher_no = $$('#voucher_no')[0].get('value');
         $scope.date = $$('#date')[0].get('value');
         $scope.cheque_date = $$('#cheque_date')[0].get('value');
-        if ($scope.expense_head == '' || $scope.expense_head == undefined || $scope.expense_head == 'select') {
+        if ($scope.date == '' || $scope.date == undefined || $scope.date == 'select') {
+            $scope.error_flag = true;
+            $scope.error_message = 'Please choose date';
+            return false;
+        } else if ($scope.expense_head == '' || $scope.expense_head == undefined || $scope.expense_head == 'select') {
             $scope.error_flag = true;
             $scope.error_message = 'Please choose expense head';
             return false;
@@ -3978,12 +3990,12 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
     $scope.delivery_note = {
         'sales_items': [],
         'date': '',
-        'customer':'',
+        'salesman':'',
         'net_total': 0,
         'total_amount': '',
         'delivery_note_no': '',
         'lpo_no': '',
-        'ref_no': ''
+        'id': '',
     }
 
     $scope.init = function(csrf_token, sales_invoice_number)
@@ -4042,13 +4054,15 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
             'unit_price': item.selling_price,
             'tax': item.tax,
             'tax_amount':0,
-            'qty_sold': 0,
+            'qty_sold': 1,
             'uom': item.uom,
             'discount_permit': item.discount_permit,
             'discount_permit_amount':0,
             'disc_given': 0,
             'unit_cost':0,
-            'net_amount': item.net_amount,    
+            'net_amount': item.net_amount,  
+            'total_qty':0,
+            'remaining_qty': 0,  
         }
         $scope.delivery_note.sales_items.push(selected_item);
     }    
@@ -4083,7 +4097,7 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                 $scope.dn_message = '';
                 $scope.selecting_delivery_note = true;
                 $scope.delivery_note_selected = false;
-                $scope.delivery_notes = data.delivery_notes; 
+                $scope.delivery_notes = data.whole_delivery_note_details; 
             } else {
                 $scope.dn_message = "There is no delivery note with this number";
             }
@@ -4095,8 +4109,10 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
     }
 
     $scope.delivery_note_validation = function(){
-
-        if($scope.delivery_note.sales_items.length == 0){
+        if ($scope.delivery_note_no == '' || $scope.delivery_note_no == undefined) {
+            $scope.validation_error = "Enter delivery note no";
+            return false;
+        } else if($scope.delivery_note.sales_items.length == 0){
             $scope.validation_error = "Choose Item";
             return false;
         } else if($scope.delivery_note.sales_items.length > 0){
@@ -4104,9 +4120,12 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                 if (parseInt($scope.delivery_note.sales_items[i].current_stock) < parseInt($scope.delivery_note.sales_items[i].qty_sold)){
                     $scope.validation_error = "Quantity not in stock for item "+$scope.delivery_note.sales_items[i].item_name;
                     return false;
+                } else if ($scope.delivery_note.sales_items[i].unit_price == 0){
+                    $scope.validation_error = "Please enter unit price for the item "+$scope.delivery_note.sales_items[i].item_code;
+                    return false;
                 }
             }
-        }  
+        } 
         return true;
     }
 
@@ -4119,10 +4138,12 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
         $scope.delivery_note_no = delivery_note.delivery_no;
         $scope.delivery_note.ref_no = $scope.quotation_no;
         $scope.delivery_note.delivery_note_no = delivery_note.delivery_no;
-        $scope.delivery_note.customer = delivery_note.customer; 
+        $scope.delivery_note.salesman = delivery_note.salesman; 
         $scope.delivery_note.net_total = delivery_note.net_total;
         $scope.delivery_note.lpo_no = delivery_note.lpo_number;
         $scope.delivery_note.date = delivery_note.date;
+        $scope.delivery_note.id = delivery_note.id;
+
         if(delivery_note.items.length > 0){
             for(var i=0; i< delivery_note.items.length; i++){
                 var selected_item = {
@@ -4131,7 +4152,7 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                     'item_name': delivery_note.items[i].item_name,
                     'barcode': delivery_note.items[i].barcode,
                     'item_description': delivery_note.items[i].item_description,
-                    'qty_sold': delivery_note.items[i].qty_sold,
+                    'qty_sold': 0,
                     'current_stock': delivery_note.items[i].current_stock,
                     'uom': delivery_note.items[i].uom,
                     'unit_price': delivery_note.items[i].selling_price,
@@ -4142,6 +4163,8 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                     'disc_given': delivery_note.items[i].discount_given,
                     'unit_cost':0,
                     'net_amount': delivery_note.items[i].net_amount,
+                    'total_qty': delivery_note.items[i].total_qty,
+                    'remaining_qty': delivery_note.items[i].remaining_qty,
                 }
                 // $scope.calculate_tax_amount_sale(selected_item);
                 // $scope.calculate_discount_amount_sale(selected_item);
@@ -4152,6 +4175,7 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                 
             }
         }
+        console.log($scope.delivery_note);
     }
     $scope.remove_from_item_list = function(item) {
         var index = $scope.delivery_note.sales_items.indexOf(item);
@@ -4179,7 +4203,7 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                     $scope.error_flag=true;
                     $scope.message = data.message;
                 } else {
-                    document.location.href = '/sales/delivery_note_pdf/'+data.delivery_note_id+'/';
+                    document.location.href = '/sales/edit_delivery_note/';
 
                 }
             }).error(function(data, success){
