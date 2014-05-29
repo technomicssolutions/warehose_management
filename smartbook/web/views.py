@@ -74,20 +74,7 @@ class UserList(View):
                 response = simplejson.dumps(res)
                 status_code = 200
                 return HttpResponse(response, status = status_code, mimetype="application/json")
-            # if request.is_ajax():
-            #     if len(users) > 0:
-            #         for usr in users:
-            #             ctx_salesman.append({
-            #                 'staff_name': usr.user.first_name,
-            #             })
-            #     res = {
-            #         'salesmen': ctx_salesman,
-                    
-            #     } 
-
-            #     response = simplejson.dumps(res)
-            #     status_code = 200
-            #     return HttpResponse(response, status = status_code, mimetype="application/json")
+            
         elif user_type == 'vendor':
             users = Vendor.objects.all()
             if request.is_ajax():
@@ -122,24 +109,6 @@ class UserList(View):
                 response = simplejson.dumps(res)
                 status_code = 200
                 return HttpResponse(response, status = status_code, mimetype="application/json")
-        # elif user_type == 'salesman': 
-        
-        #     salesmen = UserProfile.objects.filter(user_type = 'Salesman')
-
-        #     if request.is_ajax():
-        #         if len(salesmen)>0:
-        #             for salesman in salesmen:
-        #                 ctx_salesman.append({
-        #                     'salesman_name' : salesman.user.first_name if salesman.user.first_name else salesman.user.username,
-        #                 })
-        #         res = {
-        #             'salesmen' : ctx_salesman,
-        #         } 
-                
-
-        #         response = simplejson.dumps(res)
-        #         status_code = 200
-        #         return HttpResponse(response, status = status_code, mimetype="application/json")
 
         return render(request, 'user_list.html',{
             'users': users,
@@ -174,6 +143,7 @@ class RegisterUser(View):
                 message = "Please enter email"
             elif email_validation == None:
                 message = "Please enter a valid email id"
+            
         elif user_type == "vendor":
             if request.POST['name'] == '':
                 message = "Please enter Vendor Name"
@@ -184,6 +154,12 @@ class RegisterUser(View):
             elif request.POST['email'] != '':
                 if email_validation == None:                    
                     message = "Please enter a valid Email Id"
+            elif request.POST['mobile']:
+                if len(request.POST['mobile']) > 15:
+                    message = "Please enter a valid moblile no"
+            elif request.POST['phone']:
+                if len(request.POST['phone']) > 15:
+                    message = "Please enter a valid land line no"
         if message:
             context = {
                 'error_message': message,
@@ -229,8 +205,8 @@ class RegisterUser(View):
                     user.save()
 
             elif user_type == 'vendor':
-                user, created = User.objects.get_or_create(username=request.POST['name']+user_type, first_name = request.POST['name'])
-                if not created:    
+                user, vendor_created = User.objects.get_or_create(username=request.POST['name']+user_type, first_name = request.POST['name'])
+                if not vendor_created:    
                     message = 'Vendor with this name already exists'
                     if request.is_ajax():
                         res = {
@@ -280,6 +256,13 @@ class RegisterUser(View):
             if user_type == 'Salesman' and salesman_created:
 
                 users = UserProfile.objects.filter(user_type='Salesman')
+                return render(request, 'user_list.html',{
+                    'users': users,
+                    'user_type': user_type
+                })
+            elif user_type == 'vendor' and vendor_created:
+
+                users = Vendor.objects.all()
                 return render(request, 'user_list.html',{
                     'users': users,
                     'user_type': user_type
