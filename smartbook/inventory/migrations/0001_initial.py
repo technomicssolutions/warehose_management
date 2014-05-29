@@ -28,8 +28,8 @@ class Migration(SchemaMigration):
             ('code', self.gf('django.db.models.fields.CharField')(unique=True, max_length=10)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
             ('description', self.gf('django.db.models.fields.TextField')(max_length=50, null=True, blank=True)),
-            ('uom', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.UnitOfMeasure'])),
-            ('brand', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Brand'])),
+            ('uom', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.UnitOfMeasure'], null=True, blank=True)),
+            ('brand', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Brand'], null=True, blank=True)),
             ('barcode', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
             ('tax', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=2)),
             ('quantity', self.gf('django.db.models.fields.IntegerField')(default=0)),
@@ -74,7 +74,7 @@ class Migration(SchemaMigration):
         u'inventory.inventoryitem': {
             'Meta': {'object_name': 'InventoryItem'},
             'barcode': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']"}),
+            'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']", 'null': 'True', 'blank': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '10'}),
             'description': ('django.db.models.fields.TextField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'discount_permit_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
@@ -85,7 +85,7 @@ class Migration(SchemaMigration):
             'selling_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'tax': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'unit_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
-            'uom': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.UnitOfMeasure']"})
+            'uom': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.UnitOfMeasure']", 'null': 'True', 'blank': 'True'})
         },
         u'inventory.openingstock': {
             'Meta': {'object_name': 'OpeningStock'},

@@ -16,7 +16,6 @@ class Migration(SchemaMigration):
             ('vendor_do_number', self.gf('django.db.models.fields.CharField')(default='1', max_length=10)),
             ('vendor_invoice_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('purchase_invoice_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
-            ('brand', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['inventory.Brand'], null=True, blank=True)),
             ('vendor', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.Vendor'], null=True, blank=True)),
             ('payment_mode', self.gf('django.db.models.fields.CharField')(max_length=25, null=True, blank=True)),
             ('bank_name', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
@@ -24,6 +23,7 @@ class Migration(SchemaMigration):
             ('cheque_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('transportation_company', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['web.TransportationCompany'], null=True, blank=True)),
             ('discount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
+            ('discount_percentage', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
             ('net_total', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
             ('vendor_amount', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
             ('grant_total', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=14, decimal_places=3)),
@@ -146,7 +146,7 @@ class Migration(SchemaMigration):
         u'inventory.inventoryitem': {
             'Meta': {'object_name': 'InventoryItem'},
             'barcode': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']"}),
+            'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']", 'null': 'True', 'blank': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '10'}),
             'description': ('django.db.models.fields.TextField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'discount_permit_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '14', 'decimal_places': '3', 'blank': 'True'}),
@@ -157,7 +157,7 @@ class Migration(SchemaMigration):
             'selling_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'tax': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
             'unit_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '2'}),
-            'uom': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.UnitOfMeasure']"})
+            'uom': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.UnitOfMeasure']", 'null': 'True', 'blank': 'True'})
         },
         u'inventory.unitofmeasure': {
             'Meta': {'object_name': 'UnitOfMeasure'},
@@ -167,10 +167,10 @@ class Migration(SchemaMigration):
         u'purchase.purchase': {
             'Meta': {'object_name': 'Purchase'},
             'bank_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['inventory.Brand']", 'null': 'True', 'blank': 'True'}),
             'cheque_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'cheque_no': ('django.db.models.fields.CharField', [], {'max_length': '60', 'null': 'True', 'blank': 'True'}),
             'discount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            'discount_percentage': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             'grant_total': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'net_total': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),

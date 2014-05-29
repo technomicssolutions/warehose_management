@@ -19,6 +19,7 @@ class Migration(SchemaMigration):
         db.create_table(u'expenses_expense', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('salesman', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='Salesman', null=True, to=orm['auth.User'])),
             ('expense_head', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['expenses.ExpenseHead'], null=True, blank=True)),
             ('voucher_no', self.gf('django.db.models.fields.IntegerField')(unique=True)),
             ('date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
@@ -89,6 +90,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'narration': ('django.db.models.fields.TextField', [], {'max_length': '300', 'null': 'True', 'blank': 'True'}),
             'payment_mode': ('django.db.models.fields.CharField', [], {'max_length': '25', 'null': 'True', 'blank': 'True'}),
+            'salesman': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'Salesman'", 'null': 'True', 'to': u"orm['auth.User']"}),
             'voucher_no': ('django.db.models.fields.IntegerField', [], {'unique': 'True'})
         },
         u'expenses.expensehead': {

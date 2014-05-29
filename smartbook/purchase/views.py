@@ -164,23 +164,23 @@ class PurchaseEntry(View):
         purchase.save()
 
         
-
-        # Save purchase_expense in Expense
-        if Expense.objects.exists():
-            voucher_no = int(Expense.objects.aggregate(Max('voucher_no'))['voucher_no__max']) + 1
-        else:
-            voucher_no = 1
-        if not voucher_no:
-            voucher_no = 1
-        expense = Expense()
-        expense.created_by = request.user
-        expense.expense_head, created = ExpenseHead.objects.get_or_create(expense_head = 'purchase')
-        expense.date = dt.datetime.now().date().strftime('%Y-%m-%d')
-        expense.voucher_no = voucher_no
-        expense.amount = purchase_dict['purchase_expense']
-        expense.payment_mode = 'cash'
-        expense.narration = 'By purchase'
-        expense.save()        
+        if float(purchase_dict['purchase_expense']) > 0:
+            # Save purchase_expense in Expense
+            if Expense.objects.exists():
+                voucher_no = int(Expense.objects.aggregate(Max('voucher_no'))['voucher_no__max']) + 1
+            else:
+                voucher_no = 1
+            if not voucher_no:
+                voucher_no = 1
+            expense = Expense()
+            expense.created_by = request.user
+            expense.expense_head, created = ExpenseHead.objects.get_or_create(expense_head = 'purchase')
+            expense.date = dt.datetime.now().date().strftime('%Y-%m-%d')
+            expense.voucher_no = voucher_no
+            expense.amount = purchase_dict['purchase_expense']
+            expense.payment_mode = 'cash'
+            expense.narration = 'By purchase'
+            expense.save()        
 
         purchase_items = purchase_dict['purchase_items']
         deleted_items = purchase_dict['deleted_items']
