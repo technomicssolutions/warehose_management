@@ -1222,6 +1222,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
 
     $scope.calculate_grant_total_sale = function(){
         $scope.sales.grant_total = $scope.sales.net_total   - $scope.sales.roundoff;
+        $scope.calculate_balance_sale();
     }
     $scope.calculate_balance_sale = function () {
         $scope.sales.balance = $scope.sales.grant_total - $scope.sales.paid;
@@ -3273,7 +3274,7 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         } else {
             if(item.qty_sold != '' && item.unit_price != ''){
                 item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))).toFixed(2);
-            }
+            } 
             $scope.calculate_net_total_amount();
         }
     }
@@ -3431,6 +3432,8 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         'paid': 0,
         'balance': 0,
         'id': '',
+        'balance_payment':0,
+        'paid_amount': 0,
     }
     $scope.payment_mode_selection = true;
     $scope.payment_mode_selection_check = true;
@@ -3460,6 +3463,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         });
     }
     $scope.add_invoice = function(invoice) {
+        console.log(invoice.items);
         $scope.invoice_selected = true;
         $scope.invoice_no = invoice.invoice_no;
         $scope.invoice_details.invoice_no = invoice.invoice_no;
@@ -3477,8 +3481,12 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         $scope.invoice_details.roundoff = invoice.round_off;
         $scope.invoice_details.grant_total = invoice.grant_total;
         $scope.invoice_details.balance = invoice.balance;
+        $scope.invoice_details.balance_payment = invoice.balance;
         $scope.invoice_details.id = invoice.id;
+        $scope.invoice_details.paid_amount = invoice.paid,
         $scope.payment_mode_change_sales(invoice.payment_mode);
+        $scope.invoice_details.sales_items = [];
+        var selected_item = '';
         if(invoice.items.length > 0){
             for(var i=0; i< invoice.items.length; i++){
                 var selected_item = {
@@ -3488,15 +3496,18 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'barcode': invoice.items[i].barcode,
                     'item_description': invoice.items[i].item_description,
                     'qty_sold': invoice.items[i].qty_sold,
+                    'sold_qty': invoice.items[i].qty_sold,
                     'disc_given': invoice.items[i].discount_given,
                     'net_amount': invoice.items[i].net_amount,
                     'unit_price': invoice.items[i].selling_price,
                     'current_stock': invoice.items[i].current_stock,
                     'uom': invoice.items[i].uom,
                     'remaining_qty': invoice.items[i].remaining_qty,
+                    'remaining': invoice.items[i].remaining_qty,
                     'dis_amt': invoice.items[i].discount,
                     'dis_percentage': invoice.items[i].dis_percentage,
                     'qty': invoice.items[i].qty,
+                    'amt': 0,
                 }
                 $scope.invoice_details.sales_items.push(selected_item);
             }
@@ -3532,17 +3543,15 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     
     $scope.calculate_net_amount_sale = function(item) {
         console.log(item.remaining_qty,item.qty_sold)
-        if(parseInt(item.qty) > parseInt(item.remaining_qty)) {
-            $scope.validation_error = "Qauntity not in stock";
+        if(parseInt(item.total_qty) < parseInt(item.qty_sold)) {
+            $scope.validation_error = "Quantity not in stock";
             return false;
         } else {
             $scope.validation_error = "";
         }
         if(item.qty_sold != '' && item.unit_price != ''){
-            var qty = parseInt(item.qty_sold) + parseInt(item.qty);
-            item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
-            item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
-            var amount = ((parseFloat(qty)*parseFloat(item.unit_price))-parseFloat(item.dis_amt)).toFixed(2);
+
+            var amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))-parseFloat(item.dis_amt)).toFixed(2);
 
             item.net_amount = parseFloat(amount);
             
@@ -3553,19 +3562,25 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     }
 
     $scope.calculate_net_amount_sale_qty = function(item) {
-        
-        if(parseInt(item.qty_sold) > parseInt(item.remaining_qty)) {
-            $scope.validation_error = "Qauntity not in stock";
+
+        if(item.qty != '') {
+            item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
+            item.remaining_qty = parseInt(item.remaining) - parseInt(item.qty);
+        }
+        if(item.remaining_qty < 0) {
+            $scope.validation_error = "Quantity not in stock";
             return false;
         } else {
             $scope.validation_error = "";
+            
         }
+        
+        
         if(item.qty_sold != '' && item.unit_price != ''){
-            item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
-            item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
-            var amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))-parseFloat(item.dis_amt)).toFixed(2);
-            item.net_amount = parseFloat(item.net_amount) + parseFloat(amount);
-            $scope.invoice_details.balance = parseFloat($scope.invoice_details.balance) + parseFloat(amount);
+            var amount = item.amt;
+            item.amt = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            item.net_amount = parseFloat(item.amt);
+            
             $scope.calculate_net_discount_sale();
         }
         $scope.calculate_net_total_sale();
@@ -3583,10 +3598,13 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
 
     $scope.calculate_grant_total_sale = function(){
         $scope.invoice_details.grant_total = $scope.invoice_details.net_total   - $scope.invoice_details.roundoff;
+        $scope.invoice_details.balance = parseFloat($scope.invoice_details.grant_total) - parseFloat($scope.invoice_details.paid_amount);
+        $scope.calculate_net_discount_sale();
     }
 
     $scope.calculate_balance_sale = function () {
-        $scope.invoice_details.balance = $scope.invoice_details.grant_total - $scope.invoice_details.paid;
+        console.log($scope.invoice_details.balance);
+        $scope.invoice_details.balance = (parseFloat($scope.invoice_details.grant_total) - parseFloat($scope.invoice_details.paid_amount)) - parseFloat($scope.invoice_details.paid);
     }
 
     $scope.calculate_net_discount_sale = function(){
@@ -3609,8 +3627,10 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         }
         if((item.dis_percentage != '' || item.dis_percentage != 0) && (item.unit_price != '' || item.unit_price != 0)) {
             item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
-            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
-            // $scope.calculate_net_amount_sale(item);
+            var amount = item.amt;
+            item.amt = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            item.net_amount = (parseFloat(item.net_amount) - parseFloat(amount)) + parseFloat(item.amt);
+            $scope.invoice_details.balance = parseFloat($scope.invoice_details.grant_total) - parseFloat($scope.invoice_details.paid_amount);
         }
         $scope.calculate_net_total_sale();
         
@@ -3625,8 +3645,10 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         }
         if((item.dis_amt != '' || item.dis_amt != '') && (item.unit_price != '' || item.unit_price != 0)) {
             item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
-            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
-            // $scope.calculate_net_amount_sale(item);
+            var amount = item.amt;
+            item.amt = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            item.net_amount = (parseFloat(item.net_amount) - parseFloat(amount)) + parseFloat(item.amt);
+            $scope.invoice_details.balance = parseFloat($scope.invoice_details.grant_total) - parseFloat($scope.invoice_details.paid_amount);
         }
         
         $scope.calculate_net_total_sale();
@@ -3641,10 +3663,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             return false;
         } else if($scope.invoice_details.sales_items.length > 0){
             for (var i=0; i < $scope.invoice_details.sales_items.length; i++){
-                if (parseInt($scope.invoice_details.sales_items[i].remaining_qty) < parseInt($scope.invoice_details.sales_items[i].qty)){
-                    $scope.validation_error = "Quantity not in stock for item "+$scope.invoice_details.sales_items[i].item_name;
-                    return false;
-                } else if ($scope.invoice_details.sales_items[i].unit_price == 0) {
+                if ($scope.invoice_details.sales_items[i].unit_price == 0) {
                     $scope.validation_error = "Enter unit price for item "+$scope.invoice_details.sales_items[i].item_name;
                     return false;
                 } 
@@ -3704,26 +3723,6 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                 
             });
         }  
-    }
-
-    
-
-    $scope.calculate_tax_amount_sale = function(item) {
-        if(item.tax != '' && item.unit_price != ''){
-            item.tax_amount = (parseFloat(item.unit_price)*parseFloat(item.tax))/100;
-        }
-    }
-
-    $scope.calculate_discount_amount_sale = function(item) {
-        if(item.discount_permit != '' && item.unit_price != ''){
-            item.discount_permit_amount = (parseFloat(item.unit_price)*parseFloat(item.discount_permit))/100;            
-        }
-    }
-
-    $scope.calculate_unit_cost_sale = function(item) {
-        if(item.unit_price != ''){
-            item.unit_cost = (parseFloat(item.unit_price)+parseFloat(item.tax_amount)-parseFloat(item.disc_given)).toFixed(2);
-        }
     }
 }
 
@@ -4057,11 +4056,13 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
     $scope.calculate_net_amount_sale = function(item) {
         $scope.validation_error = "";
         if(parseInt(item.qty_sold) > parseInt(item.current_stock)) {
-            $scope.validation_error = "Qauntity not in stock";
+            $scope.validation_error = "Quantity not in stock";
             return false;
         } else {
             if(item.qty_sold != '' && item.unit_price != ''){
                 item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))).toFixed(2);
+            } else {
+                item.net_amount = ((parseFloat(item.total_qty)*parseFloat(item.unit_price))).toFixed(2);
             }
             $scope.calculate_net_total_amount();
         }
@@ -4759,6 +4760,13 @@ function EditExpenseController($http, $scope, $element, $location) {
         $scope.csrf_token = csrf_token;
         $scope.get_expense_head_list();
         $scope.get_salesman();
+        new Picker.Date($$('#date'), {
+            timePicker: false,
+            positionOffset: {x: 5, y: 0},
+            pickerClass: 'datepicker_bootstrap',
+            useFadeInOut: !Browser.ie,
+            format:'%d/%m/%Y',
+        });
         
     }
     $scope.get_salesman = function() {
