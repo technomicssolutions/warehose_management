@@ -112,6 +112,7 @@ class ItemList(View):
                             'current_stock': item.quantity if item.quantity  else 0 ,
                             'selling_price': item.selling_price if item.selling_price else 0 ,
                             'discount_permit': item.discount_permit_percentage if item.discount_permit_percentage else 0,
+                            'name': item.code + '-' + item.name,
                         })
                         i = i + 1
 
@@ -240,7 +241,7 @@ class AddOpeningStock(View):
 
     def post(self, request, *args, **kwargs):
 
-        item , created= InventoryItem.objects.get_or_create(code=request.POST['item'])
+        item , created= InventoryItem.objects.get_or_create(code=request.POST['item_code'])
         opening_stock = OpeningStock()
         opening_stock.item = item
         opening_stock.quantity = request.POST['quantity']

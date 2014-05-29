@@ -2547,6 +2547,36 @@ function OpeningStockController($scope, $http, $element, $location, $timeout) {
             return true;
         }
     }
+    $scope.load_items = function() {
+        $scope.message = '';
+        
+        var item_name = $scope.item_name;
+        $scope.items = []
+        $http.get('/inventory/items/?item_name='+item_name).success(function(data)
+        {
+            if(data.items.length > 0){
+                $scope.selecting_item = true;
+                $scope.item_selected = false;
+                $scope.items = data.items; 
+                $scope.message = '';
+                $scope.error_flag = false;
+            } else {
+                $scope.selecting_item = false;
+                $scope.message = "No item";
+                $scope.error_flag = true;
+            }
+            
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
+    $scope.add_item = function(item) {
+        $scope.item_selected = true;
+        $scope.item_name = item.item_code +'-'+item.item_name;
+        item_code = $("#item_code");
+        document.getElementById("item_code").value = item.item_code;
+    }
 }
 
 function StockEditController($scope, $http, $element, $location, $timeout) {

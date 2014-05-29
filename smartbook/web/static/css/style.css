@@ -899,3 +899,18 @@ a {
 	float: right;
 	width: 50% !important;
 }
+
+
+#opening_stock_entry .quotation_list {
+    border: 1px solid #ADD8E6;
+    border-radius: 5px;
+    margin-left: 203px !important;
+    margin-top: 20px;
+    position: absolute;
+    width: 18.5%;
+}
+
+
+#opening_stock_entry .item_list .item_list_row span, .purchase_item_list .item_list_row span {
+    width: 80%;
+}
