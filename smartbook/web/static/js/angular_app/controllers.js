@@ -3713,6 +3713,12 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         } else if($scope.invoice_details.sales_items.length == 0){
             $scope.validation_error = "Choose Item";
             return false;
+        } else if ($scope.invoice_details.paid == 0 && $scope.invoice_details.payment_mode == 'cash') {
+            $scope.validation_error ="You have choosed cash as payment mode , so please enter the PAID";
+            return false;
+        } else if (($scope.invoice_details.paid != $scope.invoice_details.grant_total) && ($scope.invoice_details.payment_mode == 'cash' || $scope.invoice_details.payment_mode == 'cheque')) {
+            $scope.validation_error ="Please choose payment mode as credit , because you have balance amount.";
+            return false;
         } else if($scope.invoice_details.sales_items.length > 0){
             for (var i=0; i < $scope.invoice_details.sales_items.length; i++){
                 if ($scope.invoice_details.sales_items[i].unit_price == 0) {
