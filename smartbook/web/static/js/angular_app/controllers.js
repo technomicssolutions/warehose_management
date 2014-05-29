@@ -932,6 +932,12 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         } else if ($scope.sales.discount_sale != Number($scope.sales.discount_sale)) {
             $scope.validation_error ="Enter valid Discount for sale";
             return false;
+        } else if ($scope.sales.paid == 0 && $scope.sales.payment_mode == 'cash') {
+            $scope.validation_error ="You have choosed cash as payment mode , so please enter the PAID";
+            return false;
+        } else if (($scope.sales.paid != $scope.sales.grant_total) && ($scope.sales.payment_mode == 'cash' || $scope.sales.payment_mode == 'cheque')) {
+            $scope.validation_error ="Please choose payment mode as credit , because you have balance amount.";
+            return false;
         } else if($scope.sales.sales_items.length > 0){
             for (var i=0; i < $scope.sales.sales_items.length; i++){
                 if ($scope.sales.sales_items[i].remaining_qty < 0 ){
@@ -1156,6 +1162,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                 item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
                 item.net_amount = 0;
             } else {
+                $scope.validation_error = '';
                 item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
             }
             // $scope.calculate_discount_amt(item);

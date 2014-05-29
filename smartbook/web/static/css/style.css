@@ -911,6 +911,6 @@ a {
 }
 
 
-#opening_stock_entry .item_list .item_list_row span, .purchase_item_list .item_list_row span {
+#opening_stock_entry .item_list .item_list_row span {
     width: 80%;
 }
