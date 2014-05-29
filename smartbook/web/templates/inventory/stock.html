@@ -13,15 +13,15 @@
 {% else %}
 	<table class="table table-striped">
 
-		<tr><th> Item code </th> <th> Item Name </th> <th> Barcode </th> <th> Quantity </th> <th> UOM </th> <th>  </th> </tr>
+		<tr><th> Item code </th> <th> Item Name </th> <th> Unit Price </th> <th> Quantity </th> <th> Selling Price </th> <th>  </th> </tr>
 		
 		{% for item in inventory %}
 		 	<tr>
 		 		<td> {{item.code}} </td>
 		 		<td> {{item.name}} </td>
-		 		<td> {{item.barcode}} </td>
+		 		<td> {{item.unit_price}} </td>
 		 		<td> {{item.quantity}} </td>
-		 		<td> {{item.uom.uom}} </td>
+		 		<td> {{item.selling_price}} </td>
 
 		 		<td> 
 		 			<a href="{% url 'edit_stock' %}?item_code={{item.code}}">
