@@ -592,4 +592,10 @@ class CreateCustomer(View):
             'message' : 'Customer added correctly',
             'user_type': 'customer'
         }
+        if created:
+            users = Customer.objects.all()
+            return render(request, 'user_list.html',{
+                'users': users,
+                'user_type': 'customer',
+            })
         return render(request, 'register_user.html',context)
