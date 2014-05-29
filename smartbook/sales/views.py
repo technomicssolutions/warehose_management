@@ -964,7 +964,6 @@ class QuotationDeliverynoteSales(View):
     def post(self, request, *args, **kwargs):
 
         sales_dict = ast.literal_eval(request.POST['sales'])
-        print sales_dict['sales_items']
         delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
         sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'], delivery_note=delivery_note)
         sales.sales_invoice_number = sales_dict['sales_invoice_number']
@@ -999,6 +998,8 @@ class QuotationDeliverynoteSales(View):
         sales.net_amount = sales_dict['net_total']
         sales.grant_total = sales_dict['grant_total']
         sales.salesman = salesman
+        sales.discount_for_sale = sales_dict['discount_sale']
+        sales.discount_percentage_for_sale = sales_dict['discount_sale_percentage']
         sales.payment_mode = sales_dict['payment_mode']
         sales.paid = sales_dict['paid']
         sales.balance = sales_dict['balance']
@@ -1283,6 +1284,8 @@ class InvoiceDetails(View):
                     'id': sales_invoice.id,
                     'balance': sales_invoice.balance,
                     'paid': sales_invoice.paid,
+                    'discount_sale': sales_invoice.discount_for_sale,
+                    'discount_sale_percentage': sales_invoice.discount_percentage_for_sale,
                 })
                 ctx_sales_item = []
 
@@ -1550,6 +1553,10 @@ class EditSalesInvoice(View):
             sales.grant_total = sales_invoice_details['grant_total']
         if sales.discount != sales_invoice_details['net_discount']:
             sales.discount != sales_invoice_details['net_discount']
+        if sales.discount_for_sale != float(sales_invoice_details['discount_sale']):
+            sales.discount_for_sale = float(sales_invoice_details['discount_sale'])
+        if sales.discount_percentage_for_sale != float(sales_invoice_details['discount_sale_percentage']):
+            sales.discount_percentage_for_sale != float(sales_invoice_details['discount_sale_percentage'])
         if sales_invoice_details['payment_mode'] == 'cash' or sales_invoice_details['payment_mode'] == 'cheque':
             sales.payment_mode = sales_invoice_details['payment_mode']
             sales.balance = 0

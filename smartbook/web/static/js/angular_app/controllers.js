@@ -813,6 +813,8 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         'quotation_ref_no':'',
         'delivery_no': '',  
         'lpo_number': '', 
+        'discount_sale': 0,
+        'discount_sale_percentage': 0,
     }
     $scope.sales.quotation_ref_no = '';
     $scope.custmer_name = 'select';
@@ -925,6 +927,9 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         } else if($scope.sales.sales_items.length == 0){
             $scope.validation_error = "Choose Item";
             return false;
+        } else if ($scope.sales.discount_sale != Number($scope.sales.discount_sale)) {
+            $scope.validation_error ="Enter valid Discount for sale";
+            return false;
         } else if($scope.sales.sales_items.length > 0){
             for (var i=0; i < $scope.sales.sales_items.length; i++){
                 if ($scope.sales.sales_items[i].remaining_qty < 0 ){
@@ -937,6 +942,19 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             }
         } 
         return true;       
+    }
+
+    $scope.calculate_discount_sale_percentage = function() {
+        if ($scope.sales.discount_sale != '' || $scope.sales.discount_sale != undefined) {
+            $scope.sales.discount_sale_percentage = (parseFloat($scope.sales.discount_sale)/parseFloat($scope.sales.net_total)*100).toFixed(2);
+        }
+        $scope.calculate_grant_total_sale();
+    }
+    $scope.calculate_discount_sale_amt = function() {
+        if ($scope.sales.discount_sale_percentage != '' || $scope.sales.discount_sale_percentage != undefined) {
+            $scope.sales.discount_sale = ((parseFloat($scope.sales.discount_sale_percentage) * parseFloat($scope.sales.net_total))/100).toFixed(2);
+        } 
+        $scope.calculate_grant_total_sale();
     }
 
     $scope.get_delivery_note_details = function(){
@@ -1005,7 +1023,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         $scope.sales.quotation_ref_no = $scope.quotation_no;
         $scope.sales.delivery_no = $scope.delivery_no
         $scope.sales.salesman = delivery_note.salesman; 
-        $scope.sales.net_total = delivery_note.net_total;
+        $scope.sales.net_total = 0;
         $scope.sales.lpo_number = delivery_note.lpo_number;
         if(delivery_note.items.length > 0){
             for(var i=0; i< delivery_note.items.length; i++){
@@ -1121,26 +1139,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             $scope.validation_error = "";
         }
         if(item.qty != '' && item.unit_price != ''){
-            // if(item.remaining_qty < 0) {
-            //     $scope.validation_error = item.item_name+' Not in stock';
-            //     item.qty_sold = parseInt(item.sold_qty);
-            //     item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-            //     item.net_amount = 0;
-            // } else {
-            //     $scope.validation_error = '';
-            //     if (parseInt(item.qty) == 0) {
-            //         item.qty_sold = parseInt(item.sold_qty);
-            //         item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-            //     } else {
-            //         item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
-            //         item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-            //     }
-                
-            //     item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price))).toFixed(2);
-                
-            //     $scope.calculate_net_discount_sale();
-            // }
-             
+           
             $scope.validation_error = '';
             if (parseInt(item.qty) == 0) {
                 item.qty_sold = parseInt(item.sold_qty);
@@ -1219,7 +1218,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
 
 
     $scope.calculate_grant_total_sale = function(){
-        $scope.sales.grant_total = $scope.sales.net_total   - $scope.sales.roundoff;
+        $scope.sales.grant_total = $scope.sales.net_total   - $scope.sales.roundoff - $scope.sales.discount_sale;
         $scope.calculate_balance_sale();
     }
     $scope.calculate_balance_sale = function () {
@@ -1229,7 +1228,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         $scope.sales.customer = $scope.custmer_name;
         if($scope.validate_sales()){
             $scope.sales.sales_invoice_date = $$('#sales_invoice_date')[0].get('value');
-            console.log($scope.sales);
             params = { 
                 'sales': angular.toJson($scope.sales),
                 "csrfmiddlewaretoken" : $scope.csrf_token
@@ -3432,6 +3430,8 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         'id': '',
         'balance_payment':0,
         'paid_amount': 0,
+        'discount_sale': 0,
+        'discount_sale_percentage': 0,
     }
     $scope.payment_mode_selection = true;
     $scope.payment_mode_selection_check = true;
@@ -3483,6 +3483,9 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         $scope.invoice_details.id = invoice.id;
         $scope.invoice_details.paid_amount = invoice.paid,
         $scope.payment_mode_change_sales(invoice.payment_mode);
+        console.log(invoice.discount_sale, invoice.discount_sale_percentage);
+        $scope.invoice_details.discount_sale = invoice.discount_sale;
+        $scope.invoice_details.discount_sale_percentage = invoice.discount_sale_percentage;
         $scope.invoice_details.sales_items = [];
         var selected_item = '';
         if(invoice.items.length > 0){
@@ -3512,6 +3515,18 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         }
     }
 
+    $scope.calculate_discount_sale_percentage = function() {
+        if ($scope.invoice_details.discount_sale != '' || $scope.invoice_details.discount_sale != undefined) {
+            $scope.invoice_details.discount_sale_percentage = (parseFloat($scope.invoice_details.discount_sale)/parseFloat($scope.invoice_details.net_total)*100).toFixed(2);
+        }
+        $scope.calculate_grant_total_sale();
+    }
+    $scope.calculate_discount_sale_amt = function() {
+        if ($scope.invoice_details.discount_sale_percentage != '' || $scope.invoice_details.discount_sale_percentage != undefined) {
+            $scope.invoice_details.discount_sale = ((parseFloat($scope.invoice_details.discount_sale_percentage) * parseFloat($scope.invoice_details.net_total))/100).toFixed(2);
+        } 
+        $scope.calculate_grant_total_sale();
+    }
     $scope.remove_from_item_list = function(item) {
         var index = $scope.invoice_details.sales_items.indexOf(item);
         $scope.invoice_details.sales_items.splice(index, 1);
@@ -3595,7 +3610,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     }
 
     $scope.calculate_grant_total_sale = function(){
-        $scope.invoice_details.grant_total = $scope.invoice_details.net_total   - $scope.invoice_details.roundoff;
+        $scope.invoice_details.grant_total = $scope.invoice_details.net_total - $scope.invoice_details.roundoff - $scope.invoice_details.discount_sale;
         $scope.invoice_details.balance = parseFloat($scope.invoice_details.grant_total) - parseFloat($scope.invoice_details.paid_amount);
         $scope.calculate_net_discount_sale();
     }
@@ -3664,7 +3679,10 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                 if ($scope.invoice_details.sales_items[i].unit_price == 0) {
                     $scope.validation_error = "Enter unit price for item "+$scope.invoice_details.sales_items[i].item_name;
                     return false;
-                } 
+                } else if ($scope.invoice_details.sales_items[i].remaining_qty < 0) {
+                    $scope.validation_error = "Check the entered Quantity for the item "+$scope.invoice_details.sales_items[i].item_name;
+                    return false;
+                }
             }
         } else if( $scope.invoice_details.payment_mode == 'card' && ($scope.invoice_details.card_number == '' )) {
             $scope.validation_error = 'Please Enter Card Number';

@@ -114,12 +114,14 @@ class Sales(models.Model):
     net_amount = models.DecimalField('Net Amount',max_digits=14, decimal_places=2, default=0)
     round_off = models.DecimalField('Net Round Off',max_digits=14, decimal_places=2, default=0)
     grant_total = models.DecimalField('Grand Total',max_digits=14, decimal_places=2, default=0)
-    discount = models.DecimalField('Total Discount',max_digits=14, decimal_places=2, default=0)
+    discount = models.DecimalField('Item wise Discount',max_digits=14, decimal_places=2, default=0)
     delivery_note = models.ForeignKey(DeliveryNote, null=True, blank=True)
     lpo_number = models.CharField('LPO Number', null=True, blank=True, max_length=30)
     is_processed = models.BooleanField('Processed', default=False)
     balance = models.DecimalField('Balance', null=True, blank=True, decimal_places=2, default=0, max_digits=14)
     paid = models.DecimalField('Paid', null=True, blank=True, decimal_places=2, default=0, max_digits=14)
+    discount_for_sale = models.DecimalField('Discount for sale',max_digits=14, decimal_places=2, default=0)
+    discount_percentage_for_sale = models.DecimalField('Discount percentage for sale',max_digits=14, decimal_places=2, default=0)
     def __unicode__(self):
 
         return str(self.sales_invoice_number)

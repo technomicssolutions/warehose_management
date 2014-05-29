@@ -185,11 +185,26 @@
 						</div>
 					
 						<div class="formtext_sales">
-							<label for="discount">Discount</label>
+							<label for="discount">Itemwise Discount</label>
 						</div>
 						<div class="forminput_sales">
 							<input type="text" name="net_discount" ng-model="sales.net_discount"ng-change="calculate_grant_total_sale()" readonly/>
 						</div>
+
+						<div class="formtext_sales">
+							<label for="discount">Discount for sale</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="net_discount" ng-model="sales.discount_sale"ng-change="calculate_discount_sale_percentage()"/>
+						</div>
+
+						<div class="formtext_sales">
+							<label for="discount">Discount for sale percentage</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="net_discount" ng-model="sales.discount_sale_percentage" ng-change="calculate_discount_sale_amt()"/>
+						</div>
+
 
 						<div class="formtext_sales">
 							<label for="round">Round Off</label>
