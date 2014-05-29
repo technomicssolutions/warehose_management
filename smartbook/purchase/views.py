@@ -64,7 +64,7 @@ class PurchaseDetail(View):
                 'vendor_invoice_number': purchase.vendor_invoice_number,
                 'vendor_do_number': purchase.vendor_do_number,
                 'vendor_name': purchase.vendor.user.first_name,
-                'transport': purchase.transportation_company.company_name,
+                'transport': purchase.transportation_company.company_name if purchase.transportation_company else '',
                 'vendor_invoice_date': purchase.vendor_invoice_date.strftime('%d/%m/%Y'),
                 'purchase_invoice_date': purchase.purchase_invoice_date.strftime('%d/%m/%Y'), 
                 'purchase_items': items_list,
@@ -166,17 +166,19 @@ class PurchaseEntry(View):
         
         if float(purchase_dict['purchase_expense']) > 0:
             # Save purchase_expense in Expense
-            if Expense.objects.exists():
-                voucher_no = int(Expense.objects.aggregate(Max('voucher_no'))['voucher_no__max']) + 1
-            else:
-                voucher_no = 1
-            if not voucher_no:
-                voucher_no = 1
-            expense = Expense()
+            try: 
+                expense = Expense.objects.get(purchase=purchase)
+            except:
+                if Expense.objects.exists():
+                    voucher_no = int(Expense.objects.aggregate(Max('voucher_no'))['voucher_no__max']) + 1
+                else:
+                    voucher_no = 1
+                if not voucher_no:
+                    voucher_no = 1
+                expense = Expense.objects.create(purchase=purchase, created_by = request.user, voucher_no = voucher_no)
             expense.created_by = request.user
             expense.expense_head, created = ExpenseHead.objects.get_or_create(expense_head = 'purchase')
             expense.date = dt.datetime.now().date().strftime('%Y-%m-%d')
-            expense.voucher_no = voucher_no
             expense.amount = purchase_dict['purchase_expense']
             expense.payment_mode = 'cash'
             expense.narration = 'By purchase'

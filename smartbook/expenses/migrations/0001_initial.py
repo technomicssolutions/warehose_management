@@ -30,6 +30,7 @@ class Migration(SchemaMigration):
             ('cheque_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('bank_name', self.gf('django.db.models.fields.CharField')(max_length=15, null=True, blank=True)),
             ('branch', self.gf('django.db.models.fields.CharField')(max_length=10, null=True, blank=True)),
+            ('purchase', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['purchase.Purchase'], null=True, blank=True)),
         ))
         db.send_create_signal(u'expenses', ['Expense'])
 
@@ -90,6 +91,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'narration': ('django.db.models.fields.TextField', [], {'max_length': '300', 'null': 'True', 'blank': 'True'}),
             'payment_mode': ('django.db.models.fields.CharField', [], {'max_length': '25', 'null': 'True', 'blank': 'True'}),
+            'purchase': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['purchase.Purchase']", 'null': 'True', 'blank': 'True'}),
             'salesman': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'Salesman'", 'null': 'True', 'to': u"orm['auth.User']"}),
             'voucher_no': ('django.db.models.fields.IntegerField', [], {'unique': 'True'})
         },
@@ -97,6 +99,38 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'ExpenseHead'},
             'expense_head': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        u'purchase.purchase': {
+            'Meta': {'object_name': 'Purchase'},
+            'bank_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+            'cheque_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'cheque_no': ('django.db.models.fields.CharField', [], {'max_length': '60', 'null': 'True', 'blank': 'True'}),
+            'discount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            'discount_percentage': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            'grant_total': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'net_total': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            'payment_mode': ('django.db.models.fields.CharField', [], {'max_length': '25', 'null': 'True', 'blank': 'True'}),
+            'purchase_expense': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            'purchase_invoice_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'purchase_invoice_number': ('django.db.models.fields.IntegerField', [], {'unique': 'True'}),
+            'transportation_company': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['web.TransportationCompany']", 'null': 'True', 'blank': 'True'}),
+            'vendor': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['web.Vendor']", 'null': 'True', 'blank': 'True'}),
+            'vendor_amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '14', 'decimal_places': '3'}),
+            'vendor_do_number': ('django.db.models.fields.CharField', [], {'default': "'1'", 'max_length': '10'}),
+            'vendor_invoice_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'vendor_invoice_number': ('django.db.models.fields.CharField', [], {'default': "'1'", 'max_length': '10'})
+        },
+        u'web.transportationcompany': {
+            'Meta': {'object_name': 'TransportationCompany'},
+            'company_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        u'web.vendor': {
+            'Meta': {'object_name': 'Vendor'},
+            'contact_person': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         }
     }
 
