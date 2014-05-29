@@ -685,11 +685,13 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
     }
     $scope.calculate_grant_total = function(){
         $scope.purchase.grant_total = $scope.purchase.net_total - $scope.purchase.discount;
+        $scope.purchase.vendor_amount = $scope.purchase.net_total - $scope.purchase.discount;
     }
     $scope.validate_purchase = function() {
         $scope.purchase.purchase_invoice_date = $$('#purchase_invoice_date')[0].get('value');
         $scope.purchase.vendor_invoice_date = $$('#vendor_invoice_date')[0].get('value');
-        $scope.purchase.cheque_date = $$('#cheque_date')[0].get('value');
+        if($$('#cheque_date').length > 0)
+            $scope.purchase.cheque_date = $$('#cheque_date')[0].get('value');
         $scope.validation_error = '';
         if($scope.purchase.vendor_invoice_number == '') {
             $scope.validation_error = "Please Enter Vendor invoice number" ;
