@@ -143,6 +143,12 @@ class RegisterUser(View):
                 message = "Please enter email"
             elif email_validation == None:
                 message = "Please enter a valid email id"
+            elif request.POST['mobile']:
+                if len(request.POST['mobile']) > 15:
+                    message = "Please enter a valid moblile no"
+            elif request.POST['phone']:
+                if len(request.POST['phone']) > 15:
+                    message = "Please enter a valid land line no"
             
         elif user_type == "vendor":
             if request.POST['name'] == '':
