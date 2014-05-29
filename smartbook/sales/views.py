@@ -1229,7 +1229,7 @@ class InvoiceDetails(View):
                     'invoice_no': sales_invoice.sales_invoice_number if sales_invoice.sales_invoice_number else '',
                     'dated': sales_invoice.sales_invoice_date.strftime('%d-%m-%Y') if sales_invoice.sales_invoice_date else '',
                     'customer': sales_invoice.customer.customer_name if sales_invoice.customer else '',
-                    'amount': sales_invoice.net_amount if sales_invoice else '',
+                    'amount': sales_invoice.grant_total if sales_invoice else '',
                     'paid_amount': customer_account.paid if customer_account.paid else 0,
                 })
         i = 0
