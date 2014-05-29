@@ -151,6 +151,7 @@ class RegisterUser(View):
                     message = "Please enter a valid land line no"
             
         elif user_type == "vendor":
+            ph_no_len = len(request.POST['phone'])
             if request.POST['name'] == '':
                 message = "Please enter Vendor Name"
             elif request.POST['contact_person'] == '':
@@ -163,9 +164,8 @@ class RegisterUser(View):
             elif request.POST['mobile']:
                 if len(request.POST['mobile']) > 15:
                     message = "Please enter a valid moblile no"
-            elif request.POST['phone']:
-                if len(request.POST['phone']) > 15:
-                    message = "Please enter a valid land line no"
+            if int(ph_no_len) > 15:
+                message = "Please enter a valid land line no"
         if message:
             context = {
                 'error_message': message,
