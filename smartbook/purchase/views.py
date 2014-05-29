@@ -63,8 +63,7 @@ class PurchaseDetail(View):
                 'purchase_invoice_number': purchase.purchase_invoice_number,
                 'vendor_invoice_number': purchase.vendor_invoice_number,
                 'vendor_do_number': purchase.vendor_do_number,
-                'brand': purchase.brand.brand,
-                'vendor': purchase.vendor.user.first_name,
+                'vendor_name': purchase.vendor.user.first_name,
                 'transport': purchase.transportation_company.company_name,
                 'vendor_invoice_date': purchase.vendor_invoice_date.strftime('%d/%m/%Y'),
                 'purchase_invoice_date': purchase.purchase_invoice_date.strftime('%d/%m/%Y'), 
@@ -73,7 +72,12 @@ class PurchaseDetail(View):
                 'net_total': purchase.net_total,
                 'purchase_expense': purchase.purchase_expense,
                 'discount': purchase.discount,
-                'grant_total': purchase.grant_total    
+                'grant_total': purchase.grant_total,
+                'payment_mode': purchase.payment_mode,
+                'bank_name': purchase.bank_name if purchase.bank_name else '',
+                'cheque_no': purchase.cheque_no if purchase.cheque_no else '',
+                'cheque_date': purchase.cheque_date.strftime('%d/%m/%Y') if purchase.cheque_date else '',
+                'discount_percentage': purchase.discount_percentage
             }
             res = {
                 'result': 'Ok',

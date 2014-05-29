@@ -68,29 +68,14 @@
 							<input type="text" name="purchase_invoice_date" ng-model="purchase.purchase_invoice_date" id="purchase_invoice_date"/>
 						</div>
 					</div>
-
-
-					<div class="formrow_purchase">
-						<div class="formtext_purchase">
-							<label for="brand">Brand</label>
-						</div>
-						<div class="forminput">
-							<select name="brand" ng-model="purchase.brand" ng-change="add_brand()">
-								<option value="select">Select</option>
-								<option ng-repeat="brand in brands" value="[[brand.brand_name]]" ng-selected="brand.brand_name == purchase.brand">[[brand.brand_name]]</option>
-								<option value="other">Other</option>
-							</select>
-						</div>
-					</div>
-
 					<div class="formrow_purchase">
 						<div class="formtext_purchase">
 							<label for="vendor">Vendor</label>
 						</div>
 						<div class="forminput">
-							<select name="vendor" ng-model="purchase.vendor" ng-change="add_vendor()">
+							<select name="vendor" ng-model="purchase.vendor_name" ng-change="add_vendor()">
 								<option value="select">Select</option>
-								<option ng-repeat="vendor in vendors" value="[[vendor.vendor_name]]" ng-selected="vendor.vendor_name == purchase.vendor">[[vendor.vendor_name]]</option>
+								<option ng-repeat="vendor in vendors" value="[[vendor.vendor_name]]" ng-selected="vendor.vendor_name == purchase.vendor_name">[[vendor.vendor_name]]</option>
 								<option value="other">Other</option>
 							</select>
 						</div>
@@ -108,11 +93,48 @@
 							</select>
 						</div>
 					</div>
-
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="payment_mode">Payment Mode</label>
+						</div>
+						
+						<div class="forminput" id="radio_input">
+							<input type="radio" name="payment_mode" ng-model="purchase.payment_mode" value="cash" ng-change="payment_mode_change_purchase('cash')"><label>Cash</label>
+							<input type="radio" name="payment_mode" ng-model="purchase.payment_mode" value="cheque" ng-change="payment_mode_change_purchase('cheque')"><label>Cheque</label>
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="bank_name">Bank name</label>
+						</div>
+						
+						<div class="forminput" id="radio_input">
+							<input type="text" name="bank_name" ng-model="purchase.bank_name" ng-readonly="payment_cheque"/>
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="cheque_no">Cheque No</label>
+						</div>
+						
+						<div class="forminput" id="radio_input">
+							<input type="text" name="cheque_no" ng-model="purchase.cheque_no" ng-readonly="payment_cheque"/>
+						</div>
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="cheque_date">Cheque Date</label>
+						</div>
+						
+						<div class="forminput" id="radio_input">
+							<input type="text" name="cheque_date" id="cheque_date" ng-model="purchase.cheque_date" ng-readonly="payment_cheque"/>
+						</div>
+					</div>
 						
 				</div>	
 		
-				<div class="section_3_purchase">
+				<!-- <div class="section_3_purchase">
 					<div class="search_purchase">
 						<div class="control">
 							<label> Item Code </label>
@@ -143,7 +165,7 @@
     				</div>
     				<div class="clear"></div>
     				<p class="error_message"> [[item_select_error]] </p>
-   				</div>
+   				</div> -->
 
    				<div class="purchase_items_list" ng-show="purchase.purchase_items.length > 0">
    					<div class="purchase_item_list">
@@ -185,7 +207,7 @@
 							<span> <input type="text" ng-model="item.permit_disc_amt" ng-change="calculate_discount_percent(item)" /> </span>
 							<span> <input type="text" ng-model="item.permit_disc_percent" ng-change="calculate_discount_amt(item)"/> </span>
 							<span> [[item.net_amount]] </span>
-							<a class="delete_anch" href="" ng-click="delete_purchase_item(item);"> <img src="/static/images/delete.png" /> </a> 
+							<!-- <a class="delete_anch" href="" ng-click="delete_purchase_item(item);"> <img src="/static/images/delete.png" /> </a>  -->
 						</div>
 						<div class="clear"></div>
    					</div>
@@ -222,6 +244,14 @@
 						</div>
 						<div class="forminput">
 							<input type="text" name="discount" ng-model="purchase.discount" ng-change="calculate_grant_total()" />
+						</div>
+					</div>
+					<div class="formrow_purchase">
+						<div class="formtext_purchase">
+							<label for="discount">Discount Percentage</label>
+						</div>
+						<div class="forminput">
+							<input type="text" name="discount_percentage" ng-model="purchase.discount_percentage" ng-change="calculate_discount_amount()"/>
 						</div>
 					</div>
 					<div class="formrow_purchase">
