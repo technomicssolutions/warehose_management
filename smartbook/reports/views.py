@@ -746,7 +746,7 @@ class SalesReturnReport(View):
             p.drawString(250, 875, "Item Code")
             p.drawString(350, 875, "Item Name")
             p.drawString(650, 875, "Quantity")
-            p.drawString(750, 875, "Unit Price")
+            p.drawString(750, 875, "Selling Price")
             # p.drawString(650, 875, "Selling Price")
             p.drawString(850, 875, "Total")
                 
@@ -770,7 +770,7 @@ class SalesReturnReport(View):
                             item_name = salesreturn_item.item.name
                             item_code = salesreturn_item.item.code
                             inventorys = salesreturn_item.item
-                            unitprice = inventorys.unit_price
+                            selling_price = salesreturn_item.amount
 
                             grant_total = grant_total + total
 
@@ -785,7 +785,7 @@ class SalesReturnReport(View):
                             p.drawString(250, y, str(item_code))
                             p.drawString(350, y, item_name)
                             p.drawString(650, y, str(qty))
-                            p.drawString(750, y, str(unitprice))
+                            p.drawString(750, y, str(selling_price))
                             # p.drawString(650, y, str(selling_price))
                             p.drawString(850, y, str(total))
             
