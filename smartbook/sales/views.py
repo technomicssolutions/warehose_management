@@ -899,7 +899,7 @@ class DeliveryNoteDetails(View):
                 'lpo_number': delivery_note.lpo_number if delivery_note.lpo_number else '',
                 'date': delivery_note.date.strftime('%d/%m/%Y') if delivery_note.date else '',
             })
-        for delivery_note in delivery_notes:
+        for delivery_note in delivery_note_details:
             i = 0 
             i = i + 1
             item_list = []
@@ -964,6 +964,7 @@ class QuotationDeliverynoteSales(View):
     def post(self, request, *args, **kwargs):
 
         sales_dict = ast.literal_eval(request.POST['sales'])
+        print sales_dict['sales_items']
         delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
         sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'], delivery_note=delivery_note)
         sales.sales_invoice_number = sales_dict['sales_invoice_number']
@@ -999,6 +1000,8 @@ class QuotationDeliverynoteSales(View):
         sales.grant_total = sales_dict['grant_total']
         sales.salesman = salesman
         sales.payment_mode = sales_dict['payment_mode']
+        sales.paid = sales_dict['paid']
+        sales.balance = sales_dict['balance']
         if sales_dict['payment_mode'] == 'cheque':
             sales.bank_name = sales_dict['bank_name']
         sales.save()
@@ -1007,10 +1010,9 @@ class QuotationDeliverynoteSales(View):
             customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales )
             if created:
                 customer_account.total_amount = sales_dict['grant_total']
-                customer_account.balance = customer_account.total_amount - customer_account.paid
+                customer_account.paid = sales_dict['paid']
+                customer_account.balance = sales_dict['balance']
                 customer_account.save()
-                sales.balance = customer_account.balance
-                sales.save()
         sales_items = sales_dict['sales_items']
         for sales_item in sales_items:
            
@@ -1023,13 +1025,13 @@ class QuotationDeliverynoteSales(View):
             s_item.discount_amount = sales_item['dis_amt']
             s_item.discount_percentage = sales_item['dis_percentage']
             s_item.net_amount = sales_item['net_amount']
+            print s_item.net_amount
             s_item.selling_price = sales_item['unit_price']
             # unit price is actually the selling price
             s_item.save()
                     
         res = {
             'result': 'Ok',
-            'sales_invoice_id': sales.id,
         }
         response = simplejson.dumps(res)
         status_code = 200
@@ -1242,8 +1244,6 @@ class InvoiceDetails(View):
                         if item.item.code == sale.item.code:
                             current_stock = item.total_quantity
                             remaining_qty = int(item.total_quantity) - int(item.quantity_sold)
-
-                    net_amount = float(sale.selling_price) * int(sale.quantity_sold)
                     ctx_sales_item.append({
                         'sl_no': i,
                         'item_name': sale.item.name,
@@ -1257,7 +1257,7 @@ class InvoiceDetails(View):
                         'current_stock': current_stock,
                         'selling_price': sale.selling_price,
                         'discount_permit': sale.item.discount_permit_percentage if sale.item else 0,
-                        'net_amount': net_amount,
+                        'net_amount': sale.net_amount,
                         'discount': sale.discount_amount if sale.discount_amount else 0,
                         'dis_percentage': sale.discount_percentage if sale.discount_percentage else 0,
                         'remaining_qty': remaining_qty,
@@ -1282,6 +1282,7 @@ class InvoiceDetails(View):
                     'discount': sales_invoice.discount if sales_invoice.discount else 0,
                     'id': sales_invoice.id,
                     'balance': sales_invoice.balance,
+                    'paid': sales_invoice.paid,
                 })
                 ctx_sales_item = []
 
@@ -1510,12 +1511,12 @@ class EditSalesInvoice(View):
                     if item_data['qty'] != 0:
                         for d_item in delivery_note.deliverynoteitem_set.all():
                             if d_item.item.code == item_data['item_code']:
-                                d_item.quantity_sold = int(d_item.quantity_sold) + int(item_data['qty']) 
+                                d_item.quantity_sold = int(item_data['qty_sold']) 
                                 if d_item.quantity_sold == d_item.total_quantity:
                                     d_item.is_completed = True
                                 d_item.save()
                         s_item.sales = sales
-                        s_item.quantity_sold = int(item_data['qty_sold']) + int(item_data['qty'])
+                        s_item.quantity_sold = int(item_data['qty_sold'])
                         s_item.discount_amount = item_data['dis_amt']
                         s_item.discount_percentage = item_data['dis_percentage']
                         s_item.net_amount = item_data['net_amount']
@@ -1560,10 +1561,16 @@ class EditSalesInvoice(View):
             sales.payment_mode = sales_invoice_details['payment_mode']
             if sales.balance != sales_invoice_details['balance']:
                 sales.balance = sales_invoice_details['balance']
+                sales.paid = float(sales.paid) + float(sales_invoice_details['paid'])
                 customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales)
                 if customer_account.balance != sales.balance:
                     customer_account.balance = sales.balance
                     customer_account.save()
+                if customer_account.total_amount != sales.grant_total:
+                    customer_account.total_amount = sales.grant_total
+                if customer_account.paid != sales.paid:
+                    customer_account.paid = sales.paid
+                customer_account.save()
         sales.save()
         not_completed_selling = []
         for item_data in sales_invoice_details['sales_items']:
@@ -1706,15 +1713,16 @@ class EditDeliveryNote(View):
                         inventory.save()
                         d_item.delete()
                     else:
-                        print "in else"
                         for item_data in delivery_note_details['sales_items']:
                             if item_data['item_code'] == d_item.item.code:
                                 item = d_item.item
                                 if item_data['qty_sold'] != 0:
-                                    d_item.net_amount = float(item_data['net_amount'])
                                     item.quantity = (item.quantity) - int(item_data['qty_sold'])      
                                     item.save()
                                     d_item.total_quantity = d_item.total_quantity + int(item_data['qty_sold'])
+                                    d_item.save()
+                                if float(d_item.net_amount) != float(item_data['net_amount']):
+                                    d_item.net_amount = float(item_data['net_amount'])
                                     d_item.save()
                                 if float(d_item.selling_price) != float(item_data['unit_price']):
                                     d_item.selling_price = float(item_data['unit_price'])

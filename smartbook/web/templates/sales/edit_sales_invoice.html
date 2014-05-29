@@ -84,7 +84,7 @@
 							<span> Qty </span>
 							<span> Dis Amt</span>
 							<span> Dis(%) </span>
-							
+							<!-- <span> Amt </span> -->
 							<span> Net Amount </span>
 							<span> &nbsp;&nbsp; </span>
 						</div>
@@ -92,15 +92,15 @@
 							<span class="small_column">[[item.item_code]] </span>
 							<span>[[item.item_name]] </span>
 							<span>[[item.current_stock]] </span>
-							<!-- <span><input type="text" ng-model="item.unit_price" ng-change="calculate_net_amount_sale(item)" /> </span> -->
-							<span>[[item.unit_price]]</span>
+							
+							<span><input type="text" ng-model="item.unit_price" ng-change="calculate_net_amount_sale(item)" /> </span>
 							<span>[[item.remaining_qty]]</span> 
 							<span>[[item.qty_sold]]</span>
 							<span> <input type="text" ng-model="item.qty" ng-change="calculate_net_amount_sale_qty(item)" /> </span>
-							<!-- <span> <input type="text" ng-model="item.dis_amt" ng-change="calculate_discount_percent(item)" /> </span>
-							<span> <input type="text" ng-model="item.dis_percentage" ng-change="calculate_discount_amt(item)" /> </span> -->
-							<span> [[item.dis_amt]]</span>
-							<span> [[item.dis_percentage]] </span>
+							<span> <input type="text" ng-model="item.dis_amt" ng-change="calculate_discount_percent(item)" /> </span>
+							<span> <input type="text" ng-model="item.dis_percentage" ng-change="calculate_discount_amt(item)" /> </span>
+							
+							<!-- <span> [[item.amt]] </span> -->
 							<span>[[item.net_amount]] </span>
 							<span><a href="" ng-click="remove_from_item_list(item)">X</a> </span>
 							 
@@ -192,7 +192,12 @@
 						<div class="forminput_sales">
 							<input type="text" name="grant_total" ng-model="invoice_details.grant_total" readonly/>
 						</div>
-
+						<div class="formtext_sales">
+							<label for="paid">Paid Amount</label>
+						</div>
+						<div class="forminput_sales">
+							<input type="text" name="paid" ng-model="invoice_details.paid_amount" ng-change="calculate_balance_sale()" readonly>
+						</div>
 						<div class="formtext_sales">
 							<label for="paid">Paid</label>
 						</div>
