@@ -57,7 +57,7 @@ class ItemAdd(View):
                 print str(ex), "Exception ===="
                 res = {
                         'result': 'error',
-                        'message': 'Item already existing abccc'
+                        'message': 'Item already existing'
                     }
                 status_code = 500
 
