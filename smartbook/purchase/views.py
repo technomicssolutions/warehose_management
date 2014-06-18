@@ -41,7 +41,7 @@ class PurchaseDetail(View):
                     'item_code': item.item.code,
                     'item_name': item.item.name,
                     'barcode': item.item.barcode,
-                    'uom': item.item.uom.uom,
+                    'uom': item.item.uom.uom if item.item.uom and item.item else '',
                     'current_stock': inventory.quantity,
                     'frieght': item.item_frieght,
                     'frieght_unit': item.frieght_per_unit,

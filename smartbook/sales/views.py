@@ -963,8 +963,8 @@ class QuotationDeliverynoteSales(View):
     def post(self, request, *args, **kwargs):
 
         sales_dict = ast.literal_eval(request.POST['sales'])
-        delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
-        sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'], delivery_note=delivery_note)
+        # delivery_note = DeliveryNote.objects.get(delivery_note_number=sales_dict['delivery_no'])
+        sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'])
         sales.sales_invoice_number = sales_dict['sales_invoice_number']
         sales.sales_invoice_date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
 
@@ -972,19 +972,19 @@ class QuotationDeliverynoteSales(View):
         sales.customer = customer
         sales.save()
         not_completed_selling = []
+        print sales_dict['sales_items']
         for item_data in sales_dict['sales_items']:
-            for d_item in delivery_note.deliverynoteitem_set.all():
-                if d_item.item.id == item_data['id']:
-                    if int(d_item.quantity_sold) != int(item_data['qty_sold']):
-                        d_item.quantity_sold = d_item.quantity_sold + int(item_data['qty'])
-                        d_item.save()
-                    if d_item.total_quantity == d_item.quantity_sold:
-                        d_item.is_completed = True
-                    if not d_item.is_completed:
-                        not_completed_selling.append(d_item.id)
-        if len(not_completed_selling) == 0:
-            delivery_note.is_pending = False
-            delivery_note.save()
+            d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
+            if int(d_item.quantity_sold) != int(item_data['qty_sold']):
+                d_item.quantity_sold = d_item.quantity_sold + int(item_data['qty'])
+                d_item.save()
+            if d_item.total_quantity == d_item.quantity_sold:
+                d_item.is_completed = True
+                d_item.save()
+            if d_item.is_completed:
+                delivery_note = d_item.delivery_note
+                delivery_note.is_pending = False
+                delivery_note.save()
 
         sales.lpo_number = sales_dict['lpo_number']
 
@@ -1016,16 +1016,13 @@ class QuotationDeliverynoteSales(View):
         sales_items = sales_dict['sales_items']
         for sales_item in sales_items:
            
-            item = InventoryItem.objects.get(code=sales_item['item_code'])
-                    
-            s_item, item_created = SalesItem.objects.get_or_create(item=item, sales=sales)
+            d_item = DeliveryNoteItem.objects.get(id=int(sales_item['delivery_note_item_id']))
+            s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
             s_item.sales = sales
-            s_item.item = item
             s_item.quantity_sold = sales_item['qty']
             s_item.discount_amount = sales_item['dis_amt']
             s_item.discount_percentage = sales_item['dis_percentage']
             s_item.net_amount = sales_item['net_amount']
-            print s_item.net_amount
             s_item.selling_price = sales_item['unit_price']
             # unit price is actually the selling price
             s_item.save()
@@ -1880,5 +1877,65 @@ class CheckReceiptVoucherExistence(View):
         response = simplejson.dumps(res)
         return HttpResponse(response, status=200, mimetype='application/json')
 
+class DeliveryNoteItems(View):
 
+    def get(self, request, *args, **kwargs):
+
+        if request.is_ajax():
+                try:
+                    item_code = request.GET.get('item_code', '')
+                    item_name = request.GET.get('item_name', '')
+                    barcode = request.GET.get('barcode', '')
+                    salesman_name = request.GET.get('salesman', '')
+                    if salesman_name:
+                        salesman = User.objects.get(first_name=salesman_name)
+                    items = []
+                    if item_code:
+                        items = DeliveryNoteItem.objects.filter(item__code__istartswith=item_code, delivery_note__is_pending=True, delivery_note__salesman=salesman)
+                    elif item_name:
+                        items = DeliveryNoteItem.objects.filter(item__name__istartswith=item_name, delivery_note__is_pending=True, delivery_note__salesman=salesman)
+                    elif barcode:
+                        items = DeliveryNoteItem.objects.filter(item__barcode__istartswith=barcode, delivery_note__is_pending=True, delivery_note__salesman=salesman)
+                    print "items === ", items
+                    item_list = []
+                    i = 0
+                    i = i + 1
+                    for delivery_note_item in items:
+                        print delivery_note_item.id, delivery_note_item.total_quantity, delivery_note_item.item.code
+                        item_list.append({
+                            'sl_no': i,
+                            'id': delivery_note_item.item.id,
+                            'item_name': delivery_note_item.item.name +' - ' +delivery_note_item.delivery_note.delivery_note_number,
+                            'item_code': delivery_note_item.item.code,
+                            'barcode': delivery_note_item.item.barcode + ' - ' +delivery_note_item.delivery_note.delivery_note_number if delivery_note_item.item.barcode else '',
+                            'item_description': str(delivery_note_item.item.description),
+                            'qty_sold': delivery_note_item.quantity_sold,
+                            'sold_qty': delivery_note_item.quantity_sold,
+                            'tax': delivery_note_item.item.tax if delivery_note_item.item.tax else '',
+                            'uom': delivery_note_item.item.uom.uom if delivery_note_item.item.uom else '',
+                            'current_stock': delivery_note_item.item.quantity if delivery_note_item.item else 0 ,
+                            'selling_price': delivery_note_item.selling_price if delivery_note_item.selling_price else delivery_note_item.item.selling_price ,
+                            'discount_permit': delivery_note_item.item.discount_permit_percentage if delivery_note_item.item else 0,
+                            'net_amount': delivery_note_item.net_amount,
+                            'discount_given': delivery_note_item.discount,
+                            'total_qty': delivery_note_item.total_quantity,
+                            'remaining_qty': int(delivery_note_item.total_quantity - delivery_note_item.quantity_sold) if delivery_note_item else 0,
+                            'dis_amt': 0,
+                            'dis_percentage': 0,
+                            'code_of_item': delivery_note_item.item.code + ' - ' +delivery_note_item.delivery_note.delivery_note_number, 
+                            'delivery_item_id': delivery_note_item.id,
+                        })
+                        i = i + 1
+
+                    res = {
+                        'items': item_list,
+                    }
+                    response = simplejson.dumps(res)
+
+                except Exception as ex:
+                    print str(ex)
+                    response = simplejson.dumps({'result': 'error', 'error': str(ex)})
+                    status_code = 500
+                status_code = 200
+                return HttpResponse(response, status = status_code, mimetype = 'application/json')
 

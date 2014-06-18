@@ -21,22 +21,6 @@
 				<div class="section_1_sales">
 					
 					<div class="formrow_sales">
-						<div class="formtext_sales">
-							<label for="customer">Delivery No</label>
-						</div>
-
-						<div class="forminput_sales">
-							<input type='text' id="delivery_no" ng-model="delivery_no" ng-change="get_delivery_note_details()"/>
-							<p class="error_message"> [[dn_message]] </p>
-						</div>
-						<div class="item_list delivery_note" ng-show='selecting_delivery_note' ng-hide="delivery_note_selected">
-							<div ng-repeat="delivery_note in delivery_notes" ng-click="add_delivery_note(delivery_note)" class="item_list_row">
-								<span>[[delivery_note.delivery_no]]</span>
-							</div>
-							<div class="clear"></div>
-						</div>
-					</div>
-					<div class="formrow_sales">
 						<div class="formtext_sales	">
 							<label for="Date ">Date </label>
 						</div>
@@ -51,8 +35,13 @@
 							<label for="salesman">Salesman Name</label>
 						</div>
 						<div class="forminput_sales">
-							<input type="text" name="salesman"  id="salesman" ng-model="sales.salesman" readonly/>
+							<select name="customer" ng-model="sales.salesman">
+								<option value="select">Select</option>
+								<option ng-repeat="salesman in salesmen" value="[[salesman.salesman_name]]" ng-selected="salesman.salesman_name == sales.salesman">[[salesman.salesman_name]]
+								</option>
+							</select>							
 						</div>
+						<p class="error_message">[[salesman_validation_error]]</p>
 					</div>
 
 					<div class="formrow_sales">
@@ -75,6 +64,39 @@
 					</div>
 
 				</div>	
+
+				<div class="section_3_sales">
+					<div class="search_sales">
+						<div class="control">
+							<label> Item Code </label>
+   							<input type='text' id="item_code" ng-model="item_code" ng-change="getItems('item_code')"/>
+   						</div>
+   						<div class="control">
+   							<label> Item name </label>
+   							<input type="text" id='item_name' ng-model="item_name" ng-change="getItems('item_name')"/>
+   						</div>
+   						<div class="control">
+   							<label> Barcode </label>
+   							<input type="text" id='barcode' ng-model="barcode" ng-change="getItems('barcode')"/>
+   						</div>
+   						<div class="clear"></div>
+	   					<div class="item_list" ng-show='selecting_item' ng-hide="item_selected">
+							<div class="item_list_row header">
+								<span> Item Code </span>
+								<span> Item name </span>
+								<span> Barcode </span>
+							</div>
+							<div ng-repeat="item in items" ng-click="addSalesItem(item)" class="item_list_row">
+								
+								<span>[[item.code_of_item]]</span>
+								<span>[[item.item_name]]</span>
+								<span>[[item.barcode]] </span>
+							</div>
+							<div class="clear"></div>
+						</div>
+    				</div>
+    				<div class="clear"></div>
+   				</div>
 				
 			
    				<div class="purchase_items_list" ng-show="sales.sales_items.length > 0">
@@ -150,7 +172,7 @@
 								
 							</select>
 						</div>
-
+					
 						<div class="formtext_sales" id="radio">
 							<label for="payment_mode">Payment Mode</label>
 						</div>
@@ -160,6 +182,7 @@
 							<input type="radio" name="payment_mode" ng-model="sales.payment_mode" value="credit" ng-change="payment_mode_change_sales('credit')"><label>Credit</label>
 
 						</div>
+					
 						<!-- <div class="formtext_sales">
 							<label for="card_number">Card Number</label>
 						</div> -->
@@ -183,7 +206,6 @@
 						<div class="forminput_sales">
 							<input type="text" name="net_total"ng-model="sales.net_total" readonly/ >
 						</div>
-					
 						<div class="formtext_sales">
 							<label for="discount">Itemwise Discount</label>
 						</div>
@@ -197,15 +219,14 @@
 						<div class="forminput_sales">
 							<input type="text" name="net_discount" ng-model="sales.discount_sale"ng-change="calculate_discount_sale_percentage()"/>
 						</div>
-
+					
 						<div class="formtext_sales">
 							<label for="discount">Discount for sale percentage</label>
 						</div>
 						<div class="forminput_sales">
 							<input type="text" name="net_discount" ng-model="sales.discount_sale_percentage" ng-change="calculate_discount_sale_amt()"/>
 						</div>
-
-
+					
 						<div class="formtext_sales">
 							<label for="round">Round Off</label>
 						</div>
