@@ -1234,26 +1234,25 @@ class InvoiceDetails(View):
         if invoices.count() > 0:
             for sales_invoice in invoices:
                 net_amount = 0
-                delivery_note = sales_invoice.delivery_note
+                # delivery_note = sales_invoice.delivery_note
                 for sale in sales_invoice.salesitem_set.all():
                     current_stock = 0
-                    for item in delivery_note.deliverynoteitem_set.all():
-                        if item.item.code == sale.item.code:
-                            current_stock = item.total_quantity
-                            remaining_qty = int(item.total_quantity) - int(item.quantity_sold)
+                    print sale.delivery_note_item
+                    current_stock = sale.delivery_note_item.total_quantity if sale.delivery_note_item else 0
+                    remaining_qty = int(sale.delivery_note_item.total_quantity) - int(sale.delivery_note_item.quantity_sold) if sale.delivery_note_item and sale.delivery_note_item else 0
                     ctx_sales_item.append({
                         'sl_no': i,
-                        'item_name': sale.item.name,
-                        'item_code': sale.item.code,
-                        'barcode': sale.item.barcode if sale.item.barcode else '',
-                        'item_description': sale.item.description if sale.item.description else '',
+                        'item_name': sale.delivery_note_item.item.name if sale.delivery_note_item and sale.delivery_note_item.item.name else '',
+                        'item_code': sale.delivery_note_item.item.code if sale.delivery_note_item and sale.delivery_note_item.item.code else '',
+                        'barcode': sale.delivery_note_item.item.barcode if sale.delivery_note_item and sale.delivery_note_item.item.barcode else '',
+                        'item_description': sale.delivery_note_item.item.description if sale.delivery_note_item and sale.delivery_note_item.item.description  else '',
                         'qty_sold': sale.quantity_sold,
                         'qty': 0,
-                        'tax': sale.item.tax if sale.item.tax else '',
-                        'uom': sale.item.uom.uom if sale.item.uom else '',
+                        'tax': sale.delivery_note_item.item.tax if sale.delivery_note_item and sale.delivery_note_item.item.tax else '',
+                        'uom': sale.delivery_note_item.item.uom.uom if sale.delivery_note_item and sale.delivery_note_item.item.uom else '',
                         'current_stock': current_stock,
                         'selling_price': sale.selling_price,
-                        'discount_permit': sale.item.discount_permit_percentage if sale.item else 0,
+                        'discount_permit': sale.delivery_note_item.item.discount_permit_percentage if sale.delivery_note_item and sale.delivery_note_item.item else 0,
                         'net_amount': sale.net_amount,
                         'discount': sale.discount_amount if sale.discount_amount else 0,
                         'dis_percentage': sale.discount_percentage if sale.discount_percentage else 0,
@@ -1266,8 +1265,7 @@ class InvoiceDetails(View):
                     'invoice_no': sales_invoice.sales_invoice_number,
                     'date': sales_invoice.sales_invoice_date.strftime('%d/%m/%Y') if sales_invoice.sales_invoice_date else '',
                     'customer': sales_invoice.customer.customer_name if sales_invoice.customer else '',
-                    'delivery_note_no': sales_invoice.delivery_note.delivery_note_number if sales_invoice.delivery_note else '',
-                    'lpo_number': sales_invoice.delivery_note.lpo_number if sales_invoice.delivery_note else '',
+                    'lpo_number': sales_invoice.lpo_number if sales_invoice else '',
                     'items': ctx_sales_item,
                     'salesman': sales_invoice.salesman.first_name if sales_invoice.salesman else '',
                     'payment_mode': sales_invoice.payment_mode,
@@ -1483,7 +1481,6 @@ class EditSalesInvoice(View):
         sales_invoice_details = ast.literal_eval(request.POST['invoice'])
         sales = Sales.objects.get(id = sales_invoice_details['id'])
         stored_item_names = []
-        delivery_note = sales.delivery_note
         customer = sales.customer
         for s_item in sales.salesitem_set.all():
             stored_item_names.append(s_item.item.code)
@@ -1496,24 +1493,23 @@ class EditSalesInvoice(View):
 
             # Removing the sales item object that is not in inputed sales items list
             if s_item.item.code not in s_item_names:
-                for d_item in delivery_note.deliverynoteitem_set.all():
-                    if d_item.item.code == s_item.item.code:
-                        d_item.quantity_sold = int(d_item.quantity_sold) - int(s_item.quantity_sold)
-                        if d_item.is_completed:
-                            d_item.is_completed = False
-                            d_item.save()
-                            delivery_note.is_pending = True
-                            delivery_note.save()
-                        s_item.delete()
+                d_item = s_item.delivery_note_item
+                d_item.quantity_sold = int(d_item.quantity_sold) - int(s_item.quantity_sold)
+                if d_item.is_completed:
+                    d_item.is_completed = False
+                    d_item.save()
+                    delivery_note = d_item.delivery_note
+                    delivery_note.is_pending = True
+                    delivery_note.save()
+                s_item.delete()
             else:
                 for item_data in sales_invoice_details['sales_items']:
                     if item_data['qty'] != 0:
-                        for d_item in delivery_note.deliverynoteitem_set.all():
-                            if d_item.item.code == item_data['item_code']:
-                                d_item.quantity_sold = int(item_data['qty_sold']) 
-                                if d_item.quantity_sold == d_item.total_quantity:
-                                    d_item.is_completed = True
-                                d_item.save()
+                        d_item = DeliveryNoteItem.objects.get(id=item_data['delivery_note_item_id'])
+                        d_item.quantity_sold = int(item_data['qty_sold']) 
+                        if d_item.quantity_sold == d_item.total_quantity:
+                            d_item.is_completed = True
+                        d_item.save()
                         s_item.sales = sales
                         s_item.quantity_sold = int(item_data['qty_sold'])
                         s_item.discount_amount = item_data['dis_amt']
@@ -1526,14 +1522,14 @@ class EditSalesInvoice(View):
         for item_data in sales_invoice_details['sales_items']:
 
             if item_data['item_code'] not in stored_item_names:
-                item = InventoryItem.objects.get(code=item_data['item_code'])
-                s_item, item_created = SalesItem.objects.get_or_create(item=item, sales=sales)
-                for d_item in delivery_note.deliverynoteitem_set.all():
-                    if d_item.item.code == s_item.item.code:
-                        d_item.quantity_sold = int(d_item.quantity_sold) - int(item_data['qty_sold'])
-                        if d_item.quantity_sold == d_item.total_quantity:
-                            d_item.is_completed = True
-                        d_item.save()
+                d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
+                s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
+                
+                d_item.quantity_sold = int(d_item.quantity_sold) - int(item_data['qty_sold'])
+                if d_item.quantity_sold == d_item.total_quantity:
+                    d_item.is_completed = True
+                d_item.save()
+                s_item.delivery_note_item = d_item
                 s_item.sales = sales
                 s_item.quantity_sold = item_data['qty_sold']
                 s_item.discount_amount = item_data['dis_amount']
@@ -1577,18 +1573,21 @@ class EditSalesInvoice(View):
         sales.save()
         not_completed_selling = []
         for item_data in sales_invoice_details['sales_items']:
-            for d_item in delivery_note.deliverynoteitem_set.all():
-                if d_item.item.code == item_data['item_code']:
-                    if d_item.total_quantity != d_item.quantity_sold:
-                        d_item.is_completed = True
-                    else:
-                        d_item.is_completed = False
-                    d_item.save()
-                    if not d_item.is_completed:
-                        not_completed_selling.append(d_item.id)
-        if len(not_completed_selling) != 0:
-            delivery_note.is_pending = False
-            delivery_note.save()
+            d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
+            if d_item.total_quantity != d_item.quantity_sold:
+                d_item.is_completed = True
+            else:
+                d_item.is_completed = False
+            d_item.save()
+            delivery_note = d_item.delivery_note
+            
+            for item in delivery_note.deliverynoteitem_set.all():
+                if not item.is_completed:
+                    not_completed_selling.append(item.id)
+
+            if len(not_completed_selling) != 0:
+                delivery_note.is_pending = False
+                delivery_note.save()
 
 
         res = {
