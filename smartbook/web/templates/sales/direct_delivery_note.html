@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block body_id %}direct_delivery_note{% endblock %}
+{% block body_id %}delivery_note_to_salesman{% endblock %}
 
-{% block title %}Direct Delivery Note{% endblock title %}
+{% block title %}Delivery Note To Salesman{% endblock title %}
 {% block controller %}ng-controller="DirectDeliveryNoteController" ng-init="init('{{csrf_token}}', '{{delivery_no}}')"{% endblock controller %}
 
 {% block dialogue_popup %}
@@ -13,7 +13,7 @@
 {% block content %}
 
 <div id="main-title">
-		<div class="alert alert-info" align="Center"><h4>Direct Delivery Note</h4></div>
+		<div class="alert alert-info" align="Center"><h4>Delivery Note To Salesman</h4></div>
 	</div>
 
 	<div class="sales_form_container">

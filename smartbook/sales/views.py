@@ -330,7 +330,7 @@ class DeliveryNotePDF(View):
         para_style = ParagraphStyle('fancy')
         para_style.fontSize = 20
         para_style.fontName = 'Helvetica'
-        para = Paragraph('<b> DELIVERY NOTE </b>', para_style)
+        para = Paragraph('<b> DELIVERY NOTE TO SALESMAN</b>', para_style)
 
         data =[['', delivery_note.date.strftime('%d-%m-%Y'), para , delivery_note.delivery_note_number]]
         
@@ -1509,9 +1509,7 @@ class EditSalesInvoice(View):
                 s_item_names.append(item_data['item_code'])
 
             # Removing the sales item object that is not in inputed sales items list
-            print s_item_names
             if s_item.delivery_note_item.item.code not in s_item_names:
-                print s_item.delivery_note_item.item.code
                 d_item = s_item.delivery_note_item
                 d_item.quantity_sold = int(d_item.quantity_sold) - int(s_item.quantity_sold)
                 d_item.save()
