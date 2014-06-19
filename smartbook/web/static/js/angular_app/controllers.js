@@ -3475,7 +3475,6 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         });
     }
     $scope.add_invoice = function(invoice) {
-        console.log(invoice.items);
         $scope.invoice_selected = true;
         $scope.invoice_no = invoice.invoice_no;
         $scope.invoice_details.invoice_no = invoice.invoice_no;
@@ -3497,7 +3496,6 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         $scope.invoice_details.id = invoice.id;
         $scope.invoice_details.paid_amount = invoice.paid,
         $scope.payment_mode_change_sales(invoice.payment_mode);
-        console.log(invoice.discount_sale, invoice.discount_sale_percentage);
         $scope.invoice_details.discount_sale = invoice.discount_sale;
         $scope.invoice_details.discount_sale_percentage = invoice.discount_sale_percentage;
         $scope.invoice_details.sales_items = [];
@@ -3548,7 +3546,6 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         
         for (var i=0; i< $scope.invoice_details.sales_items.length; i++) {
             item = $scope.invoice_details.sales_items[i]
-            console.log(item.qty_sold, item.unit_price,item.disc_given)
             if(item.qty_sold != '' && item.unit_price != ''){
                 item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))-parseFloat(item.disc_given)).toFixed(2);
                 $scope.calculate_net_discount_sale();
@@ -3570,7 +3567,6 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     }
     
     $scope.calculate_net_amount_sale = function(item) {
-        console.log(item.remaining_qty,item.qty_sold)
         if(parseInt(item.total_qty) < parseInt(item.qty_sold)) {
             $scope.validation_error = "Quantity not in stock";
             return false;
@@ -3594,9 +3590,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         if(item.qty != '' && item.unit_price != ''){
            
             $scope.validation_error = '';
-            console.log(item.current_stock, item.qty_sold);
             if(item.qty != '') {
-                console.log(parseInt(item.sold_qty));
                 item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
                 item.remaining_qty = parseInt(item.remaining) - parseInt(item.qty);
             }
@@ -3657,7 +3651,6 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     }
 
     $scope.calculate_balance_sale = function () {
-        console.log($scope.invoice_details.balance);
         $scope.invoice_details.balance = (parseFloat($scope.invoice_details.grant_total) - parseFloat($scope.invoice_details.paid_amount)) - parseFloat($scope.invoice_details.paid);
     }
 
@@ -3808,6 +3801,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             'dis_percentage': 0,
             'delivery_note_item_id': item.delivery_item_id,
             'code_of_item': item.code_of_item,
+            'remaining': item.remaining_qty,
 
         }
         $scope.invoice_details.sales_items.push(selected_item);
@@ -4301,7 +4295,6 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                 
             }
         }
-        console.log($scope.delivery_note);
     }
     $scope.remove_from_item_list = function(item) {
         var index = $scope.delivery_note.sales_items.indexOf(item);

@@ -972,7 +972,6 @@ class QuotationDeliverynoteSales(View):
         sales.customer = customer
         sales.save()
         not_completed_selling = []
-        print sales_dict['sales_items']
         for item_data in sales_dict['sales_items']:
             d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
             if int(d_item.quantity_sold) != int(item_data['qty_sold']):
@@ -981,10 +980,7 @@ class QuotationDeliverynoteSales(View):
             if d_item.total_quantity == d_item.quantity_sold:
                 d_item.is_completed = True
                 d_item.save()
-            if d_item.is_completed:
-                delivery_note = d_item.delivery_note
-                delivery_note.is_pending = False
-                delivery_note.save()
+            
 
         sales.lpo_number = sales_dict['lpo_number']
 
@@ -1026,6 +1022,23 @@ class QuotationDeliverynoteSales(View):
             s_item.selling_price = sales_item['unit_price']
             # unit price is actually the selling price
             s_item.save()
+        not_completed_selling = []
+        for sales_item in sales.salesitem_set.all():
+            d_item = sales_item.delivery_note_item
+            delivery_note = d_item.delivery_note
+            for delivery_item in delivery_note.deliverynoteitem_set.all():
+                if int(delivery_item.total_quantity) != int(delivery_item.quantity_sold):
+                    not_completed_selling.append(delivery_item.id)
+                    d_item.is_completed = False
+                else:
+                    d_item.is_completed = True
+                d_item.save() 
+            if len(not_completed_selling) == 0:
+                delivery_note.is_pending = False
+            else:
+                delivery_note.is_pending = True
+            delivery_note.save()
+            not_completed_selling = [] 
                     
         res = {
             'result': 'Ok',
@@ -1510,19 +1523,23 @@ class EditSalesInvoice(View):
                 for item_data in sales_invoice_details['sales_items']:
                     if item_data['qty'] != 0:
                         item = InventoryItem.objects.get(code=item_data['item_code'])
-                        print item_data['qty_sold'], item_data['item_code']
                         d_item = DeliveryNoteItem.objects.get(id=item_data['delivery_note_item_id'], item=item)
-                        d_item.quantity_sold = int(item_data['qty_sold']) 
-                        if d_item.quantity_sold == d_item.total_quantity:
-                            d_item.is_completed = True
-                        d_item.save()
-                        s_item.sales = sales
-                        s_item.quantity_sold = int(item_data['qty_sold'])
-                        s_item.discount_amount = item_data['dis_amt']
-                        s_item.discount_percentage = item_data['dis_percentage']
-                        s_item.net_amount = item_data['net_amount']
-                        s_item.selling_price = item_data['unit_price']
-                        s_item.save()
+                        sales_item = d_item.salesitem_set.all()
+                        if sales_item.count() > 0:
+                            sales_item = sales_item[0]
+                            if s_item.id == sales_item.id:
+                                d_item.quantity_sold = int(item_data['qty_sold']) 
+                                d_item.save()
+                                if int(d_item.quantity_sold) == int(d_item.total_quantity):
+                                    d_item.is_completed = True
+                                d_item.save()
+                                s_item.sales = sales
+                                s_item.quantity_sold = int(item_data['qty_sold'])
+                                s_item.discount_amount = item_data['dis_amt']
+                                s_item.discount_percentage = item_data['dis_percentage']
+                                s_item.net_amount = item_data['net_amount']
+                                s_item.selling_price = item_data['unit_price']
+                                s_item.save()
 
         # Create new sales item for the newly added item
         for item_data in sales_invoice_details['sales_items']:
@@ -1530,8 +1547,7 @@ class EditSalesInvoice(View):
             if item_data['item_code'] not in stored_item_names:
                 d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
                 s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
-                
-                d_item.quantity_sold = int(d_item.quantity_sold) - int(item_data['qty_sold'])
+                d_item.quantity_sold = int(item_data['qty_sold'])
                 if d_item.quantity_sold == d_item.total_quantity:
                     d_item.is_completed = True
                 d_item.save()
@@ -1579,9 +1595,8 @@ class EditSalesInvoice(View):
         sales.save()
         not_completed_selling = []
         for item_data in sales_invoice_details['sales_items']:
-            print item_data
             d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
-            if d_item.total_quantity != d_item.quantity_sold:
+            if d_item.total_quantity == d_item.quantity_sold:
                 d_item.is_completed = True
             else:
                 d_item.is_completed = False
@@ -1900,17 +1915,15 @@ class DeliveryNoteItems(View):
                         salesman = User.objects.get(first_name=salesman_name)
                     items = []
                     if item_code:
-                        items = DeliveryNoteItem.objects.filter(item__code__istartswith=item_code, delivery_note__is_pending=True, delivery_note__salesman=salesman)
+                        items = DeliveryNoteItem.objects.filter(item__code__istartswith=item_code, is_completed=False, delivery_note__salesman=salesman)
                     elif item_name:
-                        items = DeliveryNoteItem.objects.filter(item__name__istartswith=item_name, delivery_note__is_pending=True, delivery_note__salesman=salesman)
+                        items = DeliveryNoteItem.objects.filter(item__name__istartswith=item_name, is_completed=False, delivery_note__salesman=salesman)
                     elif barcode:
-                        items = DeliveryNoteItem.objects.filter(item__barcode__istartswith=barcode, delivery_note__is_pending=True, delivery_note__salesman=salesman)
-                    print "items === ", items
+                        items = DeliveryNoteItem.objects.filter(item__barcode__istartswith=barcode, is_completed=False, delivery_note__salesman=salesman)
                     item_list = []
                     i = 0
                     i = i + 1
                     for delivery_note_item in items:
-                        print delivery_note_item.id, delivery_note_item.total_quantity, delivery_note_item.item.code
                         item_list.append({
                             'sl_no': i,
                             'id': delivery_note_item.item.id,
