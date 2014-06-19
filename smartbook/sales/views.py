@@ -168,11 +168,16 @@ class SalesReturnView(View):
 
             return_item.quantity = return_item.quantity + int(item['returned_quantity'])
             return_item.save()
-            delivery_note = sales.delivery_note
-
-            deliverynote_item = DeliveryNoteItem.objects.get(item=return_item, delivery_note=delivery_note)
+            # for s_item in sales.salesitem_set.all():
+            s_item = sales.salesitem_set.filter(delivery_note_item__item=return_item)
+            print s_item, s_item.count()
+            deliverynote_item = s_item[0].delivery_note_item
             deliverynote_item.quantity_sold = deliverynote_item.quantity_sold - int(item['returned_quantity'])
+            deliverynote_item.is_completed = False
             deliverynote_item.save()
+            delivery_note = delivery_note_item.delivery_note
+            delivery_note.is_pending = True
+            delivery_note.save() 
         response = {
                 'result': 'Ok',
             }
@@ -207,13 +212,13 @@ class SalesDetails(View):
                     else:
                         return_quantity = int(item.quantity_sold)
                     sl_items.append({
-                        'item_code': item.item.code,
-                        'item_name': item.item.name,
-                        'barcode': item.item.barcode if item.item.barcode else '',
-                        'stock': item.item.quantity,
+                        'item_code': item.delivery_note_item.item.code,
+                        'item_name': item.delivery_note_item.item.name,
+                        'barcode': item.delivery_note_item.item.barcode if item.delivery_note_item.item.barcode else '',
+                        'stock': item.delivery_note_item.item.quantity,
                         'unit_price': item.selling_price,
-                        'tax': item.item.tax if item.item.tax else 0 ,
-                        'uom': item.item.uom.uom if item.item.uom else '',
+                        'tax': item.delivery_note_item.item.tax if item.delivery_note_item.item.tax else 0 ,
+                        'uom': item.delivery_note_item.item.uom.uom if item.delivery_note_item.item.uom else '',
                         'quantity_sold': item.quantity_sold,
                         'discount_given': item.discount_amount,
                         'max_return_qty': return_quantity,
