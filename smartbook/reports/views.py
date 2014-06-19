@@ -121,10 +121,10 @@ class SalesReports(View):
                 return render(request, 'reports/sales_reports.html', ctx)                  
             else:
 
+                report_heading = 'Date Wise Sales Report' + ' - ' + payment_mode + ' - ' + start + ' - ' + end
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
                 p = header(p)
-                report_heading = 'Date Wise Sales Report' + ' - ' + payment_mode
                 p.drawString(350, 900, report_heading)
                 p.setFontSize(13)
                 p.drawString(50, 875, "Date")
@@ -252,7 +252,7 @@ class SalesReports(View):
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
                 p = header(p)
-                report_heading = 'Item Wise Sales Report' + ' - ' + payment_mode
+                report_heading = 'Item Wise Sales Report' + ' - ' + payment_mode + ' - ' + item_code
                 p.drawString(325, 900, report_heading)
                 p.setFontSize(13)
                 p.drawString(50, 875, "Item Code")
@@ -479,6 +479,8 @@ class SalesReports(View):
             start = request.GET['start_date']
             end = request.GET['end_date']
             salesman_name = request.GET['salesman_name']
+            payment_mode = request.GET['payment_mode']
+            print payment_mode
 
             if start is None:
                 return render(request, 'reports/sales_reports.html', {})
@@ -515,9 +517,10 @@ class SalesReports(View):
 
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
+                report_heading = 'Salesman Wise Sales Report' + ' - ' + salesman_name + ' - ' + payment_mode
                 p = header(p)
 
-                p.drawString(425, 900, 'Salesman Wise Sales Report')
+                p.drawString(425, 900, report_heading)
                 p.setFontSize(13)
                 p.drawString(30, 875, "Date")
                 p.drawString(100, 875, "Invoice Number")
@@ -532,7 +535,7 @@ class SalesReports(View):
                 y = 850
                          
                 salesmen = User.objects.filter(first_name=salesman_name)                
-                sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date,salesman=salesmen)
+                sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date,salesman=salesmen, payment_mode=payment_mode)
                 
                 if sales.count()>0:                    
                     for sale in sales:
@@ -540,7 +543,7 @@ class SalesReports(View):
                         for item in items:
                             dates = item.sales.sales_invoice_date
                             invoice_no = item.sales.sales_invoice_number
-                            item_name = item.delivery_note_item.item.name
+                            item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
                             qty = item.quantity_sold
                             discount = item.discount_amount
                             selling_price = 0                            
@@ -549,9 +552,14 @@ class SalesReports(View):
                             
                             total = selling_price * qty
 
-                            purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                            # purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                            try:
+                                purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                                purchase_count = purchases.count()
+                            except:
+                                purchase_count = 0
                             avg_cp = 0
-                            if purchases.count()>0:                                
+                            if purchase_count > 0:                                
                                 for purchase in purchases:
                                     cost_price = cost_price + purchase.cost_price
                                     i = i + 1
