@@ -61,7 +61,38 @@
 						<input type="text" name="lpo_number"  ng-model="invoice_details.lpo_number" readonly/>
 					</div>
 				</div>
-				
+				<div class="section_3_sales">
+					<div class="search_sales">
+						<div class="control">
+							<label> Item Code </label>
+   							<input type='text' id="item_code" ng-model="item_code" ng-change="getItems('item_code')"/>
+   						</div>
+   						<div class="control">
+   							<label> Item name </label>
+   							<input type="text" id='item_name' ng-model="item_name" ng-change="getItems('item_name')"/>
+   						</div>
+   						<div class="control">
+   							<label> Barcode </label>
+   							<input type="text" id='barcode' ng-model="barcode" ng-change="getItems('barcode')"/>
+   						</div>
+   						<div class="clear"></div>
+	   					<div class="item_list" ng-show='selecting_item' ng-hide="item_selected">
+							<div class="item_list_row header">
+								<span> Item Code </span>
+								<span> Item name </span>
+								<span> Barcode </span>
+							</div>
+							<div ng-repeat="item in items" ng-click="addSalesItem(item)" class="item_list_row">
+								
+								<span>[[item.code_of_item]]</span>
+								<span>[[item.item_name]]</span>
+								<span>[[item.barcode]] </span>
+							</div>
+							<div class="clear"></div>
+						</div>
+    				</div>
+    				<div class="clear"></div>
+   				</div>
    				<div class="purchase_items_list" ng-show="invoice_details.sales_items.length > 0">
    					<div class="purchase_item_list">
    						
