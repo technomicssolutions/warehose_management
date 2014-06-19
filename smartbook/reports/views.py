@@ -155,9 +155,14 @@ class SalesReports(View):
                             if item.selling_price:
                                 selling_price = item.selling_price	
 
-                            purchases = item.delivery_note_item.item.purchaseitem_set.all() if item.delivery_note_item else []
+                            try:
+                                purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                                purchase_count = purchases.count()
+                            except:
+                                purchase_count = 0
+                            # purchases = item.delivery_note_item.item.purchaseitem_set.all() if item.delivery_note_item else []
                             avg_cp = 0
-                            if len(purchases) > 0:                                
+                            if purchase_count > 0:                                
                                 for purchase in purchases:                                
                                     cost_price = cost_price + purchase.cost_price
                                     i = i + 1
@@ -277,9 +282,15 @@ class SalesReports(View):
                         if salesitem.selling_price:                       
                         	selling_price = salesitem.selling_price                            
 
-                        purchases = salesitem.delivery_note_item.item.purchaseitem_set.all()
+                        try:
+                            purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                            purchase_count = purchases.count()
+                        except:
+                            purchase_count = 0
+                        
+                        # purchases = salesitem.delivery_note_item.item.purchaseitem_set.all()
                         avg_cp = 0
-                        if purchases.count()>0:
+                        if purchase_count > 0:
                             for purchase in purchases:
                                 cost_price = cost_price + purchase.cost_price
                                 i = i + 1
@@ -336,6 +347,8 @@ class SalesReports(View):
             start = request.GET['start_date']
             end = request.GET['end_date']       
             customer_name = request.GET['customer_name']
+            payment_mode = request.GET['payment_mode']
+            print payment_mode
 
             if start is None:
                 return render(request, 'reports/sales_reports.html', {})
@@ -373,7 +386,8 @@ class SalesReports(View):
                 end_date = datetime.strptime(end, '%d/%m/%Y')
                 p = header(p)
 
-                p.drawString(350, 900, 'Customer Wise Sales Report')
+                report_heading = 'Customer Wise Sales Report' + ' - ' + payment_mode + ' - ' + customer_name
+                p.drawString(350, 900, report_heading)
                 p.setFontSize(13)
                 p.drawString(50, 875, "Date")
                 p.drawString(110, 875, "Invoice Number")
@@ -389,14 +403,14 @@ class SalesReports(View):
 
                 
                 customer = Customer.objects.get(customer_name = customer_name)
-                sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date,customer=customer)
+                sales = Sales.objects.filter(sales_invoice_date__gte=start_date, sales_invoice_date__lte=end_date, customer=customer, payment_mode=payment_mode)
                 if sales.count()>0:
                     for sale in sales:
                         items = sale.salesitem_set.all()
                         for item in items:
                             dates = item.sales.sales_invoice_date
                             invoice_no = item.sales.sales_invoice_number
-                            item_name = item.delivery_note_item.item.name
+                            item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
                             qty = item.quantity_sold
                             discount = item.discount_amount
                             selling_price = 0                            
@@ -404,10 +418,15 @@ class SalesReports(View):
                             	selling_price = item.selling_price
                             
                             total = selling_price * qty
-
-                            purchases = item.delivery_note_item.delivery_note_item.item.purchaseitem_set.all()
                             avg_cp = 0
-                            if purchases.count()>0:                                
+                            purchase_count = 0
+                            
+                            try:
+                                purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                                purchase_count = purchases.count()
+                            except:
+                                purchase_count = 0
+                            if purchase_count>0:                                
                                 for purchase in purchases:
                                     cost_price = cost_price + purchase.cost_price
                                     i = i + 1
