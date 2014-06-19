@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block body_id %}delivery_note_to_salesman{% endblock %}
+{% block body_id %}direct_delivery_note{% endblock %}
 
 {% block title %}Delivery Note To Salesman{% endblock title %}
 {% block controller %}ng-controller="DirectDeliveryNoteController" ng-init="init('{{csrf_token}}', '{{delivery_no}}')"{% endblock controller %}
