@@ -175,7 +175,7 @@ class SalesReturnView(View):
             deliverynote_item.quantity_sold = deliverynote_item.quantity_sold - int(item['returned_quantity'])
             deliverynote_item.is_completed = False
             deliverynote_item.save()
-            delivery_note = delivery_note_item.delivery_note
+            delivery_note = deliverynote_item.delivery_note
             delivery_note.is_pending = True
             delivery_note.save() 
         response = {
