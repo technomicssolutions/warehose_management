@@ -1880,6 +1880,7 @@ function SalesReportController($scope, $element, $http, $timeout, $location){
     $scope.report_salesman_wise = false; 
     $scope.error_flag = false;   
     $scope.report_type = 'date';
+    $scope.payment_mode = 'cash';
 
     $scope.init = function(csrf_token,report_type){ 
 

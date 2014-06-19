@@ -26,6 +26,13 @@
 			<label for="e_date">End Date</label>
 			<input type="text" name="end_date" id="end_date" value="{{end_date}}">
 		</div>
+		<div class="reportinput" id="radio">
+			<label for="payment_mode">Payment Mode</label>
+			<div class="payment_mode">
+				<input type="radio" name="payment_mode" id="payment_mode" ng-model="payment_mode" value="cash"><label>Cash</label>
+				<input type="radio" name="payment_mode" id="payment_mode" ng-model="payment_mode" value="credit"><label>Credit</label>
+			</div>
+		</div>
 		<div ng-show="report_item_wise">
 				
 			<div class="reportinput">

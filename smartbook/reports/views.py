@@ -100,6 +100,8 @@ class SalesReports(View):
 
             start = request.GET['start_date']
             end = request.GET['end_date']
+            payment_mode = request.GET['payment_mode']
+            print payment_mode
            
             if not start:            
                 ctx = {
@@ -122,8 +124,8 @@ class SalesReports(View):
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
                 p = header(p)
-
-                p.drawString(350, 900, 'Date Wise Sales Report')
+                report_heading = 'Date Wise Sales Report' + ' - ' + payment_mode
+                p.drawString(350, 900, report_heading)
                 p.setFontSize(13)
                 p.drawString(50, 875, "Date")
                 p.drawString(110, 875, "Invoice Number")
@@ -137,7 +139,7 @@ class SalesReports(View):
 
                 y = 850
 
-                sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
+                sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date, payment_mode=payment_mode)
                 if sales.count()>0:
                     for sale in sales:
                         round_off = round_off + sale.round_off
@@ -147,15 +149,15 @@ class SalesReports(View):
                             dates = item.sales.sales_invoice_date
                             invoice_no = item.sales.sales_invoice_number
                             qty = item.quantity_sold
-                            item_name = item.delivery_note_item.item.name
-                            inventorys = item.delivery_note_item.item
+                            item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
+                            inventorys = item.delivery_note_item.item if item.delivery_note_item else ''
                             selling_price = 0  
                             if item.selling_price:
                                 selling_price = item.selling_price	
 
-                            purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                            purchases = item.delivery_note_item.item.purchaseitem_set.all() if item.delivery_note_item else []
                             avg_cp = 0
-                            if purchases.count()>0:                                
+                            if len(purchases) > 0:                                
                                 for purchase in purchases:                                
                                     cost_price = cost_price + purchase.cost_price
                                     i = i + 1
@@ -210,7 +212,8 @@ class SalesReports(View):
             start = request.GET['start_date']
             end = request.GET['end_date']
             item_code = request.GET['item']          
-
+            payment_mode = request.GET['payment_mode']
+            print payment_mode
             
             if not start:            
                 ctx = {
@@ -244,8 +247,8 @@ class SalesReports(View):
                 start_date = datetime.strptime(start, '%d/%m/%Y')
                 end_date = datetime.strptime(end, '%d/%m/%Y')
                 p = header(p)
-
-                p.drawString(325, 900, 'Item Wise Sales Report')
+                report_heading = 'Item Wise Sales Report' + ' - ' + payment_mode
+                p.drawString(325, 900, report_heading)
                 p.setFontSize(13)
                 p.drawString(50, 875, "Item Code")
                 p.drawString(120, 875, "Item Name")
@@ -258,7 +261,7 @@ class SalesReports(View):
 
                 y = 850       
                 item = InventoryItem.objects.get(code=item_code)
-                salesitems = SalesItem.objects.filter(sales__sales_invoice_date__gte=start_date, sales__sales_invoice_date__lte=end_date,delivery_note_item__item=item)
+                salesitems = SalesItem.objects.filter(sales__sales_invoice_date__gte=start_date, sales__sales_invoice_date__lte=end_date, delivery_note_item__item=item, sales__payment_mode=payment_mode)
                 # sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
                 # if sales.count()>0:
                 #     for sale in sales:

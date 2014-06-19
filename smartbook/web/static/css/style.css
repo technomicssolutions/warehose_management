@@ -914,3 +914,21 @@ a {
 #opening_stock_entry .item_list .item_list_row span {
     width: 80%;
 }
+
+#radio {
+	width: 10% !important;
+}
+
+.payment_mode {
+    height: 32px;
+    width: 100%;
+}
+
+.payment_mode label {
+	float: left;
+	margin-left: 5px;
+}
+.payment_mode input {
+	float: left;
+	margin-left: 5px;
+}
