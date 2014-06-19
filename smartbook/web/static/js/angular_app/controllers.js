@@ -1219,7 +1219,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             console.log(params);
             $http({
                 method : 'post',
-                url : "/sales/deliverynote_sales/",
+                url : "/sales/salesman_deliverynote_sales/",
                 data : $.param(params),
                 headers : {
                     'Content-Type' : 'application/x-www-form-urlencoded'
