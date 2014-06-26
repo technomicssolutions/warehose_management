@@ -995,20 +995,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         var customer_name = $scope.sales.customer;
         var item_name = item.item_name;
         $scope.latest_sales = []
-        // $http.get('/sales/latest_sales_details/?customer='+customer_name+'&item_name='+item_name).success(function(data)
-        // {   
-            
-        //     if(data.latest_sales_details.length > 0){
-        //         $scope.sales_deatils = true;
-        //         $scope.latest_sales = data.latest_sales_details; 
-        //     } else {
-        //         $scope.sales_deatils = false;
-        //     }
-            
-        // }).error(function(data, status)
-        // {
-        //     console.log(data || "Request failed");
-        // });
+        
     }
     $scope.hide_sales_details = function(){
         $scope.sales_deatils = false;
@@ -1140,7 +1127,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                     item.net_amount = 0;
                 }
             }
-            // $scope.calculate_discount_amt(item);
             $scope.calculate_discount_percent(item);
             $scope.calculate_net_discount_sale();
         }
@@ -1179,7 +1165,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         if((item.dis_percentage != '' || item.dis_percentage != 0) && (item.unit_price != '' || item.unit_price != 0)) {
             item.dis_amt = ((parseFloat(item.unit_price)*parseFloat(item.dis_percentage))/100).toFixed(2);
             item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
-            // $scope.calculate_net_amount_sale(item);
+            
         }
         $scope.calculate_net_total_sale();
     }
@@ -1194,7 +1180,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         if((item.dis_amt != '' || item.dis_amt != '') && (item.unit_price != '' || item.unit_price != 0)) {
             item.dis_percentage = ((parseFloat(item.dis_amt)/parseFloat(item.unit_price))*100).toFixed(2);
             item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
-            // $scope.calculate_net_amount_sale(item);
+            
         }
         console.log( item.dis_percentage);
         $scope.calculate_net_total_sale();
@@ -1225,7 +1211,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                     'Content-Type' : 'application/x-www-form-urlencoded'
                 }
             }).success(function(data, status) {
-                document.location.href = '/sales/deliverynote_sales/';               
+                document.location.href = '/sales/salesman_deliverynote_sales/';               
             }).error(function(data, success){
                 
             });
