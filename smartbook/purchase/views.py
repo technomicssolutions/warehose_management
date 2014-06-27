@@ -154,8 +154,8 @@ class PurchaseEntry(View):
             vendor_account.balance = purchase_dict['vendor_amount']
         else:
             if purchase_created:
-                vendor_account.total_amount = vendor_account.total_amount + purchase_dict['vendor_amount']
-                vendor_account.balance = vendor_account.balance + purchase_dict['vendor_amount']
+                vendor_account.total_amount = float(vendor_account.total_amount) + float(purchase_dict['vendor_amount'])
+                vendor_account.balance = float(vendor_account.balance) + float(purchase_dict['vendor_amount'])
             else:
                 vendor_account.total_amount = float(vendor_account.total_amount) - float(purchase.vendor_amount) + float(purchase_dict['vendor_amount'])
                 vendor_account.balance = float(vendor_account.balance) - float(purchase.vendor_amount) + float(purchase_dict['vendor_amount'])
