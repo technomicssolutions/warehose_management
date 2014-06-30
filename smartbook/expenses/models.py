@@ -5,7 +5,7 @@ from django.conf import settings
 from purchase.models import Purchase
 
 class ExpenseHead(models.Model):
-	expense_head = models.CharField('Expense Head', max_length=15, unique=True)
+	expense_head = models.CharField('Expense Head', max_length=75, unique=True)
 
 	class Meta:
 		verbose_name = 'Expense Head'
