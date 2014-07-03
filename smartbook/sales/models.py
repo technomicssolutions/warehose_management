@@ -144,7 +144,7 @@ class SalesItem(models.Model):
     
     def __unicode__(self):
 
-        return str(self.sales.sales_invoice_number)
+        return str(self.sales.sales_invoice_number) + ' - ' + str(self.delivery_note_item)
 
     class Meta:
 

@@ -1053,7 +1053,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         
         if($scope.sales.sales_items.length > 0) {
             for(var i=0; i< $scope.sales.sales_items.length; i++) {
-                if($scope.sales.sales_items[i].delivery_note_item_id == item.delivery_item_id) {
+                if($scope.sales.sales_items[i].item_code == item.item_code) {
                     $scope.item_select_error = "Item already selected";
                     return false;
                 }
@@ -3394,6 +3394,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         'quotation_ref_no': '',
         'delivery_note_no': '',
         'sales_items': [],
+        'removed_items': [],
         'customer': '', 
         'date': '',
         'lpo_number': '',
@@ -3489,10 +3490,12 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'qty': invoice.items[i].qty,
                     'amt': 0,
                     'delivery_note_item_id': invoice.items[i].delivery_note_item_id,
+                    'newly_added': 'false',
                 }
                 $scope.invoice_details.sales_items.push(selected_item);
             }
         }
+        $scope.invoice_details.removed_items = []
     }
 
     $scope.calculate_discount_sale_percentage = function() {
@@ -3510,7 +3513,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     $scope.remove_from_item_list = function(item) {
         var index = $scope.invoice_details.sales_items.indexOf(item);
         $scope.invoice_details.sales_items.splice(index, 1);
-        
+        $scope.invoice_details.removed_items.push(item)
         for (var i=0; i< $scope.invoice_details.sales_items.length; i++) {
             item = $scope.invoice_details.sales_items[i]
             if(item.qty_sold != '' && item.unit_price != ''){
@@ -3568,13 +3571,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                 $scope.validation_error = "";
                 
             }
-            // if (parseInt(item.qty) == 0) {
-            //     item.qty_sold = parseInt(item.sold_qty);
-            //     item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-            // } else {
-            //     item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
-            //     item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
-            // }
+
             if(item.remaining_qty < 0) {
                 $scope.validation_error = item.item_name+' Not in stock';
                 item.qty_sold = parseInt(item.sold_qty);
@@ -3588,15 +3585,26 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     item.net_amount = 0;
                 }
             }
-        }
-        
-        
-        if(item.qty_sold != '' && item.unit_price != ''){
-            var amount = item.amt;
-            item.amt = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
-            item.net_amount = parseFloat(item.amt);
-            
-            $scope.calculate_net_discount_sale();
+            if (item.newly_added == 'true') {
+                console.log('newly added');
+                console.log(parseInt(item.qty));
+                if(item.qty_sold != '' && item.unit_price != ''){
+                    var amount = item.amt;
+                    item.amt = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+                    item.net_amount = parseFloat(item.amt);
+                    
+                    $scope.calculate_net_discount_sale();
+                }
+            } else {
+                
+                if(item.qty_sold != '' && item.unit_price != ''){
+                    var amount = item.amt;
+                    item.amt = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+                    item.net_amount = parseFloat(item.amt);
+                    
+                    $scope.calculate_net_discount_sale();
+                }
+            }
         }
         $scope.calculate_net_total_sale();
     }
@@ -3678,7 +3686,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         } else if ($scope.invoice_details.paid == 0 && $scope.invoice_details.payment_mode == 'cash') {
             $scope.validation_error ="You have choosed cash as payment mode , so please enter the PAID";
             return false;
-        } else if (($scope.invoice_details.paid != $scope.invoice_details.grant_total) && ($scope.invoice_details.payment_mode == 'cash' || $scope.invoice_details.payment_mode == 'cheque')) {
+        } else if (($scope.invoice_details.balance != 0) && ($scope.invoice_details.payment_mode == 'cash' || $scope.invoice_details.payment_mode == 'cheque')) {
             $scope.validation_error ="Please choose payment mode as credit , because you have balance amount.";
             return false;
         } else if($scope.invoice_details.sales_items.length > 0){
@@ -3748,15 +3756,11 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             'sl_no': item.sl_no,
             'item_code': item.item_code,
             'item_name': item.item_name,
-            'barcode': item.barcode,
-            'item_description': item.item_description,
             'qty_sold': item.qty_sold,
             'current_stock': item.total_qty,
-            'uom': item.uom,
             'unit_price': item.selling_price,
             'discount_permit': item.discount_permit,
-            'tax': item.tax,
-            'tax_amount': 0,
+            
             'discount_permit_amount':0,
             'disc_given': item.discount_given,
             'unit_cost':0,
@@ -3767,8 +3771,8 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             'dis_amt': 0,
             'dis_percentage': 0,
             'delivery_note_item_id': item.delivery_item_id,
-            'code_of_item': item.code_of_item,
             'remaining': item.remaining_qty,
+            'newly_added': 'true',
 
         }
         $scope.invoice_details.sales_items.push(selected_item);

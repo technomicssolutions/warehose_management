@@ -1008,33 +1008,35 @@ class QuotationDeliverynoteSales(View):
         sales_items = sales_dict['sales_items']
         for sales_item in sales_items:
            
-            delivery_note_items = DeliveryNoteItem.objects.filter(item__code=sales_item['item_code'], is_completed=False, delivery_note__salesman=salesman).order_by('id')
+            delivery_note_items = DeliveryNoteItem.objects.filter(item__code=sales_item['item_code'], is_completed=False, delivery_note__salesman=salesman).order_by('-id')
             
             remaining_qty = 0
             d_item_remaining_qty = 0
             remaining_qty = int(sales_item['qty'])
             
             for d_item in delivery_note_items:
-                
+                sold_qty = 0
                 if remaining_qty > 0:
                     d_item_remaining_qty =  int(d_item.total_quantity) - int(d_item.quantity_sold)
                     
                     if int(d_item_remaining_qty) > int(remaining_qty):
                         
                         d_item.quantity_sold = d_item.quantity_sold + int(remaining_qty)
+                        sold_qty = remaining_qty
                         remaining_qty = 0
                         
                         d_item.save()
                     else:
                         d_item.quantity_sold = int(d_item.quantity_sold) + int(d_item_remaining_qty)
+                        sold_qty = d_item_remaining_qty
                         remaining_qty = int(remaining_qty) - int(d_item_remaining_qty)
                         d_item.save()
                     s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
                     s_item.sales = sales
-                    s_item.quantity_sold = sales_item['qty']
+                    s_item.quantity_sold = sold_qty
                     s_item.discount_amount = sales_item['dis_amt']
                     s_item.discount_percentage = sales_item['dis_percentage']
-                    s_item.net_amount = sales_item['net_amount']
+                    s_item.net_amount = float(sold_qty) * float(sales_item['unit_price'])
                     s_item.selling_price = sales_item['unit_price']
                     # unit price is actually the selling price
                     s_item.save()
@@ -1512,69 +1514,8 @@ class EditSalesInvoice(View):
     def post(self, request, *args, **kwargs):
         sales_invoice_details = ast.literal_eval(request.POST['invoice'])
         sales = Sales.objects.get(id = sales_invoice_details['id'])
-        stored_item_names = []
         customer = sales.customer
-        for s_item in sales.salesitem_set.all():
-            stored_item_names.append(s_item.delivery_note_item.item.code)
-
-        # Editing and Removing the Existing details of the sales item
-        for s_item in sales.salesitem_set.all():
-            s_item_names = []
-            for item_data in sales_invoice_details['sales_items']:
-                s_item_names.append(item_data['item_code'])
-
-            # Removing the sales item object that is not in inputed sales items list
-            if s_item.delivery_note_item.item.code not in s_item_names:
-                d_item = s_item.delivery_note_item
-                d_item.quantity_sold = int(d_item.quantity_sold) - int(s_item.quantity_sold)
-                d_item.save()
-                if d_item.is_completed:
-                    d_item.is_completed = False
-                    d_item.save()
-                    delivery_note = d_item.delivery_note
-                    delivery_note.is_pending = True
-                    delivery_note.save()
-                s_item.delete()
-            else:
-                for item_data in sales_invoice_details['sales_items']:
-                    if item_data['qty'] != 0:
-                        item = InventoryItem.objects.get(code=item_data['item_code'])
-                        d_item = DeliveryNoteItem.objects.get(id=item_data['delivery_note_item_id'], item=item)
-                        sales_item = d_item.salesitem_set.all()
-                        if sales_item.count() > 0:
-                            sales_item = sales_item[0]
-                            if s_item.id == sales_item.id:
-                                d_item.quantity_sold = int(item_data['qty_sold']) 
-                                d_item.save()
-                                if int(d_item.quantity_sold) == int(d_item.total_quantity):
-                                    d_item.is_completed = True
-                                d_item.save()
-                                s_item.sales = sales
-                                s_item.quantity_sold = int(item_data['qty_sold'])
-                                s_item.discount_amount = item_data['dis_amt']
-                                s_item.discount_percentage = item_data['dis_percentage']
-                                s_item.net_amount = item_data['net_amount']
-                                s_item.selling_price = item_data['unit_price']
-                                s_item.save()
-
-        # Create new sales item for the newly added item
-        for item_data in sales_invoice_details['sales_items']:
-
-            if item_data['item_code'] not in stored_item_names:
-                d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
-                s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
-                d_item.quantity_sold = int(item_data['qty_sold'])
-                if d_item.quantity_sold == d_item.total_quantity:
-                    d_item.is_completed = True
-                d_item.save()
-                s_item.delivery_note_item = d_item
-                s_item.sales = sales
-                s_item.quantity_sold = item_data['qty_sold']
-                s_item.discount_amount = item_data['dis_amt']
-                s_item.discount_percentage = item_data['dis_percentage']
-                s_item.net_amount = item_data['net_amount']
-                s_item.selling_price = item_data['unit_price']
-                s_item.save()
+        salesman = sales.salesman
         if sales.net_amount != sales_invoice_details['net_total']:
             sales.net_amount = sales_invoice_details['net_total']
         if sales.round_off != sales_invoice_details['roundoff']:
@@ -1609,14 +1550,73 @@ class EditSalesInvoice(View):
                     customer_account.paid = sales.paid
                 customer_account.save()
         sales.save()
-        not_completed_selling = []
-        for item_data in sales_invoice_details['sales_items']:
-            d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
-            if d_item.total_quantity == d_item.quantity_sold:
-                d_item.is_completed = True
-            else:
-                d_item.is_completed = False
+
+        removed_items = sales_invoice_details['removed_items']
+        for r_item in removed_items:
+            item = InventoryItem.objects.get(code=r_item['item_code'])
+            d_item = DeliveryNoteItem.objects.get(id=r_item['delivery_note_item_id'], item=item)
+            s_item = SalesItem.objects.get(sales=sales, item=item, delivery_note_item=d_item)
+            d_item.quantity_sold =  int(d_item.quantity_sold) - int(s_item.quantity_sold) 
             d_item.save()
+            if d_item.is_completed:
+                d_item.is_completed = False
+                d_item.save()
+                delivery_note = d_item.delivery_note
+                delivery_note.is_pending = True
+                delivery_note.save()
+            s_item.delete()
+
+        for item_data in sales_invoice_details['sales_items']:
+            item = InventoryItem.objects.get(code=item_data['item_code'])
+            try:
+                d_item = DeliveryNoteItem.objects.get(id=int(item_data['delivery_note_item_id']))
+                
+                s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
+                if int(item_data['qty']) != 0:
+                    d_item.quantity_sold = int(d_item.quantity_sold) + int(item_data['qty'])
+                    s_item.quantity_sold = int(s_item.quantity_sold) + int(item_data['qty'])
+                    s_item.save()
+                    d_item.save()
+                if int(d_item.quantity_sold) == int(d_item.total_quantity):
+                    d_item.is_completed = True
+                    d_item.save()
+                
+                s_item.discount_amount = item_data['dis_amt']
+                s_item.discount_percentage = item_data['dis_percentage']
+                s_item.net_amount = item_data['net_amount']
+                s_item.selling_price = item_data['unit_price']
+                s_item.save()
+            except Exception as ex:
+                delivery_note_items = DeliveryNoteItem.objects.filter(item=item, is_completed=False, delivery_note__salesman=salesman).order_by('-id')
+                
+                remaining_qty = 0
+                d_item_remaining_qty = 0
+                remaining_qty = int(item_data['qty'])
+                for d_item in delivery_note_items:
+                    sold_qty = 0
+                    if remaining_qty > 0:
+                        d_item_remaining_qty =  int(d_item.total_quantity) - int(d_item.quantity_sold)
+                        if int(d_item_remaining_qty) > int(remaining_qty):
+                            d_item.quantity_sold = d_item.quantity_sold + int(remaining_qty)
+                            sold_qty = remaining_qty
+                            remaining_qty = 0
+                            
+                            d_item.save()
+                        else:
+                            d_item.quantity_sold = int(d_item.quantity_sold) + int(d_item_remaining_qty)
+                            sold_qty = d_item_remaining_qty
+                            remaining_qty = int(remaining_qty) - int(d_item_remaining_qty)
+                            d_item.save()
+                        s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
+                        s_item.sales = sales
+                        s_item.quantity_sold = sold_qty
+                        s_item.discount_amount = item_data['dis_amt']
+                        s_item.discount_percentage = item_data['dis_percentage']
+                        s_item.net_amount = float(sold_qty) * float(item_data['unit_price'])
+                        s_item.selling_price = item_data['unit_price']
+                        # unit price is actually the selling price
+                        s_item.save()
+        not_completed_selling = []
         for s_item in sales.salesitem_set.all():
 
             d_item = s_item.delivery_note_item
@@ -1930,33 +1930,34 @@ class DeliveryNoteItems(View):
                     for item in items:
                         delivery_notes = DeliveryNoteItem.objects.filter(item=item, is_completed=False, delivery_note__salesman=salesman)
                         for delivery_note_item in delivery_notes:
+                            
                             quantity_sold = int(delivery_note_item.quantity_sold) + int(quantity_sold)
                             quantity = int(quantity) + int(delivery_note_item.item.quantity)
                             total_quantity = int(total_quantity) + int(delivery_note_item.total_quantity)
                         if delivery_notes.count() > 0:
                             selling_price = delivery_notes[::-1][0].selling_price if delivery_notes[::-1][0].selling_price else item.selling_price
                             discount = delivery_notes[::-1][0].discount if delivery_notes[::-1][0].discount else 0
-                        item_list.append({
-                            'sl_no': i,
-                            'id': item.id,
-                            'item_name': item.name,
-                            'item_code': item.code,
-                            'barcode': item.barcode,
-                            'qty_sold': quantity_sold,
-                            'sold_qty': quantity_sold,
-                            'current_stock': quantity,
-                            'selling_price': selling_price,
-                            'discount_permit': item.discount_permit_percentage if item else 0,
-                            # 'net_amount': delivery_note_item.net_amount,
-                            'discount_given': discount,
-                            'total_qty': total_quantity,
-                            'remaining_qty': int(total_quantity - quantity_sold),
-                            # 'dis_amt': 0,
-                            # 'dis_percentage': 0,
-                            'code_of_item': item.code, 
-                            # 'delivery_item_id': delivery_note_item.id,
-                        })
-                        i = i + 1
+                            item_list.append({
+                                'sl_no': i,
+                                'id': item.id,
+                                'item_name': item.name + ' - ' + str(int(total_quantity - quantity_sold)),
+                                'item_code': item.code,
+                                'barcode': item.barcode,
+                                'qty_sold': quantity_sold,
+                                'sold_qty': quantity_sold,
+                                'current_stock': quantity,
+                                'selling_price': selling_price,
+                                'discount_permit': item.discount_permit_percentage if item else 0,
+                                # 'net_amount': delivery_note_item.net_amount,
+                                'discount_given': discount,
+                                'total_qty': total_quantity,
+                                'remaining_qty': int(total_quantity - quantity_sold),
+                                # 'dis_amt': 0,
+                                # 'dis_percentage': 0,
+                                'code_of_item': item.code, 
+                                # 'delivery_item_id': delivery_note_item.id,
+                            })
+                            i = i + 1
                     # for delivery_note_item in items:
                     #     item_list.append({
                     #         'sl_no': i,
