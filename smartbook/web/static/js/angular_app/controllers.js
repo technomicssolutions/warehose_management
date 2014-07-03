@@ -1060,30 +1060,21 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             }
         } 
         var selected_item = {
-            'sl_no': item.sl_no,
+            'sl_no': $scope.sales.sales_items.length + 1,
             'item_code': item.item_code,
             'item_name': item.item_name,
-            'barcode': item.barcode,
-            'item_description': item.item_description,
             'qty_sold': item.qty_sold,
             'current_stock': item.total_qty,
-            'uom': item.uom,
             'unit_price': item.selling_price,
             'discount_permit': item.discount_permit,
-            'tax': item.tax,
-            'tax_amount': 0,
             'discount_permit_amount':0,
             'disc_given': item.discount_given,
-            'unit_cost':0,
             'net_amount': 0,
             'remaining_qty': item.remaining_qty,
             'qty': 0,
             'sold_qty': item.sold_qty,
             'dis_amt': 0,
             'dis_percentage': 0,
-            'delivery_note_item_id': item.delivery_item_id,
-            'code_of_item': item.code_of_item,
-
         }
         $scope.sales.sales_items.push(selected_item);
         $scope.calculate_grant_total_sale();
