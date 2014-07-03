@@ -4094,6 +4094,7 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
     $scope.customer_name = '';
     $scope.delivery_note = {
         'sales_items': [],
+        'removed_items': [],
         'date': '',
         'salesman':'',
         'net_total': 0,
@@ -4250,6 +4251,7 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
         $scope.delivery_note.lpo_no = delivery_note.lpo_number;
         $scope.delivery_note.date = delivery_note.date;
         $scope.delivery_note.id = delivery_note.id;
+        $scope.delivery_note.removed_items = [];
 
         if(delivery_note.items.length > 0){
             for(var i=0; i< delivery_note.items.length; i++){
@@ -4282,8 +4284,10 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
                 
             }
         }
+        $scope.delivery_note.removed_items = [];
     }
     $scope.remove_from_item_list = function(item) {
+        $scope.delivery_note.removed_items.push(item);12345678
         var index = $scope.delivery_note.sales_items.indexOf(item);
         $scope.delivery_note.sales_items.splice(index, 1);
         $scope.calculate_net_total_amount();
