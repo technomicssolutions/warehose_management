@@ -982,10 +982,6 @@ class QuotationDeliverynoteSales(View):
             if int(d_item.quantity_sold) != int(item_data['qty_sold']):
                 d_item.quantity_sold = d_item.quantity_sold + int(item_data['qty'])
                 d_item.save()
-            if d_item.total_quantity == d_item.quantity_sold:
-                d_item.is_completed = True
-                d_item.save()
-            
 
         sales.lpo_number = sales_dict['lpo_number']
 
@@ -1755,6 +1751,10 @@ class EditDeliveryNote(View):
                 if d_item.total_quantity != d_item.quantity_sold:
                     d_item.is_completed = False
                     d_item.save()
+                else:
+                    d_item.is_completed = True
+                    d_item.save()
+
                 if not d_item.is_completed:
                     not_completed_selling.append(d_item.id)
             if len(not_completed_selling) != 0:

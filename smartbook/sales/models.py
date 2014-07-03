@@ -94,7 +94,7 @@ class DeliveryNoteItem(models.Model):
 
     def __unicode__(self):
 
-        return str(self.delivery_note.delivery_note_number)
+        return str(self.delivery_note.delivery_note_number) + ' - ' + str(self.item.code)
 
     class Meta:
 

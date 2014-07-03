@@ -634,7 +634,6 @@ function PurchaseController($scope, $element, $http, $timeout, share, $location)
         if((item.permit_disc_amt != '' || item.permit_disc_amt != '') && (item.selling_price != '' || item.selling_price != 0)) {
             item.permit_disc_percent = ((parseFloat(item.permit_disc_amt)/parseFloat(item.selling_price))*100).toFixed(2);
         }
-        console.log( item.permit_disc_percent);
     }
 
     $scope.calculate_vendor_amount = function() {
@@ -850,7 +849,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         {   
 
             $scope.customers = data.customers;
-            console.log($scope.customers);
 
         }).error(function(data, status)
         {
@@ -859,7 +857,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
     }
 
     $scope.add_customer = function() {
-        console.log($scope.custmer_name);
         if($scope.custmer_name == 'other') {
 
             $scope.popup = new DialogueModelWindow({
@@ -899,7 +896,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             } else {
                 $scope.existance_message = '';
                 $scope.sales_invoice_existing = false;
-                console.log($scope.sales_invoice_existing);
             }  
         });
     }
@@ -1057,7 +1053,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         
         if($scope.sales.sales_items.length > 0) {
             for(var i=0; i< $scope.sales.sales_items.length; i++) {
-                if($scope.sales.sales_items[i].item_code == item.item_code) {
+                if($scope.sales.sales_items[i].delivery_note_item_id == item.delivery_item_id) {
                     $scope.item_select_error = "Item already selected";
                     return false;
                 }
@@ -1138,7 +1134,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
         for(i=0; i<$scope.sales.sales_items.length; i++){
             net_total = net_total + (parseFloat($scope.sales.sales_items[i].net_amount));
         }
-        console.log(net_total);
         $scope.sales.net_total = net_total;
         $scope.calculate_grant_total_sale();
         $scope.calculate_net_discount_sale();
@@ -1182,7 +1177,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
             
         }
-        console.log( item.dis_percentage);
         $scope.calculate_net_total_sale();
     }
 
@@ -1202,7 +1196,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                 'sales': angular.toJson($scope.sales),
                 "csrfmiddlewaretoken" : $scope.csrf_token
             }
-            console.log(params);
             $http({
                 method : 'post',
                 url : "/sales/salesman_deliverynote_sales/",
@@ -1555,7 +1548,6 @@ function VendorAccountController($scope, $element, $http, $timeout, $location){
         });
     }
     $scope.validate_vendor_account = function(){
-        console.log($scope.vendor_account.vendor);
         if($scope.vendor_account.vendor == '' || $scope.vendor_account.vendor == undefined ) {
             $scope.validation_error = "Please select Vendor";
             return false;
@@ -2145,7 +2137,6 @@ function SalesReturnController($scope, $element, $http, $timeout, share, $locati
             } else {
                 $scope.existance_message = '';
                 $scope.sales_return_existing = false;
-                console.log($scope.sales_return_existing);
             }  
         });
     }
@@ -3097,7 +3088,6 @@ function ReceiptVoucherController($scope, $element, $http, $timeout, share, $loc
             } else {
                 $scope.existance_message = '';
                 $scope.rv_existing = false;
-                console.log($scope.rv_existing);
             }  
         });
     }
@@ -3338,7 +3328,6 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             } else {
                 $scope.existance_message = '';
                 $scope.delivery_note_existing = false;
-                console.log($scope.delivery_note_existing);
             }  
         });
     }
