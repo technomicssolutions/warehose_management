@@ -1277,14 +1277,13 @@ class InvoiceDetails(View):
                     if sale.delivery_note_item.item.id not in ctx_item_list:
                         ctx_item_list.append(sale.delivery_note_item.item.id)
 
-                print ctx_item_list
 
                 for item_data in ctx_item_list:
                     item = InventoryItem.objects.get(id=item_data)
                     sale_items = SalesItem.objects.filter(sales=sales_invoice, delivery_note_item__item=item)
                     for sale in sale_items:
                         net_amount = float(net_amount) + float(sale.net_amount)
-                    print sale_items
+                    
                     delivery_notes = DeliveryNoteItem.objects.filter(item=item, is_completed=False, delivery_note__salesman=sales_invoice.salesman)
                     for delivery_note_item in delivery_notes:
                         
