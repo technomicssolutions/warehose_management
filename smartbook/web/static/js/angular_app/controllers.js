@@ -3822,7 +3822,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'Content-Type' : 'application/x-www-form-urlencoded'
                 }
             }).success(function(data, status) {
-                // document.location.href = '/sales/edit_sales_invoice/';               
+                document.location.href = '/sales/edit_sales_invoice/';               
             }).error(function(data, success){
                 
             });

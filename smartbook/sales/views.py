@@ -1657,82 +1657,28 @@ class EditSalesInvoice(View):
         for item_data in sales_invoice_details['sales_items']:
             if item_data['qty'] != 0:
                 item = InventoryItem.objects.get(code=item_data['item_code'])
-                s_items = SalesItem.objects.filter(sales=sales, delivery_note_item__item=item)
-                print "sales invoice", s_items
+                s_items = SalesItem.objects.filter(sales=sales, delivery_note_item__item=item, delivery_note_item__is_completed=False)
+                remaining_qty = 0
                 for s_item in s_items:
-                    remaining_qty = 0
+                    remaining_qty = item_data['qty']
                     d_item = s_item.delivery_note_item
                     d_item_remaining_qty =  int(d_item.total_quantity) - int(d_item.quantity_sold)
-                    if int(d_item_remaining_qty) > int(remaining_qty):
-                        print "greater"
-                        d_item.quantity_sold = d_item.quantity_sold + int(remaining_qty)
-                        sold_qty = remaining_qty
-                        remaining_qty = 0
+                    if remaining_qty != 0:
+                        if int(d_item_remaining_qty) > int(remaining_qty):
+                            d_item.quantity_sold = d_item.quantity_sold + int(remaining_qty)
+                            sold_qty = remaining_qty
+                            remaining_qty = 0
+                            
+                            d_item.save()
+                            s_item.discount_amount = item_data['dis_amt']
+                            s_item.discount_percentage = item_data['dis_percentage']
+                            
+                            s_item.selling_price = item_data['unit_price']
+                            s_item.quantity_sold = int(s_item.quantity_sold) + int(sold_qty)
+                            s_item.save()
+                            s_item.net_amount = float(s_item.quantity_sold) * float(s_item.selling_price)
+                            s_item.save()
                         
-                        d_item.save()
-                        s_item.discount_amount = item_data['dis_amt']
-                        s_item.discount_percentage = item_data['dis_percentage']
-                        s_item.net_amount = item_data['net_amount']
-                        s_item.selling_price = item_data['unit_price']
-                        s_item.quantity_sold = int(s_item.quantity_sold) + int(sold_qty)
-                        s_item.save()
-                    else:
-                        print "lessaer"
-                        d_item.quantity_sold = int(d_item.quantity_sold) + int(d_item_remaining_qty)
-                        sold_qty = d_item_remaining_qty
-                        remaining_qty = int(remaining_qty) - int(d_item_remaining_qty)
-                        if d_item.total_quantity == d_item.quantity_sold:
-                            d_item.is_completed = True
-                        d_item.save()
-
-                        delivery_note_items = DeliveryNoteItem.objects.filter(item=item, is_completed=False, delivery_note__salesman=salesman).order_by('id')
-                        for d_item in delivery_note_items:
-                            s_item_new, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
-                            sold_qty = 0
-                            print s_item_new
-                            if item_created:
-                                print "created"
-                                if remaining_qty > 0:
-                                    d_item_remaining_qty =  int(d_item.total_quantity) - int(d_item.quantity_sold)
-                                    if int(d_item_remaining_qty) > int(remaining_qty):
-                                        d_item.quantity_sold = d_item.quantity_sold + int(remaining_qty)
-                                        sold_qty = remaining_qty
-                                        remaining_qty = 0
-                                        
-                                        d_item.save()
-                                    else:
-                                        d_item.quantity_sold = int(d_item.quantity_sold) + int(d_item_remaining_qty)
-                                        sold_qty = d_item_remaining_qty
-                                        remaining_qty = int(remaining_qty) - int(d_item_remaining_qty)
-                                        d_item.save()
-                                    
-                                    s_item_new.sales = sales
-                                    s_item_new.quantity_sold = sold_qty
-                                    s_item_new.discount_amount = item_data['dis_amt']
-                                    s_item_new.discount_percentage = item_data['dis_percentage']
-                                    s_item_new.net_amount = float(sold_qty) * float(item_data['unit_price'])
-                                    s_item_new.selling_price = item_data['unit_price']
-                                    # unit price is actually the selling price
-                                    s_item_new.save()
-                            else:
-                                print item_data
-                                print "not created"
-                                if int(item_data['qty']) != 0:
-                                    d_item.quantity_sold = int(d_item.quantity_sold) + int(item_data['qty'])
-                                    s_item_new.quantity_sold = int(s_item.quantity_sold) + int(item_data['qty'])
-                                    s_item_new.save()
-                                    d_item.save()
-                                if int(d_item.quantity_sold) == int(d_item.total_quantity):
-                                    d_item.is_completed = True
-                                else:
-                                    d_item.is_completed = False
-                                d_item.save()
-                                
-                                s_item_new.discount_amount = item_data['dis_amt']
-                                s_item_new.discount_percentage = item_data['dis_percentage']
-                                s_item_new.net_amount = item_data['net_amount']
-                                s_item_new.selling_price = item_data['unit_price']
-                                s_item_new.save() 
         not_completed_selling = []
         for s_item in sales.salesitem_set.all():
 
