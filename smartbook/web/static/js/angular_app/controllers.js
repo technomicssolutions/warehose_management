@@ -3468,14 +3468,13 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
         $scope.invoice_details.discount_sale_percentage = invoice.discount_sale_percentage;
         $scope.invoice_details.sales_items = [];
         var selected_item = '';
+        console.log(invoice);
         if(invoice.items.length > 0){
             for(var i=0; i< invoice.items.length; i++){
                 var selected_item = {
                     'sl_no': invoice.items[i].sl_no,
                     'item_code': invoice.items[i].item_code,
                     'item_name': invoice.items[i].item_name,
-                    'barcode': invoice.items[i].barcode,
-                    'item_description': invoice.items[i].item_description,
                     'qty_sold': invoice.items[i].qty_sold,
                     'sold_qty': invoice.items[i].qty_sold,
                     'disc_given': invoice.items[i].discount_given,
@@ -3558,7 +3557,9 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
     $scope.calculate_net_amount_sale_qty = function(item) {
 
         if(item.qty != '' && item.unit_price != ''){
-           
+            console.log(item);
+            var net_amount = 0;
+            net_amount = item.net_amount;
             $scope.validation_error = '';
             if(item.qty != '') {
                 item.qty_sold = parseInt(item.sold_qty) + parseInt(item.qty);
@@ -3585,26 +3586,25 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     item.net_amount = 0;
                 }
             }
-            if (item.newly_added == 'true') {
-                console.log('newly added');
-                console.log(parseInt(item.qty));
-                if(item.qty_sold != '' && item.unit_price != ''){
-                    var amount = item.amt;
-                    item.amt = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+            
+            if(item.qty_sold != '' && item.unit_price != ''){
+                var amount = item.amt;
+                console.log(item.amt, item.qty);
+                item.amt = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
+                console.log(item.amt);
+                if (item.newly_added == 'true') {
+                    console.log('newly added');
+                    console.log(parseInt(item.qty));
                     item.net_amount = parseFloat(item.amt);
-                    
-                    $scope.calculate_net_discount_sale();
+                } else {
+                    console.log('old');
+                    console.log(item.amt, net_amount );
+                    item.net_amount = parseFloat(net_amount) + parseFloat(item.amt);
+                    console.log(item.amt, item.net_amount );
                 }
-            } else {
-                
-                if(item.qty_sold != '' && item.unit_price != ''){
-                    var amount = item.amt;
-                    item.amt = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
-                    item.net_amount = parseFloat(item.amt);
-                    
-                    $scope.calculate_net_discount_sale();
-                }
-            }
+                $scope.calculate_net_discount_sale();
+            
+            } 
         }
         $scope.calculate_net_total_sale();
     }
@@ -3809,6 +3809,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             if($scope.invoice_details.payment_mode == null) {
                 $scope.invoice_details.payment_mode = 'cash';
             }
+            console.log($scope.invoice_details);
             params = { 
                 'invoice': angular.toJson($scope.invoice_details),
                 "csrfmiddlewaretoken" : $scope.csrf_token
@@ -3821,7 +3822,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'Content-Type' : 'application/x-www-form-urlencoded'
                 }
             }).success(function(data, status) {
-                document.location.href = '/sales/edit_sales_invoice/';               
+                // document.location.href = '/sales/edit_sales_invoice/';               
             }).error(function(data, success){
                 
             });
