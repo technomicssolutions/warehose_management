@@ -143,42 +143,53 @@ class SalesReports(View):
                 if sales.count()>0:
                     for sale in sales:
                         round_off = round_off + sale.round_off
-                        items = sale.salesitem_set.all()
-                        for item in items:
-                            discount = item.discount_amount                         
-                            dates = item.sales.sales_invoice_date
-                            invoice_no = item.sales.sales_invoice_number
-                            qty = item.quantity_sold
-                            item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
-                            inventorys = item.delivery_note_item.item if item.delivery_note_item else ''
-                            selling_price = 0  
-                            if item.selling_price:
-                                selling_price = item.selling_price	
+                        ctx_item_list = []
 
-                            try:
-                                purchases = item.delivery_note_item.item.purchaseitem_set.all()
-                                purchase_count = purchases.count()
-                            except:
-                                purchase_count = 0
-                            # purchases = item.delivery_note_item.item.purchaseitem_set.all() if item.delivery_note_item else []
+                        for s_item in sale.salesitem_set.all(): 
+                            if s_item.delivery_note_item.item.id not in ctx_item_list:
+                                ctx_item_list.append(s_item.delivery_note_item.item.id)
+                        for item_id in ctx_item_list:
+                            quantity = 0
                             avg_cp = 0
-                            if purchase_count > 0:                                
-                                for purchase in purchases:                                
-                                    cost_price = cost_price + purchase.cost_price
-                                    i = i + 1
-                                avg_cp = cost_price/i 
+                            total = 0
+                            profit = 0
+                            discount = 0
+                            for item in sale.salesitem_set.filter(delivery_note_item__item__id =item_id):
+                                discount = item.discount_amount + discount                        
+                                dates = item.sales.sales_invoice_date
+                                invoice_no = item.sales.sales_invoice_number
+                                quantity = int(item.quantity_sold) + int(quantity)
+                                item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
+                                inventorys = item.delivery_note_item.item if item.delivery_note_item else ''
+                                selling_price = 0  
+                                if item.selling_price:
+                                    selling_price = item.selling_price	
 
+                                try:
+                                    purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                                    purchase_count = purchases.count()
+                                except:
+                                    purchase_count = 0
+                                # purchases = item.delivery_note_item.item.purchaseitem_set.all() if item.delivery_note_item else []
+                                avg_cp = 0
+                                if purchase_count > 0:                                
+                                    for purchase in purchases:                                
+                                        cost_price = cost_price + purchase.cost_price
+                                        i = i + 1
+                                    avg_cp = cost_price/i 
 
-                            total = selling_price * qty
-                            # profit = (selling_price - avg_cp)*qty
-                            profit = round(((selling_price - avg_cp)*qty) - discount,0)
-                            avg_cp = math.ceil(avg_cp*100)/100                           
+                                total_item_sale = item.selling_price * item.quantity_sold
+                                total = total_item_sale + total
+                                total_item_sale = 0
+                                # profit = (selling_price - avg_cp)*qty
+                                profit = round(((selling_price - avg_cp)*quantity) - discount,0)
+                                avg_cp = math.ceil(avg_cp*100)/100                           
+                                
+                                total_profit = total_profit + profit
+                                total_discount = total_discount + discount
+
+                                avg_cp = math.ceil(avg_cp*100)/100
                             grant_total = grant_total + total
-                            total_profit = total_profit + profit
-                            total_discount = total_discount + discount
-
-                            avg_cp = math.ceil(avg_cp*100)/100
-
                             y = y - 30
                             if y <= 135:
                                 y = 850
@@ -187,7 +198,7 @@ class SalesReports(View):
                             p.drawString(50, y, dates.strftime('%d/%m/%y'))
                             p.drawString(120, y, str(invoice_no))
                             p.drawString(200, y, item_name)
-                            p.drawString(450, y, str(qty))
+                            p.drawString(450, y, str(quantity))
                             p.drawString(500, y, str(discount))
                             p.drawString(570, y, str(selling_price))
                             p.drawString(650,y,str(avg_cp))
@@ -406,41 +417,51 @@ class SalesReports(View):
                 sales = Sales.objects.filter(sales_invoice_date__gte=start_date, sales_invoice_date__lte=end_date, customer=customer, payment_mode=payment_mode)
                 if sales.count()>0:
                     for sale in sales:
-                        items = sale.salesitem_set.all()
-                        for item in items:
-                            dates = item.sales.sales_invoice_date
-                            invoice_no = item.sales.sales_invoice_number
-                            item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
-                            qty = item.quantity_sold
-                            discount = item.discount_amount
-                            selling_price = 0                            
-                            if item.selling_price:                        
-                            	selling_price = item.selling_price
-                            
-                            total = selling_price * qty
+                        ctx_item_list = []
+                        for s_item in sale.salesitem_set.all(): 
+                            if s_item.delivery_note_item.item.id not in ctx_item_list:
+                                ctx_item_list.append(s_item.delivery_note_item.item.id)
+                        for item_id in ctx_item_list:
+                            qty = 0
                             avg_cp = 0
-                            purchase_count = 0
-                            
-                            try:
-                                purchases = item.delivery_note_item.item.purchaseitem_set.all()
-                                purchase_count = purchases.count()
-                            except:
+                            total = 0
+                            profit = 0
+                            discount = 0
+                            for item in sale.salesitem_set.filter(delivery_note_item__item__id =item_id):
+                                dates = item.sales.sales_invoice_date
+                                invoice_no = item.sales.sales_invoice_number
+                                item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
+                                qty = int(item.quantity_sold) + qty
+                                discount = item.discount_amount
+                                selling_price = 0                            
+                                if item.selling_price:                        
+                                	selling_price = item.selling_price
+                                
+                                total = selling_price * qty
+                                avg_cp = 0
                                 purchase_count = 0
-                            if purchase_count>0:                                
-                                for purchase in purchases:
-                                    cost_price = cost_price + purchase.cost_price
-                                    i = i + 1
-                                avg_cp = cost_price/i
-                            # profit = (selling_price - avg_cp)*qty
-                           
-                            profit = math.ceil((selling_price - avg_cp)*qty) - float(discount)
+                                
+                                try:
+                                    purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                                    purchase_count = purchases.count()
+                                except:
+                                    purchase_count = 0
+                                if purchase_count>0:                                
+                                    for purchase in purchases:
+                                        cost_price = cost_price + purchase.cost_price
+                                        i = i + 1
+                                    avg_cp = cost_price/i
+                                # profit = (selling_price - avg_cp)*qty
+                               
+                                profit = math.ceil((selling_price - avg_cp)*qty) - float(discount)
 
-                            total_profit = total_profit + profit
-                            total_discount = total_discount + discount                            
-                            total_sp = total_sp + selling_price
+                                total_profit = total_profit + profit
+                                total_discount = total_discount + discount                            
+                                total_sp = total_sp + selling_price
+                                
+
+                                avg_cp = math.ceil(avg_cp*100)/100
                             grant_total = grant_total + total
-
-                            avg_cp = math.ceil(avg_cp*100)/100
 
                             y = y - 30
                             if y <= 135:
@@ -539,40 +560,50 @@ class SalesReports(View):
                 
                 if sales.count()>0:                    
                     for sale in sales:
-                        items = sale.salesitem_set.all()
-                        for item in items:
-                            dates = item.sales.sales_invoice_date
-                            invoice_no = item.sales.sales_invoice_number
-                            item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
-                            qty = item.quantity_sold
-                            discount = item.discount_amount
-                            selling_price = 0                            
-                            if item.selling_price:                          
-                            	selling_price = item.selling_price
-                            
-                            total = selling_price * qty
-
-                            # purchases = item.delivery_note_item.item.purchaseitem_set.all()
-                            try:
-                                purchases = item.delivery_note_item.item.purchaseitem_set.all()
-                                purchase_count = purchases.count()
-                            except:
-                                purchase_count = 0
+                        ctx_item_list = []
+                        for s_item in sale.salesitem_set.all(): 
+                            if s_item.delivery_note_item.item.id not in ctx_item_list:
+                                ctx_item_list.append(s_item.delivery_note_item.item.id)
+                        for item_id in ctx_item_list:
+                            qty = 0
                             avg_cp = 0
-                            if purchase_count > 0:                                
-                                for purchase in purchases:
-                                    cost_price = cost_price + purchase.cost_price
-                                    i = i + 1
-                                avg_cp = cost_price/i
-                            # profit = (selling_price - avg_cp)*qty
-                            profit = round(((selling_price - avg_cp)*qty) - discount,0)
+                            total = 0
+                            profit = 0
+                            discount = 0
+                            for item in sale.salesitem_set.filter(delivery_note_item__item__id =item_id):
+                                dates = item.sales.sales_invoice_date
+                                invoice_no = item.sales.sales_invoice_number
+                                item_name = item.delivery_note_item.item.name if item.delivery_note_item else ''
+                                qty = int(item.quantity_sold) + int(qty)
+                                discount = item.discount_amount
+                                selling_price = 0                            
+                                if item.selling_price:                          
+                                	selling_price = item.selling_price
+                                
+                                total = selling_price * qty
 
-                            total_profit = total_profit + profit
-                            total_discount = total_discount + discount                            
-                            total_sp = total_sp + selling_price
+                                # purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                                try:
+                                    purchases = item.delivery_note_item.item.purchaseitem_set.all()
+                                    purchase_count = purchases.count()
+                                except:
+                                    purchase_count = 0
+                                avg_cp = 0
+                                if purchase_count > 0:                                
+                                    for purchase in purchases:
+                                        cost_price = cost_price + purchase.cost_price
+                                        i = i + 1
+                                    avg_cp = cost_price/i
+                                # profit = (selling_price - avg_cp)*qty
+                                profit = round(((selling_price - avg_cp)*qty) - discount,0)
+
+                                total_profit = total_profit + profit
+                                total_discount = total_discount + discount                            
+                                total_sp = total_sp + selling_price
+                                
+
+                                avg_cp = math.ceil(avg_cp*100)/100
                             grant_total = grant_total + total
-
-                            avg_cp = math.ceil(avg_cp*100)/100
                             y = y - 30
                             if y <= 135:
                                 y = 850
