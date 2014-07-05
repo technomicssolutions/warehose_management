@@ -1950,13 +1950,10 @@ class DeliveryNoteItems(View):
                     items = []
                     if item_code:
                         items = InventoryItem.objects.filter(code__istartswith=item_code)
-                        # items = DeliveryNoteItem.objects.filter(item__code__istartswith=item_code, is_completed=False, delivery_note__salesman=salesman)
                     elif item_name:
-                        items = InventoryItem.objects.filter(name__istartswith=item_code)
-                        # items = DeliveryNoteItem.objects.filter(item__name__istartswith=item_name, is_completed=False, delivery_note__salesman=salesman)
+                        items = InventoryItem.objects.filter(name__istartswith=item_name)
                     elif barcode:
-                        items = InventoryItem.objects.filter(barcode__istartswith=item_code)
-                        # items = DeliveryNoteItem.objects.filter(item__barcode__istartswith=barcode, is_completed=False, delivery_note__salesman=salesman)
+                        items = InventoryItem.objects.filter(barcode__istartswith=barcode)
                     item_list = []
                     i = 0
                     i = i + 1
