@@ -1430,29 +1430,38 @@ class SalesmanStockReports(View):
         p.drawString(400, 900, 'Salesman Stock Report - ' + salesman_name)
 
         y = 850
-        p.drawString(80, y, 'Delivery Note No')
         p.drawString(190, y, 'Item Code')
         p.drawString(280, y, 'Item Name')
         p.drawString(610, y, 'Total Quantity')    
         p.drawString(700, y, 'Sold Quantity')
         p.drawString(790, y, 'Pending')
         
+        ctx_item_list = []
+        for delivery_note in delivery_notes:
+            for d_item in delivery_note.deliverynoteitem_set.all():
+                if d_item.item.id not in ctx_item_list:
+                    ctx_item_list.append(d_item.item.id)
+
         y = y - 50 
-        if len(delivery_notes) > 0:
+        for item_id in ctx_item_list:
+            item = InventoryItem.objects.get(id=item_id)
+            quantity_sold = 0
+            total_quantity = 0
             for delivery_note in delivery_notes:
-                if delivery_note.deliverynoteitem_set.all().count() > 0:
-                    for d_item in delivery_note.deliverynoteitem_set.all():
-                        p.drawString(80, y, delivery_note.delivery_note_number)
-                        p.drawString(190, y, d_item.item.code)
-                        p.drawString(280, y, d_item.item.name)
-                        p.drawString(610, y, str(d_item.total_quantity))
-                        p.drawString(700, y, str(d_item.quantity_sold))
-                        p.drawString(790, y, str(int(d_item.total_quantity) - int(d_item.quantity_sold)))
-                        y = y - 30
-                        if y <= 270:
-                            y = 850
-                            p.showPage()
-                            p = header(p)
+                for d_item in delivery_note.deliverynoteitem_set.filter(item__id=item_id):
+                    quantity_sold = quantity_sold + d_item.quantity_sold
+                    total_quantity = total_quantity + d_item.total_quantity
+            p.drawString(190, y, item.code)
+            p.drawString(280, y, item.name)
+            p.drawString(610, y, str(total_quantity))
+            p.drawString(700, y, str(quantity_sold))
+            p.drawString(790, y, str(int(total_quantity) - int(quantity_sold)))
+            
+            y = y - 30
+            if y <= 270:
+                y = 850
+                p.showPage()
+                p = header(p)
 
         p.showPage()
         p.save()

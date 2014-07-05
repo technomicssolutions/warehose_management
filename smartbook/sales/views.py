@@ -1661,6 +1661,11 @@ class EditSalesInvoice(View):
             delivery_note = d_item.delivery_note
             
             for item in delivery_note.deliverynoteitem_set.all():
+                if item.total_quantity == item.quantity_sold:
+                    item.is_completed  = True
+                else:
+                    item.is_completed = False
+                item.save()    
                 if not item.is_completed:
                     not_completed_selling.append(item.id)
 
