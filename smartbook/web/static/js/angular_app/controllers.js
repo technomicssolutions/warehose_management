@@ -1059,6 +1059,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                 }
             }
         } 
+        console.log(item);
         var selected_item = {
             'sl_no': $scope.sales.sales_items.length + 1,
             'item_code': item.item_code,
@@ -3481,7 +3482,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'net_amount': invoice.items[i].net_amount,
                     'amount_net': invoice.items[i].net_amount,
                     'unit_price': invoice.items[i].selling_price,
-                    'current_stock': invoice.items[i].current_stock,
+                    'current_stock': invoice.items[i].total_qty,
                     'uom': invoice.items[i].uom,
                     'remaining_qty': invoice.items[i].remaining_qty,
                     'remaining': invoice.items[i].remaining_qty,

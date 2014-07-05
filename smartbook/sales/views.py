@@ -1277,7 +1277,7 @@ class InvoiceDetails(View):
                     if sale.delivery_note_item.item.id not in ctx_item_list:
                         ctx_item_list.append(sale.delivery_note_item.item.id)
 
-
+                ctx_item_id_list = []
                 for item_data in ctx_item_list:
                     item = InventoryItem.objects.get(id=item_data)
                     sale_items = SalesItem.objects.filter(sales=sales_invoice, delivery_note_item__item=item)
@@ -1285,14 +1285,56 @@ class InvoiceDetails(View):
                         net_amount = float(net_amount) + float(sale.net_amount)
                     
                     delivery_notes = DeliveryNoteItem.objects.filter(item=item, is_completed=False, delivery_note__salesman=sales_invoice.salesman)
-                    for delivery_note_item in delivery_notes:
-                        
-                        quantity_sold = int(delivery_note_item.quantity_sold) + int(quantity_sold)
-                        quantity = int(quantity) + int(delivery_note_item.item.quantity)
-                        total_quantity = int(total_quantity) + int(delivery_note_item.total_quantity)
                     if delivery_notes.count() > 0:
+                        for delivery_note_item in delivery_notes:
+                            
+                            quantity_sold = int(delivery_note_item.quantity_sold) + int(quantity_sold)
+                            quantity = int(quantity) + int(delivery_note_item.item.quantity)
+                            total_quantity = int(total_quantity) + int(delivery_note_item.total_quantity)
+                        if delivery_notes.count() > 0:
+                            selling_price = delivery_notes[::-1][0].selling_price if delivery_notes[::-1][0].selling_price else item.selling_price
+                            discount = delivery_notes[::-1][0].discount if delivery_notes[::-1][0].discount else 0
+                            ctx_sales_item.append({
+                                'sl_no': i,
+                                'id': item.id,
+                                'item_name': item.name + ' - ' + str(int(total_quantity - quantity_sold)),
+                                'item_code': item.code,
+                                'barcode': item.barcode,
+                                'qty_sold': quantity_sold,
+                                'sold_qty': quantity_sold,
+                                'current_stock': quantity,
+                                'selling_price': selling_price,
+                                'discount_permit': item.discount_permit_percentage if item else 0,
+                                'qty': 0,
+                                'net_amount': net_amount,
+                                'discount_given': discount,
+                                'total_qty': total_quantity,
+                                'remaining_qty': int(total_quantity - quantity_sold),
+                                'discount': sale_items[::-1][0].discount_amount,
+                                'dis_percentage': sale_items[::-1][0].discount_percentage,
+                                'code_of_item': item.code, 
+                            })
+                            i = i + 1
+                            net_amount = 0
+                            net_amount = 0
+                            quantity_sold = 0
+                            selling_price = 0
+                            discount = 0
+                            total_quantity = 0
+                            quantity = 0
+                    else:
+                        print "else"
+                        total_quantity = 0
+                        quantity_sold = 0
+                        delivery_notes = DeliveryNoteItem.objects.filter(item=item, is_completed=True, delivery_note__salesman=sales_invoice.salesman)
                         selling_price = delivery_notes[::-1][0].selling_price if delivery_notes[::-1][0].selling_price else item.selling_price
                         discount = delivery_notes[::-1][0].discount if delivery_notes[::-1][0].discount else 0
+                        sold_qty = 0
+                        for delivery_note_item in delivery_notes:
+                            quantity_sold = int(delivery_note_item.quantity_sold) + int(quantity_sold)
+                            quantity = int(quantity) + int(delivery_note_item.item.quantity)
+                            total_quantity = int(delivery_note_item.total_quantity) + int(total_quantity)
+                            
                         ctx_sales_item.append({
                             'sl_no': i,
                             'id': item.id,
@@ -1301,7 +1343,7 @@ class InvoiceDetails(View):
                             'barcode': item.barcode,
                             'qty_sold': quantity_sold,
                             'sold_qty': quantity_sold,
-                            'current_stock': quantity,
+                            'current_stock': total_quantity,
                             'selling_price': selling_price,
                             'discount_permit': item.discount_permit_percentage if item else 0,
                             'qty': 0,
@@ -1313,14 +1355,7 @@ class InvoiceDetails(View):
                             'dis_percentage': sale_items[::-1][0].discount_percentage,
                             'code_of_item': item.code, 
                         })
-                        i = i + 1
-                        net_amount = 0
-                        net_amount = 0
-                        quantity_sold = 0
-                        selling_price = 0
-                        discount = 0
-                        total_quantity = 0
-                        quantity = 0
+                        i = i + 1 
 
                 ctx_sales_invoices.append({
                     'invoice_no': sales_invoice.sales_invoice_number,
