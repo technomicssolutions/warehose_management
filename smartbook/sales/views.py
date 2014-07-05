@@ -2033,6 +2033,8 @@ class DeliveryNoteItems(View):
                                 # 'delivery_item_id': delivery_note_item.id,
                             })
                             i = i + 1
+                        total_quantity = 0
+                        quantity_sold = 0
                     # for delivery_note_item in items:
                     #     item_list.append({
                     #         'sl_no': i,
