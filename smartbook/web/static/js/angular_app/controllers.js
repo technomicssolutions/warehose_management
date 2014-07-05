@@ -3479,6 +3479,7 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
                     'sold_qty': invoice.items[i].qty_sold,
                     'disc_given': invoice.items[i].discount_given,
                     'net_amount': invoice.items[i].net_amount,
+                    'amount_net': invoice.items[i].net_amount,
                     'unit_price': invoice.items[i].selling_price,
                     'current_stock': invoice.items[i].current_stock,
                     'uom': invoice.items[i].uom,
@@ -3589,19 +3590,11 @@ function EditSalesInvoiceController($scope, $element, $location, $http){
             
             if(item.qty_sold != '' && item.unit_price != ''){
                 var amount = item.amt;
-                console.log(item.amt, item.qty);
+                console.log(item.qty, item.amount_net);
                 item.amt = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
-                console.log(item.amt);
-                if (item.newly_added == 'true') {
-                    console.log('newly added');
-                    console.log(parseInt(item.qty));
-                    item.net_amount = parseFloat(item.amt);
-                } else {
-                    console.log('old');
-                    console.log(item.amt, net_amount );
-                    item.net_amount = parseFloat(net_amount) + parseFloat(item.amt);
-                    console.log(item.amt, item.net_amount );
-                }
+                
+                item.net_amount = parseFloat(item.amount_net) + parseFloat(item.amt);
+                console.log(item.amt, item.net_amount, item.amount_net);
                 $scope.calculate_net_discount_sale();
             
             } 

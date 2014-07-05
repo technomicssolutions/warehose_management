@@ -25,10 +25,10 @@ class  Expense(models.Model):
 	payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=25)
 	narration = models.TextField('Narration', max_length=300, null=True, blank=True)
 	
-	cheque_no = models.CharField('Cheque No', null=True, blank=True, max_length=20)
+	cheque_no = models.CharField('Cheque No', null=True, blank=True, max_length=50)
 	cheque_date = models.DateField('Cheque Date', null=True, blank=True)
-	bank_name = models.CharField('Bank Name', max_length=15, null=True, blank=True)
-	branch = models.CharField('Branch', max_length=10, null=True, blank=True)
+	bank_name = models.CharField('Bank Name', max_length=50, null=True, blank=True)
+	branch = models.CharField('Branch', max_length=50, null=True, blank=True)
 	purchase = models.ForeignKey(Purchase, null=True, blank=True)
 
 	class Meta:

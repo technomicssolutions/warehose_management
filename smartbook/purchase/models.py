@@ -90,14 +90,14 @@ class VendorAccount(models.Model):
     vendor = models.ForeignKey(Vendor, unique=True)
     date = models.DateField('Date', null=True, blank=True)
     payment_mode = models.CharField('Payment Mode', max_length=10, choices=PAYMENT_MODE, default='cash')
-    narration = models.CharField('Narration', max_length=10, null=True, blank=True)
+    narration = models.TextField('Narration', null=True, blank=True)
     total_amount = models.DecimalField('Total Amount', max_digits=14, decimal_places=3, default=0)
     paid_amount = models.DecimalField('Paid Amount', max_digits=14, decimal_places=3, default=0)
     balance = models.DecimalField('Balance', max_digits=14, decimal_places=3, default=0)
-    cheque_no = models.IntegerField('Cheque No', null=True, blank=True)
+    cheque_no = models.CharField('Cheque No', null=True, blank=True, max_length=50)
     cheque_date = models.DateField('Cheque Date', null=True, blank=True)
-    bank_name = models.CharField('Bank Name', max_length=200, null=True, blank=True)
-    branch_name = models.CharField('Branch Name', max_length=200, null=True, blank=True)
+    bank_name = models.CharField('Bank Name', max_length=75, null=True, blank=True)
+    branch_name = models.CharField('Branch Name', max_length=75, null=True, blank=True)
 
     def __unicode__(self):
         return self.vendor.user.first_name
