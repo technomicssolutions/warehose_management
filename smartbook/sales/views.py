@@ -1615,18 +1615,21 @@ class EditSalesInvoice(View):
 
         removed_items = sales_invoice_details['removed_items']
         for r_item in removed_items:
+
             item = InventoryItem.objects.get(code=r_item['item_code'])
-            d_item = DeliveryNoteItem.objects.get(id=r_item['delivery_note_item_id'], item=item)
-            s_item = SalesItem.objects.get(sales=sales, item=item, delivery_note_item=d_item)
-            d_item.quantity_sold =  int(d_item.quantity_sold) - int(s_item.quantity_sold) 
-            d_item.save()
-            if d_item.is_completed:
-                d_item.is_completed = False
+            s_items = SalesItem.objects.filter(sales=sales, delivery_note_item__item=item)
+            print s_items
+            for s_item in s_items:
+                d_item = s_item.delivery_note_item
+                d_item.quantity_sold =  int(d_item.quantity_sold) - int(s_item.quantity_sold) 
                 d_item.save()
-                delivery_note = d_item.delivery_note
-                delivery_note.is_pending = True
-                delivery_note.save()
-            s_item.delete()
+                if d_item.is_completed:
+                    d_item.is_completed = False
+                    d_item.save()
+                    delivery_note = d_item.delivery_note
+                    delivery_note.is_pending = True
+                    delivery_note.save()
+                s_item.delete()
 
         for item_data in sales_invoice_details['sales_items']:
             if item_data['qty'] != 0:
