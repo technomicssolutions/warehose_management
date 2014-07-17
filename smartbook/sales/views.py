@@ -1018,28 +1018,28 @@ class QuotationDeliverynoteSales(View):
                 sold_qty = 0
                 if remaining_qty > 0:
                     d_item_remaining_qty =  int(d_item.total_quantity) - int(d_item.quantity_sold)
-                    
-                    if int(d_item_remaining_qty) > int(remaining_qty):
-                        
-                        d_item.quantity_sold = d_item.quantity_sold + int(remaining_qty)
-                        sold_qty = remaining_qty
-                        remaining_qty = 0
-                        
-                        d_item.save()
-                    else:
-                        d_item.quantity_sold = int(d_item.quantity_sold) + int(d_item_remaining_qty)
-                        sold_qty = d_item_remaining_qty
-                        remaining_qty = int(remaining_qty) - int(d_item_remaining_qty)
-                        d_item.save()
-                    s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
-                    s_item.sales = sales
-                    s_item.quantity_sold = sold_qty
-                    s_item.discount_amount = sales_item['dis_amt']
-                    s_item.discount_percentage = sales_item['dis_percentage']
-                    s_item.net_amount = float(sold_qty) * float(sales_item['unit_price'])
-                    s_item.selling_price = sales_item['unit_price']
-                    # unit price is actually the selling price
-                    s_item.save()
+                    if d_item_remaining_qty > 0:
+                        if int(d_item_remaining_qty) > int(remaining_qty):
+                            
+                            d_item.quantity_sold = d_item.quantity_sold + int(remaining_qty)
+                            sold_qty = remaining_qty
+                            remaining_qty = 0
+                            
+                            d_item.save()
+                        else:
+                            d_item.quantity_sold = int(d_item.quantity_sold) + int(d_item_remaining_qty)
+                            sold_qty = d_item_remaining_qty
+                            remaining_qty = int(remaining_qty) - int(d_item_remaining_qty)
+                            d_item.save()
+                        s_item, item_created = SalesItem.objects.get_or_create(delivery_note_item=d_item, sales=sales)
+                        s_item.sales = sales
+                        s_item.quantity_sold = sold_qty
+                        s_item.discount_amount = sales_item['dis_amt']
+                        s_item.discount_percentage = sales_item['dis_percentage']
+                        s_item.net_amount = float(sold_qty) * float(sales_item['unit_price'])
+                        s_item.selling_price = sales_item['unit_price']
+                        # unit price is actually the selling price
+                        s_item.save()
         not_completed_selling = []
         for sales_item in sales.salesitem_set.all():
             delivery_note = sales_item.delivery_note_item.delivery_note
@@ -1852,9 +1852,13 @@ class EditDeliveryNote(View):
 
                 if not d_item.is_completed:
                     not_completed_selling.append(d_item.id)
+            print len(not_completed_selling), not_completed_selling
             if len(not_completed_selling) != 0:
                 delivery_note.is_pending = True
-                delivery_note.save()
+                
+            else:
+                delivery_note.is_pending = False
+            delivery_note.save()
 
             res = {
                 'result': 'ok',
