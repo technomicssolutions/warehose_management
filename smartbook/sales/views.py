@@ -1046,10 +1046,10 @@ class QuotationDeliverynoteSales(View):
             for delivery_item in delivery_note.deliverynoteitem_set.all():
                 if int(delivery_item.total_quantity) != int(delivery_item.quantity_sold):
                     not_completed_selling.append(delivery_item.id)
-                    d_item.is_completed = False
+                    delivery_item.is_completed = False
                 else:
-                    d_item.is_completed = True
-                d_item.save() 
+                    delivery_item.is_completed = True
+                delivery_item.save() 
             if len(not_completed_selling) == 0:
                 delivery_note.is_pending = False
             else:
@@ -1854,7 +1854,9 @@ class EditDeliveryNote(View):
                     not_completed_selling.append(d_item.id)
             if len(not_completed_selling) != 0:
                 delivery_note.is_pending = True
-                delivery_note.save()
+            else:
+                delivery_note.is_pending = False
+            delivery_note.save()
 
             res = {
                 'result': 'ok',
