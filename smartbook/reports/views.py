@@ -1405,6 +1405,7 @@ class StockReports(View):
         return response
 
 
+
 class SalesmanStockReports(View):
     
     def get(self, request, *args, **kwargs):
