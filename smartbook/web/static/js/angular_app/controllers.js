@@ -941,8 +941,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             return false;
         } else if($scope.sales.sales_items.length > 0){
             for (var i=0; i < $scope.sales.sales_items.length; i++){
-                var remaining_qty = parseInt($scope.sales.sales_items[i].remaining_qty) - parseInt($scope.sales.sales_items[i].qty);
-                if (remaining_qty < 0 ){
+                if ($scope.sales.sales_items[i].exceeds == 1){
                     $scope.validation_error = "Quantity not in stock for item "+$scope.sales.sales_items[i].item_name;
                     return false;
                 } else if ($scope.sales.sales_items[i].qty == 0) {
@@ -1060,7 +1059,6 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                 }
             }
         } 
-        console.log(item);
         var selected_item = {
             'sl_no': $scope.sales.sales_items.length + 1,
             'item_code': item.item_code,
@@ -1077,6 +1075,7 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             'sold_qty': item.sold_qty,
             'dis_amt': 0,
             'dis_percentage': 0,
+            'exceeds':0,
         }
         $scope.sales.sales_items.push(selected_item);
         $scope.calculate_grant_total_sale();
@@ -1108,7 +1107,9 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
                 item.qty_sold = parseInt(item.sold_qty);
                 item.remaining_qty = parseInt(item.current_stock) - parseInt(item.qty_sold);
                 item.net_amount = 0;
+                item.exceeds = 1;
             } else {
+                item.exceeds = 0;
                 $scope.validation_error = '';
                 if (item.qty != '' || item.qty != 0) {
                     item.net_amount = ((parseFloat(item.qty)*parseFloat(item.unit_price)) - parseFloat(item.dis_amt)).toFixed(2);
