@@ -941,7 +941,8 @@ function SalesDNController($scope, $element, $http, $timeout, share, $location) 
             return false;
         } else if($scope.sales.sales_items.length > 0){
             for (var i=0; i < $scope.sales.sales_items.length; i++){
-                if ($scope.sales.sales_items[i].remaining_qty < 0 ){
+                var remaining_qty = parseInt($scope.sales.sales_items[i].remaining_qty) - parseInt($scope.sales.sales_items[i].qty);
+                if (remaining_qty < 0 ){
                     $scope.validation_error = "Quantity not in stock for item "+$scope.sales.sales_items[i].item_name;
                     return false;
                 } else if ($scope.sales.sales_items[i].qty == 0) {
