@@ -3,18 +3,18 @@
 {% block body_id %}pending_customer_stock{% endblock %}
 
 {% block controller %}
-	ng-controller="PendingCustomerReportController" ng-init="init('{{csrf_token}}')"   
+	ng-controller="CustomerPaymentReportController" ng-init="init('{{csrf_token}}')"   
 {% endblock controller %}
 
 {% block content %}
 <div class="main-title">		
-	<div class="alert alert-info" align="Center" >Pending Customer Reports</div>
+	<div class="alert alert-info" align="Center" > Customer Reports</div>
 </div>
 <div class="message">
 	<p>{{msg}}</p>
 </div>
 
-<form name="purchase_form" method="get" action="{% url 'pending_customer_report' %}">
+<form name="purchase_form" method="get" action="{% url 'customer_payment_report' %}">
 	<!-- {% if message %}
 		<p class="error_message">{{message}}</p>
 	{% endif %}

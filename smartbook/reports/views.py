@@ -23,7 +23,7 @@ from django.core.files import File
 
 import math
 
-from purchase.models import Purchase, VendorAccount, PurchaseReturn
+from purchase.models import Purchase, VendorAccount, VendorAccountDetail, PurchaseReturn
 
 from reportlab.lib.units import cm
 from reportlab.pdfgen.canvas import Canvas
@@ -740,10 +740,14 @@ class PurchaseReports(View):
             p.drawString(50, 875, "Date")
             p.drawString(150, 875, "Invoice No")
             p.drawString(250, 875, "Vendor Invoice")
-            p.drawString(370, 875, "Amount")
+            p.drawString(370, 875, "Purchase Amount")
+            p.drawString(480, 875, "Discount Amount")
+            p.drawString(590, 875, "Vendor Amount")
             p.setFontSize(12)  
             y = 850
+            total_vendor_amount = 0
             total_amount = 0
+            total_discount_amount = 0
             for purchase in purchases:
                             
                 y = y - 30
@@ -754,15 +758,38 @@ class PurchaseReports(View):
                 p.drawString(50, y, purchase.purchase_invoice_date.strftime('%d/%m/%y'))
                 p.drawString(150, y, str(purchase.purchase_invoice_number))
                 p.drawString(250, y, str(purchase.vendor_invoice_number))
-                p.drawString(350, y, str(purchase.vendor_amount))
-                total_amount = total_amount + purchase.vendor_amount
+                p.drawString(370, y, str(purchase.net_total))
+                p.drawString(480, y, str(purchase.discount))
+                p.drawString(590, y, str(purchase.vendor_amount))
+                total_amount = total_amount + purchase.net_total
+                total_discount_amount = total_discount_amount + purchase.discount
+                total_vendor_amount = total_vendor_amount + purchase.vendor_amount
             y = y - 30
             if y <= 270:
                 y = 850
                 p.showPage()
                 p = header(p)
-            p.drawString(250, y, 'Total:')
-            p.drawString(350, y, str(total_amount))    
+            p.drawString(250, y, 'Total Purchase Amount:')
+            p.drawString(380, y, str(total_amount))
+
+            
+            y = y - 30
+            if y <= 270:
+                y = 850
+                p.showPage()
+                p = header(p)
+            p.drawString(250, y, 'Total Discount Amount:')
+            p.drawString(380, y, str(total_discount_amount))
+            
+            y = y - 30
+            if y <= 270:
+                y = 850
+                p.showPage()
+                p = header(p)
+            p.drawString(250, y, 'Total Vendor Amount:')
+            p.drawString(380, y, str(total_vendor_amount))
+
+
             p.showPage()
             p.save()
                   
@@ -906,8 +933,12 @@ class DailyReport(View):
 
             p.drawString(50, 870, "Date")
             p.drawString(150, 870, "Particulars/Narration")
-            p.drawString(550, 870, "Income")
-            p.drawString(650, 870, "Expense")           
+            p.drawString(380, 870, "Salesman")
+            p.drawString(460, 870, "Cash Sale")
+            p.drawString(550, 870, "Credit Sale")
+            p.drawString(650, 870, "Cheque Sale")
+            p.drawString(750, 870, "Income")
+            p.drawString(850, 870, "Expense")           
 
             y = 850
             
@@ -915,7 +946,56 @@ class DailyReport(View):
             discount = 0
             total_income = 0
             total_expense = 0
+            total_credit = 0
+            total_cash = 0
+            total_cheque = 0
+            total_collection = 0
+
+            sales = Sales.objects.filter(payment_mode= 'cash',sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
+            if sales.count()>0:
+                for sale in sales:
+                    y = y - 30
+                    if y <= 135:
+                        y = 850
+                        p.showPage()
+                        p = header(p)
+                    p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
+                    p.drawString(150, y, 'By cash '+str(sale.sales_invoice_number))
+                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(460,y,str(sale.paid))
+
+                    total_cash = total_cash + sale.paid
             
+            sales = Sales.objects.filter(payment_mode= 'cheque',sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
+            if sales.count()>0:
+                for sale in sales:
+                    y = y - 30
+                    if y <= 135:
+                        y = 850
+                        p.showPage()
+                        p = header(p)
+                    p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
+                    p.drawString(150, y, 'By Cheque '+str(sale.sales_invoice_number))
+                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(460,y,str(sale.paid))
+
+                    total_cheque = total_cheque + sale.paid
+            total_collection = total_cash + total_cheque        
+            sales = Sales.objects.filter(payment_mode= 'credit',sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
+            if sales.count()>0:
+                for sale in sales:
+                    y = y - 30
+                    if y <= 135:
+                        y = 850
+                        p.showPage()
+                        p = header(p)
+                    p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
+                    p.drawString(150, y, 'By credit '+str(sale.sales_invoice_number))
+                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(550,y,str(sale.grant_total))
+
+                    total_credit = total_credit + sale.grant_total
+
             sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
             if sales.count()>0:
                 for sale in sales:
@@ -926,12 +1006,15 @@ class DailyReport(View):
                         p = header(p)
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By Sales '+str(sale.sales_invoice_number))
-                    p.drawString(550, y, str(sale.grant_total))
-                    p.drawString(650, y, '') 
+                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(750, y, str(sale.grant_total))
+                    p.drawString(850, y, '') 
 
                     round_off = round_off+sale.round_off
                     discount = discount+sale.discount
-                    total_income = total_income + sale.grant_total            
+                    total_income = total_income + sale.grant_total   
+
+            
             
             expenses = Expense.objects.filter(date__gte=start_date, date__lte=end_date)
             if expenses.count()>0:
@@ -945,8 +1028,9 @@ class DailyReport(View):
                     
                     p.drawString(50, y, (expense.date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By Voucher '+str(expense.voucher_no)+','+expense.narration)
-                    p.drawString(550, y, '')
-                    p.drawString(650, y, str( expense.amount))    
+                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(750, y, '')
+                    p.drawString(850, y, str( expense.amount))    
                     
                     total_expense = total_expense + expense.amount 
             total_expense = total_expense + round_off + discount
@@ -958,9 +1042,39 @@ class DailyReport(View):
                 p.showPage()
                 p = header(p)
             p.drawString(50, y, '')
+            p.drawString(150, y, 'TotalCash-Sales')
+            p.drawString(550, y, '')
+            p.drawString(360, y, str(total_cash))
+
+            y = y-30
+            if y <= 135:
+                y = 850
+                p.showPage()
+                p = header(p)
+            p.drawString(50, y, '')
+            p.drawString(150, y, 'TotalCredit-Sales')
+            p.drawString(550, y, '')
+            p.drawString(360, y, str(total_credit))
+            
+            y = y-30
+            if y <= 135:
+                y = 850
+                p.showPage()
+                p = header(p)
+            p.drawString(50, y, '')
+            p.drawString(150, y, 'TotalCheque-Sales')
+            p.drawString(550, y, '')
+            p.drawString(360, y, str(total_cheque))
+
+            y = y-30
+            if y <= 135:
+                y = 850
+                p.showPage()
+                p = header(p)
+            p.drawString(50, y, '')
             p.drawString(150, y, 'TotalRoundOff-Sales')
             p.drawString(550, y, '')
-            p.drawString(650, y, str(round_off))
+            p.drawString(360, y, str(round_off))
 
             y = y-30
             if y <= 135:
@@ -970,18 +1084,34 @@ class DailyReport(View):
             p.drawString(50, y, '')
             p.drawString(150, y, 'TotalDiscount-Sales')
             p.drawString(550, y, '')
-            p.drawString(650, y, str(discount))            
+            p.drawString(360, y, str(discount))            
 
-            
             y = y-30
             if y <= 135:
                 y = 850
                 p.showPage()
                 p = header(p)
             p.drawString(50, y, '')
-            p.drawString(150, y, 'Total')
-            p.drawString(550, y, str(total_income))
-            p.drawString(650, y, str(total_expense))            
+            p.drawString(150, y, 'Total Collection')
+            p.drawString(360, y, str(total_collection)) 
+
+            y = y-30
+            if y <= 135:
+                y = 850
+                p.showPage()
+                p = header(p)
+            p.drawString(50, y, '')
+            p.drawString(150, y, 'Total Income')
+            p.drawString(360, y, str(total_income))            
+
+            y = y-30
+            if y <= 135:
+                y = 850
+                p.showPage()
+                p = header(p)
+            p.drawString(50, y, '')
+            p.drawString(150, y, 'Total Expense')
+            p.drawString(360, y, str(total_expense))        
 
             p.showPage()
             p.save()
@@ -1276,14 +1406,14 @@ class VendorAccountsReport(View):
                 p.drawString(150, 875, "Vendor Name")
                 p.drawString(250, 875, "Payment Mode")
                 p.drawString(350, 875, "Narration")
-                p.drawString(450, 875, "Total Amount")
-                p.drawString(550, 875, "Paid Amount")
-                p.drawString(650, 875, "Balance") 
+                p.drawString(470, 875, "Opening Balance")
+                p.drawString(580, 875, "Amount")
+                p.drawString(650, 875, "Closing Balance") 
 
                 
                 y = 850
 
-                purchase_accounts = VendorAccount.objects.filter(date__gte=start_date, date__lte=end_date).order_by('date')
+                purchase_accounts = VendorAccountDetail.objects.filter(date__gte=start_date, date__lte=end_date).order_by('date')
                 if len(purchase_accounts) > 0:
                     for purchase_account in purchase_accounts:
 
@@ -1294,13 +1424,13 @@ class VendorAccountsReport(View):
                             p = header(p)
 
                         p.drawString(50, y, purchase_account.date.strftime('%d/%m/%Y') if purchase_account.date else '')
-                        p.drawString(150, y, purchase_account.vendor.user.first_name)
-                        p.drawString(250, y, purchase_account.payment_mode)
-                        p.drawString(350, y, purchase_account.narration if purchase_account.narration else '')
+                        p.drawString(150, y, purchase_account.vendor_account.vendor.user.first_name)
+                        p.drawString(250, y, purchase_account.vendor_account.payment_mode)
+                        p.drawString(350, y, purchase_account.vendor_account.narration if purchase_account.vendor_account.narration else '')
 
-                        p.drawString(450, y, str(purchase_account.total_amount))
-                        p.drawString(550, y, str(purchase_account.paid_amount))
-                        p.drawString(650, y, str(purchase_account.balance)) 
+                        p.drawString(470, y, str(purchase_account.opening_balance))
+                        p.drawString(580, y, str(purchase_account.amount))
+                        p.drawString(660, y, str(purchase_account.closing_balance)) 
 
                 p.showPage()
                 p.save()
@@ -1520,6 +1650,81 @@ class PendingSalesmanReport(View):
         p.showPage()
         p.save()
         return response
+class CustomerPaymentReport(View):
+    def get(self, request, *args, **kwargs):
+
+        response = HttpResponse(content_type='application/pdf')
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
+
+        status_code = 200
+        customer_name = request.GET.get('customer_name')
+        
+        if customer_name is None:
+            return render(request, 'reports/customer_payment_report.html', {})
+        if customer_name:
+            if customer_name == 'select':
+                context = {
+                    'message': 'Please Choose Customer'
+                }
+                return render(request, 'reports/customer_report.html', context) 
+            elif customer_name == 'all':
+                customers = Customer.objects.all()
+            else:
+                customer = Customer.objects.get(customer_name=customer_name)
+                customer_payments = CustomerPayment.objects.filter(customer=customer)
+        p = header(p)
+
+        p.drawString(400, 900, ' Customer Report - ' + customer_name)
+
+        y = 850
+        p.drawString(150, y, 'Date')
+        p.drawString(220, y, 'Customer Name')
+        p.drawString(420, y, 'Invoice No')
+        p.drawString(550, y, 'Total Amount')
+        p.drawString(650, y, 'Paid')
+        p.drawString(750, y, 'Amount Paid')
+        p.drawString(850, y, 'Balance') 
+        
+        y = y - 50 
+        if customer_name == 'all':
+            if len(customers) > 0:
+                for customer in customers:
+                    customer_payments = CustomerPayment.objects.filter(customer=customer)
+                    for customer_account in customer_accounts:
+                            p.drawString(150, y, customer_payment.date.strftime('%d/%m/%Y') if customer_payment.date else '')
+                            p.drawString(220, y, customer_payment.customer.customer_name)
+                            p.drawString(420, y, customer_payment.customer_account.sales_invoice.sales_invoice_number)
+                            p.drawString(550, y, str(customer_payment.total_amount))
+                            p.drawString(650, y, str(customer_payment.paid))
+                            p.drawString(750, y, str(customer_payment.amount))
+                            p.drawString(850, y, str(customer_payment.balance))
+                            y = y - 30
+                            if y <= 270:
+                                y = 850
+                                p.showPage()
+                                p = header(p)
+        else:
+            if len(customer_payments) > 0:
+                for customer_payment in customer_payments:
+
+                    p.drawString(150, y, customer_payment.date.strftime('%d/%m/%Y') if customer_payment.date else '')
+                    p.drawString(220, y, customer_payment.customer.customer_name)
+                    p.drawString(420, y, customer_payment.customer_account.sales_invoice.sales_invoice_number)
+                    p.drawString(550, y, str(customer_payment.total_amount))
+                    p.drawString(650, y, str(customer_payment.paid))
+                    p.drawString(750, y, str(customer_payment.amount))
+                    p.drawString(850, y, str(customer_payment.balance))
+                    y = y - 30
+                    if y <= 270:
+                        y = 850
+                        p.showPage()
+                        p = header(p)
+
+        p.showPage()
+        p.save()
+        return response
+
+
 
 class PendingCustomerReport(View):
 
@@ -1550,10 +1755,11 @@ class PendingCustomerReport(View):
 
         y = 850
         p.drawString(200, y, 'Customer Name')
-        p.drawString(320, y, 'Invoice No')
-        p.drawString(420, y, 'Total Amount')
-        p.drawString(550, y, 'Paid') 
-        p.drawString(650, y, 'Balance') 
+        p.drawString(320, y, 'Salesman' )
+        p.drawString(420, y, 'Invoice No')
+        p.drawString(550, y, 'Total Amount')
+        p.drawString(650, y, 'Paid') 
+        p.drawString(750, y, 'Balance') 
         
         y = y - 50 
         if customer_name == 'all':
@@ -1563,10 +1769,11 @@ class PendingCustomerReport(View):
                     for customer_account in customer_accounts:
                             
                             p.drawString(200, y, customer_account.customer.customer_name)
-                            p.drawString(320, y, customer_account.invoice_no.sales_invoice_number)
-                            p.drawString(420, y, str(customer_account.total_amount))
-                            p.drawString(550, y, str(customer_account.paid))
-                            p.drawString(650, y, str(customer_account.balance))
+                            p.drawString(320, y, customer_account.invoice_no.salesman.first_name )
+                            p.drawString(420, y, customer_account.invoice_no.sales_invoice_number)
+                            p.drawString(550, y, str(customer_account.total_amount))
+                            p.drawString(650, y, str(customer_account.paid))
+                            p.drawString(750, y, str(customer_account.balance))
                             y = y - 30
                             if y <= 270:
                                 y = 850
@@ -1577,10 +1784,11 @@ class PendingCustomerReport(View):
                 for customer_account in customer_accounts:
                     
                     p.drawString(200, y, customer_account.customer.customer_name)
-                    p.drawString(320, y, customer_account.invoice_no.sales_invoice_number)
-                    p.drawString(420, y, str(customer_account.total_amount))
-                    p.drawString(550, y, str(customer_account.paid))
-                    p.drawString(650, y, str(customer_account.balance))
+                    p.drawString(320, y, customer_account.invoice_no.salesman.first_name )
+                    p.drawString(420, y, customer_account.invoice_no.sales_invoice_number)
+                    p.drawString(550, y, str(customer_account.total_amount))
+                    p.drawString(650, y, str(customer_account.paid))
+                    p.drawString(750, y, str(customer_account.balance))
                     y = y - 30
                     if y <= 270:
                         y = 850

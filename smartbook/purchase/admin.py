@@ -8,4 +8,6 @@ admin.site.register(PurchaseReturn)
 admin.site.register(PurchaseItem)
 admin.site.register(PurchaseReturnItem)
 admin.site.register(VendorAccount)
+admin.site.register(VendorAccountDetail)
+
 

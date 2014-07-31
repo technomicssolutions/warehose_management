@@ -930,3 +930,24 @@ a {
 	float: left;
 	margin-left: 5px;
 }
+.search_customer{
+	width: 64%;
+	/*margin: auto;*/
+	height: 100%;
+	padding-bottom: 30px;
+}
+
+.search_customer .control {
+	/*background-color: #ADD8E6;*/
+    /*float: left;*/
+    padding: 13px;
+    width: 30%;
+    /*margin: auto;*/
+}
+.customer_reporttext {
+    float: left;
+    padding-left: 10px;
+    width: 90px;
+    /*width: 100%;
+    margin: auto;*/
+}

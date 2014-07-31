@@ -18,7 +18,7 @@ from inventory.models import UnitOfMeasure
 from inventory.models import Brand
 
 from web.models import (UserProfile, Vendor, Customer, TransportationCompany)
-from purchase.models import Purchase, PurchaseItem, VendorAccount, PurchaseReturn, PurchaseReturnItem
+from purchase.models import Purchase, PurchaseItem, VendorAccount, VendorAccountDetail, PurchaseReturn, PurchaseReturnItem
 from expenses.models import Expense, ExpenseHead
 
 class PurchaseDetail(View):
@@ -254,8 +254,10 @@ class VendorAccountDetails(View):
         try:
             vendor = get_object_or_404(Vendor, user__first_name=request.GET['vendor'])
             vendor_account =  VendorAccount.objects.get(vendor=vendor)
+            
             res = {
                 'result': 'Ok',
+                
                 'vendor_account': {
                     'vendor_account_date' : vendor_account.date.strftime('%d/%m/%Y') if vendor_account.date else '',
                     'payment_mode': vendor_account.payment_mode,
@@ -282,22 +284,30 @@ class VendorAccountDetails(View):
 
     def post(self, request, *args, **kwargs):
 
+        
         vendor_account_dict = ast.literal_eval(request.POST['vendor_account'])
         vendor = get_object_or_404(Vendor, user__first_name=vendor_account_dict['vendor'])
+        vendor_detail = VendorAccountDetail()
         vendor_account, created =  VendorAccount.objects.get_or_create(vendor=vendor) 
         vendor_account.date = datetime.strptime(vendor_account_dict['vendor_account_date'], '%d/%m/%Y')
+        vendor_detail.date = vendor_account.date
         vendor_account.payment_mode = vendor_account_dict['payment_mode']
         vendor_account.narration = vendor_account_dict['narration']
         vendor_account.amount = int(vendor_account_dict['amount'])
+        vendor_detail.amount = vendor_account.amount
         # vendor_account.total_amount = int(vendor_account_dict['total_amount'])
         vendor_account.paid_amount = vendor_account.paid_amount + vendor_account.amount  #int(vendor_account_dict['amount_paid'])
-        vendor_account.balance = vendor_account.balance - vendor_account.amount  #int(vendor_account_dict['balance_amount'])        
+        vendor_detail.opening_balance = vendor_account.balance
+        vendor_account.balance = vendor_account.balance - vendor_account.amount #int(vendor_account_dict['balance_amount'])        
+        vendor_detail.closing_balance = vendor_account.balance
+        vendor_detail.vendor_account = vendor_account
         if vendor_account_dict['cheque_date']:
             vendor_account.cheque_no = int(vendor_account_dict['cheque_no'])
             vendor_account.cheque_date = datetime.strptime(vendor_account_dict['cheque_date'], '%d/%m/%Y') 
             vendor_account.bank_name = vendor_account_dict['bank_name']
             vendor_account.branch_name = vendor_account_dict['branch_name']
         vendor_account.save()
+        vendor_detail.save()
         response = {
                 'result': 'Ok',
             }

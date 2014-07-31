@@ -102,4 +102,10 @@ class VendorAccount(models.Model):
     def __unicode__(self):
         return self.vendor.user.first_name
     
+class  VendorAccountDetail(models.Model):
     
+    vendor_account = models.ForeignKey(VendorAccount)
+    date = models.DateField('Date' , null=True, blank=True) 
+    opening_balance = models.DecimalField('Opening Balance', max_digits=14, decimal_places=3, default=0) 
+    closing_balance = models.DecimalField('Closing Balance', max_digits=14, decimal_places=3, default=0)
+    amount = models.DecimalField('Amount', max_digits=14, decimal_places=3, default=0)

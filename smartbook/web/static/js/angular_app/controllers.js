@@ -4812,6 +4812,11 @@ function EditItemController($scope, $http, $element, $location, $timeout) {
 
 function PendingCustomerReportController($scope, $element, $http, $location) {
       
+    $scope.customers = [];
+    $scope.selected_customer = '';
+    $scope.customer_name = '';
+    $scope.selecting_customer = false;
+    $scope.customer_selected = false;
     
     $scope.init = function(csrf_token) {
         $scope.csrf_token = csrf_token;
@@ -4819,12 +4824,62 @@ function PendingCustomerReportController($scope, $element, $http, $location) {
         $scope.get_customers();
 
     }
-    $scope.get_customers = function() {
-        $http.get('/customer/list/').success(function(data)
+    $scope.addcustomer = function(customer) {
+        $scope.selecting_customer = false;
+        $scope.customer_selected = true;
+        document.location.href = '/reports/pending_customer/?customer_name='+customer.customer_name;
+           
+        
+        
+    }
+    $scope.get_customers = function(parameter) {
+        if(parameter == 'customer_name')
+            var param = $scope.customer_name;
+        $http.get('/customers/?'+parameter+'='+param).success(function(data)
         {   
-
+            $scope.selecting_customer = true;
+            $scope.customer_selected = false;
             $scope.customers = data.customers;
-            $scope.customer_name = 'select';
+            
+
+        }).error(function(data, status)
+        {
+            console.log(data || "Request failed");
+        });
+    }
+    
+}
+function CustomerPaymentReportController($scope, $element, $http, $location) {
+      
+    $scope.customers = [];
+    $scope.selected_customer = '';
+    $scope.customer_name = '';
+    $scope.selecting_customer = false;
+    $scope.customer_selected = false;
+    
+    $scope.init = function(csrf_token) {
+        $scope.csrf_token = csrf_token;
+        
+        $scope.get_customers();
+
+    }
+    $scope.addcustomer = function(customer) {
+        $scope.selecting_customer = false;
+        $scope.customer_selected = true;
+        document.location.href = '/reports/customer_payment/?customer_name='+customer.customer_name;
+           
+        
+        
+    }
+    $scope.get_customers = function(parameter) {
+        if(parameter == 'customer_name')
+            var param = $scope.customer_name;
+        $http.get('/customers/?'+parameter+'='+param).success(function(data)
+        {   
+            $scope.selecting_customer = true;
+            $scope.customer_selected = false;
+            $scope.customers = data.customers;
+            
 
         }).error(function(data, status)
         {

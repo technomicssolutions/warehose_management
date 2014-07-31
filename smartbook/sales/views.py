@@ -1195,11 +1195,15 @@ class ReceiptVoucherCreation(View):
             customer = Customer.objects.get(customer_name=receiptvoucher['customer'])
             sales_invoice_obj = Sales.objects.get(sales_invoice_number=receiptvoucher['invoice_no'])
             receipt_voucher = ReceiptVoucher.objects.create(sales_invoice=sales_invoice_obj)
-
+            customer_payment = CustomerPayment()
+            customer_payment.customer = customer
             receipt_voucher.date = datetime.strptime(receiptvoucher['date'], '%d/%m/%Y')
-            
+            customer_payment.date = receipt_voucher.date
             receipt_voucher.total_amount = receiptvoucher['amount']
+            customer_payment.total_amount = receipt_voucher.total_amount
             receipt_voucher.paid_amount = receiptvoucher['paid_amount']
+            print receipt_voucher.paid_amount,'sadsad'
+            customer_payment.amount = receipt_voucher.paid_amount
             receipt_voucher.receipt_voucher_no = receiptvoucher['voucher_no']
             receipt_voucher.payment_mode = receiptvoucher['payment_mode']
             receipt_voucher.bank = receiptvoucher['bank_name']
@@ -1217,7 +1221,12 @@ class ReceiptVoucherCreation(View):
                 customer_account.paid = float(customer_account.paid) + float(receiptvoucher['paid_amount'])
             customer_account.save()
             customer_account.balance = float(customer_account.total_amount) - float(customer_account.paid)
+            print customer_account.paid
+            customer_payment.paid = customer_account.paid
+            customer_payment.balance = customer_account.balance
+            customer_payment.customer_account = receipt_voucher
             customer_account.save()
+            customer_payment.save()
             sales_invoice_obj.balance = customer_account.balance
             sales_invoice_obj.save()
             if customer_account.balance == 0:

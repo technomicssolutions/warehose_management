@@ -49,7 +49,7 @@ class Vendor(models.Model):
     
 class Customer(models.Model):
     
-    customer_name = models.CharField('Name of the customer', null=True, blank=True, max_length=50)
+    customer_name = models.CharField('Name of the customer', null=True, blank=True, max_length=50,unique =True)
     house_name = models.CharField('House name', null=True, blank=True, max_length=50)
     street = models.CharField('Street', null=True, blank=True, max_length=50)
     city = models.CharField('City', null=True, blank=True, max_length=50)
