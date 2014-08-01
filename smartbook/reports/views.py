@@ -961,7 +961,7 @@ class DailyReport(View):
                         p = header(p)
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By cash '+str(sale.sales_invoice_number))
-                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(380, y, sale.salesman.first_name if sale.salesman else '')
                     p.drawString(460,y,str(sale.paid))
 
                     total_cash = total_cash + sale.paid
@@ -976,7 +976,7 @@ class DailyReport(View):
                         p = header(p)
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By Cheque '+str(sale.sales_invoice_number))
-                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(380, y, sale.salesman.first_name if sale.salesman else '')
                     p.drawString(460,y,str(sale.paid))
 
                     total_cheque = total_cheque + sale.paid
@@ -991,29 +991,10 @@ class DailyReport(View):
                         p = header(p)
                     p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By credit '+str(sale.sales_invoice_number))
-                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(380, y, sale.salesman.first_name if sale.salesman else '')
                     p.drawString(550,y,str(sale.grant_total))
 
                     total_credit = total_credit + sale.grant_total
-
-            sales = Sales.objects.filter(sales_invoice_date__gte=start_date,sales_invoice_date__lte=end_date)
-            if sales.count()>0:
-                for sale in sales:
-                    y = y - 30
-                    if y <= 135:
-                        y = 850
-                        p.showPage()
-                        p = header(p)
-                    p.drawString(50, y, (sale.sales_invoice_date).strftime('%d-%m-%Y'))
-                    p.drawString(150, y, 'By Sales '+str(sale.sales_invoice_number))
-                    p.drawString(380, y, sale.salesman.first_name)
-                    p.drawString(750, y, str(sale.grant_total))
-                    p.drawString(850, y, '') 
-
-                    round_off = round_off+sale.round_off
-                    discount = discount+sale.discount
-                    total_income = total_income + sale.grant_total   
-
             
             
             expenses = Expense.objects.filter(date__gte=start_date, date__lte=end_date)
@@ -1028,7 +1009,7 @@ class DailyReport(View):
                     
                     p.drawString(50, y, (expense.date).strftime('%d-%m-%Y'))
                     p.drawString(150, y, 'By Voucher '+str(expense.voucher_no)+','+expense.narration)
-                    p.drawString(380, y, sale.salesman.first_name)
+                    p.drawString(380, y, expense.salesman.first_name if expense.salesman else '')
                     p.drawString(750, y, '')
                     p.drawString(850, y, str( expense.amount))    
                     
