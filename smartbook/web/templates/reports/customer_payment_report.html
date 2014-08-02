@@ -33,6 +33,7 @@
 			<div class="control">
 				<label> Customer </label>
 					<input type='text' name="customer_name" id="customer_name" ng-model="customer_name" ng-change="get_customers('customer_name')"/>
+					<input type='hidden' name="report_type" value="{{report_type}}"/>
 				</div>
 				
 				<div class="clear"></div>

@@ -4829,10 +4829,7 @@ function PendingCustomerReportController($scope, $element, $http, $location) {
     $scope.addcustomer = function(customer) {
         $scope.selecting_customer = false;
         $scope.customer_selected = true;
-        document.location.href = '/reports/pending_customer/?customer_name='+customer.customer_name;
-           
-        
-        
+        $scope.customer_name = customer.customer_name;
     }
     $scope.get_customers = function(parameter) {
         if(parameter == 'customer_name')
@@ -4872,10 +4869,7 @@ function CustomerPaymentReportController($scope, $element, $http, $location) {
     $scope.addcustomer = function(customer) {
         $scope.selecting_customer = false;
         $scope.customer_selected = true;
-        document.location.href = '/reports/customer_payment/?customer_name='+customer.customer_name;
-           
-        
-        
+        $scope.customer_name = customer.customer_name;
     }
     $scope.get_customers = function(parameter) {
         if(parameter == 'customer_name')
