@@ -4837,6 +4837,10 @@ function PendingCustomerReportController($scope, $element, $http, $location) {
     $scope.get_customers = function(parameter) {
         if(parameter == 'customer_name')
             var param = $scope.customer_name;
+        // else if(param == 'all')
+        //     var val = $scope.customer_name;
+        //     var param = document.getElementById('customer_name').val;
+            // console.log(param)
         $http.get('/customers/?'+parameter+'='+param).success(function(data)
         {   
             $scope.selecting_customer = true;

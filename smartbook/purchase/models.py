@@ -109,3 +109,6 @@ class  VendorAccountDetail(models.Model):
     opening_balance = models.DecimalField('Opening Balance', max_digits=14, decimal_places=3, default=0) 
     closing_balance = models.DecimalField('Closing Balance', max_digits=14, decimal_places=3, default=0)
     amount = models.DecimalField('Amount', max_digits=14, decimal_places=3, default=0)
+
+    def __unicode__(self):
+        return self.vendor_account.vendor.user.first_name

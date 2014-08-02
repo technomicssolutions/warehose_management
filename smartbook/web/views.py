@@ -539,7 +539,7 @@ class CustomerSearch(View):
                 customer_name = request.GET.get('customer_name')
                 customers=[]
                 # if customer_name:
-                customers = Customer.objects.filter(customer_name__startswith=customer_name)
+                customers = Customer.objects.filter(customer_name__istartswith=customer_name)
                 # else:
                 
                 customer_list = []

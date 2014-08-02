@@ -1388,7 +1388,7 @@ class VendorAccountsReport(View):
                 p.drawString(250, 875, "Payment Mode")
                 p.drawString(350, 875, "Narration")
                 p.drawString(470, 875, "Opening Balance")
-                p.drawString(580, 875, "Amount")
+                p.drawString(580, 875, "Paid Amount")
                 p.drawString(650, 875, "Closing Balance") 
 
                 
@@ -1438,14 +1438,14 @@ class VendorAccountsReport(View):
                 p.drawString(50, 875, "Date")
                 p.drawString(150, 875, "Payment Mode")
                 p.drawString(250, 875, "Narration")
-                p.drawString(350, 875, "Total Amount")
-                p.drawString(450, 875, "Paid Amount")
-                p.drawString(550, 875, "Balance") 
+                p.drawString(380, 875, "Opening Balance")
+                p.drawString(480, 875, "Paid Amount")
+                p.drawString(580, 875, "Closing Balance") 
 
                 y = 850
 
                 vendor = Vendor.objects.get(user__first_name = vendor_name)
-                purchase_accounts = VendorAccount.objects.filter(vendor = vendor)
+                purchase_accounts = VendorAccountDetail.objects.filter(vendor_account__vendor = vendor)[:10]
 
                 if len(purchase_accounts) > 0:
                     for purchase_account in purchase_accounts:
@@ -1458,11 +1458,11 @@ class VendorAccountsReport(View):
 
 
                         p.drawString(50, y, purchase_account.date.strftime('%d/%m/%Y') if purchase_account.date else '')
-                        p.drawString(150, y, purchase_account.payment_mode)
-                        p.drawString(250, y, purchase_account.narration if purchase_account.narration else '')
-                        p.drawString(350, y, str(purchase_account.total_amount))
-                        p.drawString(450, y, str(purchase_account.paid_amount))
-                        p.drawString(550, y, str(purchase_account.balance)) 
+                        p.drawString(150, y, purchase_account.vendor_account.payment_mode)
+                        p.drawString(250, y, purchase_account.vendor_account.narration if purchase_account.vendor_account.narration else '')
+                        p.drawString(380, y, str(purchase_account.opening_balance))
+                        p.drawString(480, y, str(purchase_account.amount))
+                        p.drawString(580, y, str(purchase_account.closing_balance)) 
                 p.showPage()
                 p.save()
             
@@ -1643,16 +1643,12 @@ class CustomerPaymentReport(View):
         if customer_name is None:
             return render(request, 'reports/customer_payment_report.html', {})
         if customer_name:
-            if customer_name == 'select':
-                context = {
-                    'message': 'Please Choose Customer'
-                }
-                return render(request, 'reports/customer_report.html', context) 
-            elif customer_name == 'all':
+            if customer_name == 'all':
                 customers = Customer.objects.all()
             else:
                 customer = Customer.objects.get(customer_name=customer_name)
                 customer_payments = CustomerPayment.objects.filter(customer=customer)
+                
         p = header(p)
 
         p.drawString(400, 900, ' Customer Report - ' + customer_name)
@@ -1660,9 +1656,9 @@ class CustomerPaymentReport(View):
         y = 850
         p.drawString(150, y, 'Date')
         p.drawString(220, y, 'Customer Name')
-        p.drawString(420, y, 'Invoice No')
+        p.drawString(450, y, 'Invoice No')
         p.drawString(550, y, 'Total Amount')
-        p.drawString(650, y, 'Paid')
+        p.drawString(650, y, 'Payment Mode')
         p.drawString(750, y, 'Amount Paid')
         p.drawString(850, y, 'Balance') 
         
@@ -1670,14 +1666,18 @@ class CustomerPaymentReport(View):
         if customer_name == 'all':
             if len(customers) > 0:
                 for customer in customers:
+                    
                     customer_payments = CustomerPayment.objects.filter(customer=customer)
-                    for customer_account in customer_accounts:
+                    for customer_payment in customer_payments:
                             p.drawString(150, y, customer_payment.date.strftime('%d/%m/%Y') if customer_payment.date else '')
                             p.drawString(220, y, customer_payment.customer.customer_name)
-                            p.drawString(420, y, customer_payment.customer_account.sales_invoice.sales_invoice_number)
+                            p.drawString(450, y, customer_payment.customer_account.sales_invoice_number)
                             p.drawString(550, y, str(customer_payment.total_amount))
-                            p.drawString(650, y, str(customer_payment.paid))
-                            p.drawString(750, y, str(customer_payment.amount))
+                            p.drawString(650, y, str(customer_payment.payment_mode))
+                            if customer_payment.payment_mode == 'Cash(sales)' or customer_payment.payment_mode == 'Cheque(sales)':
+                                p.drawString(750, y, str(customer_payment.paid))
+                            else:
+                                p.drawString(750, y, str(customer_payment.amount))
                             p.drawString(850, y, str(customer_payment.balance))
                             y = y - 30
                             if y <= 270:
@@ -1687,13 +1687,18 @@ class CustomerPaymentReport(View):
         else:
             if len(customer_payments) > 0:
                 for customer_payment in customer_payments:
-
+                    
+                    customer_payments = CustomerPayment.objects.filter(customer=customer)
                     p.drawString(150, y, customer_payment.date.strftime('%d/%m/%Y') if customer_payment.date else '')
                     p.drawString(220, y, customer_payment.customer.customer_name)
-                    p.drawString(420, y, customer_payment.customer_account.sales_invoice.sales_invoice_number)
+                    p.drawString(450, y, customer_payment.customer_account.sales_invoice_number)
                     p.drawString(550, y, str(customer_payment.total_amount))
-                    p.drawString(650, y, str(customer_payment.paid))
-                    p.drawString(750, y, str(customer_payment.amount))
+                    p.drawString(650, y, str(customer_payment.payment_mode))
+                    if customer_payment.payment_mode == 'Cash(sales)' or customer_payment.payment_mode == 'Cheque(sales)':
+                        p.drawString(750, y, str(customer_payment.paid))
+                    else:
+                        p.drawString(750, y, str(customer_payment.amount))
+
                     p.drawString(850, y, str(customer_payment.balance))
                     y = y - 30
                     if y <= 270:
@@ -1708,9 +1713,9 @@ class CustomerPaymentReport(View):
 
 
 class PendingCustomerReport(View):
-
+    
     def get(self, request, *args, **kwargs):
-
+        print  request.GET
         response = HttpResponse(content_type='application/pdf')
         p = canvas.Canvas(response, pagesize=(1000, 1100))
 
@@ -1719,23 +1724,20 @@ class PendingCustomerReport(View):
         
         if customer_name is None:
             return render(request, 'reports/pending_customer_report.html', {})
-        if customer_name:
-            if customer_name == 'select':
-                context = {
-                    'message': 'Please Choose Customer'
-                }
-                return render(request, 'reports/pending_customer_report.html', context) 
-            elif customer_name == 'all':
-                customers = Customer.objects.all()
-            else:
-                customer = Customer.objects.get(customer_name=customer_name)
-                customer_accounts = CustomerAccount.objects.filter(customer=customer, is_complted=False)
+        
+        if customer_name == 'all':
+            customers = Customer.objects.all()
+            print customers
+        else:
+            customer = Customer.objects.get(customer_name=customer_name)
+            customer_accounts = CustomerAccount.objects.filter(customer=customer, is_complted=False)
         p = header(p)
 
         p.drawString(400, 900, 'Pending Customer Report - ' + customer_name)
 
         y = 850
-        p.drawString(200, y, 'Customer Name')
+        p.drawString(50,y,'Date')
+        p.drawString(140, y, 'Customer Name')
         p.drawString(320, y, 'Salesman' )
         p.drawString(420, y, 'Invoice No')
         p.drawString(550, y, 'Total Amount')
@@ -1748,8 +1750,8 @@ class PendingCustomerReport(View):
                 for customer in customers:
                     customer_accounts = CustomerAccount.objects.filter(customer=customer, is_complted=False)
                     for customer_account in customer_accounts:
-                            
-                            p.drawString(200, y, customer_account.customer.customer_name)
+                            p.drawString(50, y, customer_account.invoice_no.sales_invoice_date.strftime('%d/%m/%Y') if customer_account.invoice_no.sales_invoice_date else '')
+                            p.drawString(140, y, customer_account.customer.customer_name)
                             p.drawString(320, y, customer_account.invoice_no.salesman.first_name )
                             p.drawString(420, y, customer_account.invoice_no.sales_invoice_number)
                             p.drawString(550, y, str(customer_account.total_amount))
@@ -1763,8 +1765,8 @@ class PendingCustomerReport(View):
         else:
             if len(customer_accounts) > 0:
                 for customer_account in customer_accounts:
-                    
-                    p.drawString(200, y, customer_account.customer.customer_name)
+                    p.drawString(50, y, customer_account.invoice_no.sales_invoice_date.strftime('%d/%m/%Y') if customer_account.invoice_no.sales_invoice_date else '')
+                    p.drawString(140, y, customer_account.customer.customer_name)
                     p.drawString(320, y, customer_account.invoice_no.salesman.first_name )
                     p.drawString(420, y, customer_account.invoice_no.sales_invoice_number)
                     p.drawString(550, y, str(customer_account.total_amount))
@@ -1779,6 +1781,9 @@ class PendingCustomerReport(View):
         p.showPage()
         p.save()
         return response
+
+
+   
 
 class CompletedDNReport(View):
 

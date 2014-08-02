@@ -214,7 +214,8 @@ class CustomerAccount(models.Model):
 class CustomerPayment(models.Model):
 
     invoice_no = models.CharField('Invoice no', null=True, blank=True, max_length=30)
-    customer_account = models.ForeignKey(ReceiptVoucher, null=True, blank=True)
+    customer_account = models.ForeignKey(Sales, null=True, blank=True)
+    payment_mode = models.CharField('Payment Mode', null=True, blank=True, max_length=25)
     customer = models.ForeignKey(Customer, null=True, blank=True)
     date = models.DateField('Date', null=True, blank=True)
     total_amount = models.DecimalField('Total amount', max_digits=14, decimal_places=2, default=0)
@@ -230,5 +231,5 @@ class CustomerPayment(models.Model):
 
     def __unicode__(self):
 
-        return str(self.customer_account.receipt_voucher_no)
+        return str(self.customer_account.sales_invoice_number)
 

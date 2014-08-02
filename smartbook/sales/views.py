@@ -972,8 +972,14 @@ class QuotationDeliverynoteSales(View):
         sales = Sales.objects.create(sales_invoice_number=sales_dict['sales_invoice_number'])
         sales.sales_invoice_number = sales_dict['sales_invoice_number']
         sales.sales_invoice_date = datetime.strptime(sales_dict['sales_invoice_date'], '%d/%m/%Y')
-
+        customer_payment = CustomerPayment()
         customer = Customer.objects.get(customer_name = sales_dict['customer'])
+        customer_payment.customer =customer
+        customer_payment.date = sales.sales_invoice_date 
+        customer_payment.customer_account = sales
+        customer_payment.amount = 0
+        
+        customer_payment.payment_mode = 'Cash(sales)'
         sales.customer = customer
         sales.save()
         not_completed_selling = []
@@ -988,23 +994,30 @@ class QuotationDeliverynoteSales(View):
         sales.round_off = sales_dict['roundoff']
         sales.net_amount = sales_dict['net_total']
         sales.grant_total = sales_dict['grant_total']
+        customer_payment.total_amount = sales.grant_total
         sales.salesman = salesman
         sales.discount_for_sale = sales_dict['discount_sale']
         sales.discount_percentage_for_sale = sales_dict['discount_sale_percentage']
         sales.payment_mode = sales_dict['payment_mode']
         sales.paid = sales_dict['paid']
+        customer_payment.paid = sales.paid
         sales.balance = sales_dict['balance']
+        customer_payment.balance = sales.balance
         if sales_dict['payment_mode'] == 'cheque':
             sales.bank_name = sales_dict['bank_name']
+            customer_payment.payment_mode = 'Cheque(sales)'
         sales.save()
-
+        
         if sales_dict['payment_mode'] == 'credit':
+            customer_payment.payment_mode = 'Credit(sales)'
+            print customer_payment.payment_mode
             customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales )
             if created:
                 customer_account.total_amount = sales_dict['grant_total']
                 customer_account.paid = sales_dict['paid']
                 customer_account.balance = sales_dict['balance']
                 customer_account.save()
+        customer_payment.save()
         sales_items = sales_dict['sales_items']
         for sales_item in sales_items:
            
@@ -1202,14 +1215,15 @@ class ReceiptVoucherCreation(View):
             receipt_voucher.total_amount = receiptvoucher['amount']
             customer_payment.total_amount = receipt_voucher.total_amount
             receipt_voucher.paid_amount = receiptvoucher['paid_amount']
-            print receipt_voucher.paid_amount,'sadsad'
             customer_payment.amount = receipt_voucher.paid_amount
+            customer_payment.payment_mode = 'Cash(R.V)'
             receipt_voucher.receipt_voucher_no = receiptvoucher['voucher_no']
             receipt_voucher.payment_mode = receiptvoucher['payment_mode']
             receipt_voucher.bank = receiptvoucher['bank_name']
             receipt_voucher.cheque_no = receiptvoucher['cheque_no']
             if receiptvoucher['cheque_date']:   
                 receipt_voucher.dated = datetime.strptime(receiptvoucher['cheque_date'], '%d/%m/%Y')
+                customer_payment.payment_mode = 'Cheque(R.V)'
             receipt_voucher.save()
             customer_account, created = CustomerAccount.objects.get_or_create(customer=customer, invoice_no=sales_invoice_obj )
  
@@ -1224,7 +1238,7 @@ class ReceiptVoucherCreation(View):
             print customer_account.paid
             customer_payment.paid = customer_account.paid
             customer_payment.balance = customer_account.balance
-            customer_payment.customer_account = receipt_voucher
+            customer_payment.customer_account = sales_invoice_obj
             customer_account.save()
             customer_payment.save()
             sales_invoice_obj.balance = customer_account.balance
