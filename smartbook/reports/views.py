@@ -1412,7 +1412,14 @@ class VendorAccountsReport(View):
                         p.drawString(470, y, str(purchase_account.opening_balance))
                         p.drawString(580, y, str(purchase_account.amount))
                         p.drawString(660, y, str(purchase_account.closing_balance)) 
-
+                    y = y - 50
+                    if y <= 270:
+                        y = 850
+                        p.showPage()
+                        p = header(p)
+                    p.drawString(470, y, 'Current Balance:')
+                    p.drawString(580, y, str(purchase_account.vendor_account.balance))
+                
                 p.showPage()
                 p.save()
             
