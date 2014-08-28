@@ -1407,7 +1407,7 @@ class VendorAccountsReport(View):
                         p.drawString(50, y, purchase_account.date.strftime('%d/%m/%Y') if purchase_account.date else '')
                         p.drawString(150, y, purchase_account.vendor_account.vendor.user.first_name)
                         p.drawString(250, y, purchase_account.vendor_account.payment_mode)
-                        p.drawString(350, y, purchase_account.vendor_account.narration if purchase_account.vendor_account.narration else '')
+                        p.drawString(350, y, purchase_account.narration if purchase_account.narration else '')
 
                         p.drawString(470, y, str(purchase_account.opening_balance))
                         p.drawString(580, y, str(purchase_account.amount))
@@ -1452,7 +1452,7 @@ class VendorAccountsReport(View):
                 y = 850
 
                 vendor = Vendor.objects.get(user__first_name = vendor_name)
-                purchase_accounts = VendorAccountDetail.objects.filter(vendor_account__vendor = vendor)[:10]
+                purchase_accounts = VendorAccountDetail.objects.filter(vendor_account__vendor = vendor).order_by('-id')[:10]
 
                 if len(purchase_accounts) > 0:
                     for purchase_account in purchase_accounts:
@@ -1466,7 +1466,7 @@ class VendorAccountsReport(View):
 
                         p.drawString(50, y, purchase_account.date.strftime('%d/%m/%Y') if purchase_account.date else '')
                         p.drawString(150, y, purchase_account.vendor_account.payment_mode)
-                        p.drawString(250, y, purchase_account.vendor_account.narration if purchase_account.vendor_account.narration else '')
+                        p.drawString(250, y, purchase_account.narration if purchase_account.narration else '')
                         p.drawString(380, y, str(purchase_account.opening_balance))
                         p.drawString(480, y, str(purchase_account.amount))
                         p.drawString(580, y, str(purchase_account.closing_balance))
@@ -1642,6 +1642,68 @@ class PendingSalesmanReport(View):
                             p.showPage()
                             p = header(p)
 
+        p.showPage()
+        p.save()
+        return response
+
+class SalesmanWiseOutstandingCustomerReport(View):
+    def get(self, request, *args, **kwargs):
+        
+        response = HttpResponse(content_type='application/pdf')
+        p = canvas.Canvas(response, pagesize=(1000, 1100))
+
+        status_code = 200
+
+        salesman_name = request.GET.get('salesman_name')
+        print salesman_name
+        if salesman_name is None:
+            return render(request, 'reports/salesman_outstanding_customer_report.html', {})
+        if salesman_name:
+            if salesman_name == 'select':
+                context = {
+                    'message': 'Please Choose Salesman'
+                }
+                return render(request, 'reports/salesman_outstanding_customer_report.html', context) 
+            salesman = User.objects.get(first_name=salesman_name)
+            customer_accounts = CustomerAccount.objects.filter(invoice_no__salesman__first_name=salesman_name, is_complted=False)
+        p = header(p)
+
+        p.drawString(400, 900, 'Salesman Wise Outstanding Customer Report - ' + salesman_name)
+        total_balance = 0
+        y = 850
+        p.drawString(50,y,'Date')
+        p.drawString(140, y, 'Customer Name')
+        p.drawString(420, y, 'Invoice No')
+        p.drawString(550, y, 'Total Amount')
+        p.drawString(650, y, 'Paid') 
+        p.drawString(750, y, 'Balance') 
+        
+        y = y - 50 
+        customer_accounts = CustomerAccount.objects.filter(invoice_no__salesman__first_name=salesman_name, is_complted=False)
+        print customer_accounts
+        for customer_account in customer_accounts:
+            p.drawString(50, y, customer_account.invoice_no.sales_invoice_date.strftime('%d/%m/%Y') if customer_account.invoice_no.sales_invoice_date else '')
+            p.drawString(140, y, customer_account.customer.customer_name)
+            p.drawString(420, y, customer_account.invoice_no.sales_invoice_number)
+            p.drawString(550, y, str(customer_account.total_amount))
+            p.drawString(650, y, str(customer_account.paid))
+            p.drawString(750, y, str(customer_account.balance))
+            y = y - 30
+            if y <= 270:
+                y = 850
+                p.showPage()
+                p = header(p)
+            total_balance = total_balance + customer_account.balance
+
+        p.drawString(50, y, '')
+        p.drawString(150, y, '')
+        p.drawString(650, y, 'Total Balance: ')
+        p.drawString(750, y, str(total_balance))
+        y = y - 30
+        if y <= 270:
+            y = 850
+            p.showPage()
+            p = header(p)
         p.showPage()
         p.save()
         return response

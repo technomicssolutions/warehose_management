@@ -293,6 +293,7 @@ class VendorAccountDetails(View):
         vendor_detail.date = vendor_account.date
         vendor_account.payment_mode = vendor_account_dict['payment_mode']
         vendor_account.narration = vendor_account_dict['narration']
+        vendor_detail.narration =  vendor_account_dict['narration']
         vendor_account.amount = int(vendor_account_dict['amount'])
         vendor_detail.amount = vendor_account.amount
         # vendor_account.total_amount = int(vendor_account_dict['total_amount'])

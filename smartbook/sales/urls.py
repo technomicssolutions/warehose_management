@@ -33,5 +33,6 @@ urlpatterns = patterns('',
 	url(r'^check_return_invoice_no_existence/$', login_required(CheckReturnInvoiceExistence.as_view()), name='return_invoice_exists'),
 	url(r'^check_receipt_voucher_existence/$', login_required(CheckReceiptVoucherExistence.as_view()), name='rv_exists'),
 
+	url(r'^closing_month',login_required(ClosingDeliveryNote.as_view()),name='closing_month'),
 	url(r'^delivery_note_items/$', login_required(DeliveryNoteItems.as_view()), name='delivery_note_items'),
 )

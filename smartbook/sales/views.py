@@ -1917,6 +1917,86 @@ class PendingDeliveryNoteList(View):
             response = simplejson.dumps(res)
         return HttpResponse(response, status=status, mimetype='application/json')
 
+class ClosingDeliveryNote(View):
+
+    def get(self, request, *args, **kwargs):
+
+        return render(request, 'sales/monthly_closing_stock.html', {})
+
+    def post(self, request, *args, **kwargs):
+
+        monthly_closing_stock = ast.literal_eval(request.POST['monthly_closing'])
+        print monthly_closing_stock
+        # salesman_name = request.POST.get('salesman_name')
+        salesman_name = monthly_closing_stock['salesman_name']
+        print salesman_name
+        if salesman_name is None:
+            return render(request, 'sales/monthly_closing_stock.html', {})
+        if salesman_name:
+            if salesman_name == 'select':
+                context = {
+                    'message': 'Please Choose Salesman'
+                }
+                return render(request, 'sales/monthly_closing_stock.html', context) 
+        month = monthly_closing_stock['month']
+        salesman = User.objects.get(first_name=salesman_name)
+        year = datetime.now().year
+        pending_deliverynotes = DeliveryNote.objects.filter(salesman=salesman,date__year=year, date__month=month ,  is_pending=True)
+        # deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_deliverynotes)
+        ctx_pendinglist = []
+        # print pending_deliverynotes
+        if pending_deliverynotes.count() > 0:
+            
+            delivery_note = DeliveryNote()
+            delivery_note.salesman = salesman
+            delivery_note.date = datetime.now()
+            delivery_note.is_pending = True
+            delivery_note.delivery_note_number = monthly_closing_stock['delivery_note_no']
+            delivery_note.save()
+            for pending_delivery_note in pending_deliverynotes:
+                
+                deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_delivery_note, is_completed=False)
+                
+                print "sadasd",deliverynote_items
+                for deliverynote_item in deliverynote_items:
+                    new_deliverynote_item = DeliveryNoteItem()
+                    
+                    if not deliverynote_item.is_completed:
+                        
+                        new_deliverynote_item.item = deliverynote_item.item
+                        item = InventoryItem.objects.get(code=deliverynote_item.item.code)
+                        print "item:",item
+                        print deliverynote_item
+                        new_deliverynote_item.is_completed = False
+                        new_deliverynote_item.delivery_note = delivery_note
+                        new_deliverynote_item.selling_price = deliverynote_item.selling_price
+                        new_deliverynote_item.discount = deliverynote_item.discount
+                        remaining_qty = deliverynote_item.total_quantity - deliverynote_item.quantity_sold
+                        new_deliverynote_item.total_quantity = remaining_qty
+                        new_deliverynote_item.net_amount = deliverynote_item.selling_price * remaining_qty
+                        new_deliverynote_item.save()
+                        
+                    deliverynote_item.is_completed = True
+                    deliverynote_item.save()
+                pending_delivery_note.is_pending = False
+                pending_delivery_note.save()
+            
+            res = {
+                    'result': 'ok',
+                    'pending_list': ctx_pendinglist,
+                }
+            status = 200
+            response = simplejson.dumps(res)
+        else:
+            res = {
+                'result': 'error',
+                'pending_list': ctx_pendinglist,
+            }
+            status = 200
+            response = simplejson.dumps(res)
+        return HttpResponse(response, status=status, mimetype='application/json')
+
+
 class CheckDeliverynoteExistence(View):
 
     def get(self, request, *args, **kwargs):

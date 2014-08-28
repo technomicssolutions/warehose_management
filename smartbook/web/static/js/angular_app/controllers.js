@@ -4303,6 +4303,91 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
         }
     }
 }
+function MonthlyClosingStockController($scope, $element, $http, $location){
+    $scope.months = {};
+    $scope.monthly_closing = {
+        'delivery_note_no': '',
+        'salesman_name': '',
+        'month': '',
+    }
+    $scope.delivery_note_existing = false;
+        
+    $scope.init = function(csrf_token) {
+        $scope.csrf_token = csrf_token;
+        
+        console.log($scope.months)
+        $scope.get_salesman();
+        // $scope.save_monthly_closing_stock();
+    }
+    $scope.delivery_note_validation = function(){
+        if ($scope.monthly_closing.delivery_note_no == '' || $scope.monthly_closing.delivery_note_no == undefined) {
+            $scope.validation_error = "Enter delivery note no";
+            return false;
+        }else if ($scope.delivery_note_existing) {
+            $scope.validation_error = "Delivery Note with this delivery note no is already existing" ;
+            return false;
+        }else if ($scope.monthly_closing.salesman == 'select') {
+            $scope.validation_error = "Enter Salesman Name";
+            return false;
+        }else if ($scope.monthly_closing.month == ''|| $scope.monthly_closing.month == undefined) {
+            $scope.validation_error = "Enter Month";
+            return false;
+        } return true;
+    }
+    $scope.save_monthly_closing_stock = function(){
+        $scope.monthly_closing.salesman_name = $scope.salesman_name;
+        console.log($scope.monthly_closing.salesman_name)
+        $scope.monthly_closing.month = $scope.months;
+        console.log( $scope.monthly_closing.month )
+        console.log()
+        params = {
+                'monthly_closing':angular.toJson($scope.monthly_closing),
+                "csrfmiddlewaretoken" : $scope.csrf_token,
+            }
+       $http({
+            method : 'post',
+            url : "/sales/closing_month/",
+            data : $.param(params),
+            headers : {
+                'Content-Type' : 'application/x-www-form-urlencoded'
+            }
+        }).success(function(data, status) {
+                
+                if (data.result == 'error'){
+                    $scope.error_flag=true;
+                    $scope.message = data.message;
+                } else {
+                    document.location.href = '/sales/closing_month/';
+
+                }
+        }).error(function(data, success){
+                
+        });
+    }
+    $scope.is_delivery_note_exists = function() {
+        var delivery_note_no = $scope.monthly_closing.delivery_note_no;
+        $http.get('/sales/check_delivery_note_no_existence/?delivery_no='+delivery_note_no).success(function(data)
+        {
+            if(data.result == 'error') {
+                $scope.existance_message = 'Delivery Note with this no already exists';
+                $scope.delivery_note_existing = true;
+            } else {
+                $scope.existance_message = '';
+                $scope.delivery_note_existing = false;
+            }  
+        });
+    }
+    $scope.get_salesman = function() {
+        $http.get('/Salesman/list/').success(function(data)
+        {   
+            
+            $scope.salesmen = data.salesmen;
+            console.log($scope.salesmen)
+            
+            $scope.salesman_name = 'select';
+        })
+    }    
+}
 
 function SalesmanSalesController($scope, $element, $http, $timeout, share, $location) {
 
@@ -4569,6 +4654,24 @@ function SalesmanSalesController($scope, $element, $http, $timeout, share, $loca
 
 function SalesmanStockReportController($scope, $element, $http, $location) {      
     
+    $scope.init = function(csrf_token) {
+        $scope.csrf_token = csrf_token;
+        
+        $scope.get_salesman();
+
+    }
+
+    $scope.get_salesman = function() {
+        $http.get('/Salesman/list/').success(function(data)
+        {
+            $scope.salesmen = data.salesmen;
+            $scope.salesman_name = 'select';
+        })
+    }    
+}
+
+function SalesmanWiseOutstandingCustomerReportController($scope, $element, $http, $location){
+
     $scope.init = function(csrf_token) {
         $scope.csrf_token = csrf_token;
         

@@ -18,4 +18,5 @@ urlpatterns = patterns('',
 	url(r'^pending_customer/$', PendingCustomerReport.as_view(), name='pending_customer_report'),
 	url(r'^completed_dn/$', CompletedDNReport.as_view(), name='completed_dn_report'),
 	url(r'^vendor/$', VendorReport.as_view(), name='vendor_report'),
+	url(r'^salesman_outstanding_customer', SalesmanWiseOutstandingCustomerReport.as_view() ,name='salesman_outstanding_customer')
 )
