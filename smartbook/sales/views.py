@@ -1959,23 +1959,27 @@ class ClosingDeliveryNote(View):
                 
                 print "sadasd",deliverynote_items
                 for deliverynote_item in deliverynote_items:
-                    new_deliverynote_item = DeliveryNoteItem()
+                    
                     
                     if not deliverynote_item.is_completed:
                         
-                        new_deliverynote_item.item = deliverynote_item.item
-                        item = InventoryItem.objects.get(code=deliverynote_item.item.code)
-                        print "item:",item
+                        
+                        new_deliverynote_item, created = DeliveryNoteItem.objects.get_or_create(item=deliverynote_item.item, delivery_note=delivery_note, is_completed=False)
+                        
+                        
                         print deliverynote_item
+                        if created :
+                            new_deliverynote_item.total_quantity = deliverynote_item.total_quantity - deliverynote_item.quantity_sold
+                        else :
+                            new_deliverynote_item.total_quantity = deliverynote_item.total_quantity
+                        new_deliverynote_item.item = deliverynote_item.item
                         new_deliverynote_item.is_completed = False
                         new_deliverynote_item.delivery_note = delivery_note
                         new_deliverynote_item.selling_price = deliverynote_item.selling_price
                         new_deliverynote_item.discount = deliverynote_item.discount
-                        remaining_qty = deliverynote_item.total_quantity - deliverynote_item.quantity_sold
-                        new_deliverynote_item.total_quantity = remaining_qty
-                        new_deliverynote_item.net_amount = deliverynote_item.selling_price * remaining_qty
+                        new_deliverynote_item.net_amount = deliverynote_item.selling_price * new_deliverynote_item.total_quantity
                         new_deliverynote_item.save()
-                        
+                    
                     deliverynote_item.is_completed = True
                     deliverynote_item.save()
                 pending_delivery_note.is_pending = False
