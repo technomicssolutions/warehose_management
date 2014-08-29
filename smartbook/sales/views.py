@@ -1944,6 +1944,8 @@ class ClosingDeliveryNote(View):
         pending_deliverynotes = DeliveryNote.objects.filter(salesman=salesman,date__year=year, date__month=month ,  is_pending=True)
         # deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_deliverynotes)
         ctx_pendinglist = []
+        total = 0
+        d_total = 0
         # print pending_deliverynotes
         if pending_deliverynotes.count() > 0:
             
@@ -1954,8 +1956,8 @@ class ClosingDeliveryNote(View):
             delivery_note.delivery_note_number = monthly_closing_stock['delivery_note_no']
             delivery_note.save()
             for pending_delivery_note in pending_deliverynotes:
-                
-                deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_delivery_note, is_completed=False)
+                total = 0
+                deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_delivery_note)
                 
                 print "sadasd",deliverynote_items
                 for deliverynote_item in deliverynote_items:
@@ -1969,32 +1971,57 @@ class ClosingDeliveryNote(View):
                         
                         print deliverynote_item
                         if created :
-                            new_deliverynote_item.total_quantity = deliverynote_item.total_quantity - deliverynote_item.quantity_sold
+                            new_deliverynote_item.total_quantity =  deliverynote_item.total_quantity - deliverynote_item.quantity_sold
+                            
+                            
                         else :
-                            new_deliverynote_item.total_quantity = deliverynote_item.total_quantity
+                            new_deliverynote_item.total_quantity = new_deliverynote_item.total_quantity + deliverynote_item.total_quantity - deliverynote_item.quantity_sold
+                            
+                    
+                        deliverynote_item.total_quantity = deliverynote_item.quantity_sold
+                        deliverynote_item.net_amount = deliverynote_item.selling_price * deliverynote_item.quantity_sold
                         new_deliverynote_item.item = deliverynote_item.item
                         new_deliverynote_item.is_completed = False
                         new_deliverynote_item.delivery_note = delivery_note
                         new_deliverynote_item.selling_price = deliverynote_item.selling_price
                         new_deliverynote_item.discount = deliverynote_item.discount
                         new_deliverynote_item.net_amount = deliverynote_item.selling_price * new_deliverynote_item.total_quantity
+                        d_total = d_total + new_deliverynote_item.net_amount
+                        total = total + deliverynote_item.net_amount
+                        delivery_note.net_total = d_total 
+                        delivery_note.save()
                         new_deliverynote_item.save()
+                    else:
+                        total = total + deliverynote_item.net_amount
+                        print "dt:",total
                     
+                    
+                    
+                    print "total:", total
+                    pending_delivery_note.net_total = total
                     deliverynote_item.is_completed = True
                     deliverynote_item.save()
+
                 pending_delivery_note.is_pending = False
                 pending_delivery_note.save()
-            
+            total = 0
+            for d_item in delivery_note.deliverynoteitem_set.all():
+                net_amount = d_item.selling_price * d_item.total_quantity
+                print net_amount
+                total = total + net_amount
+            delivery_note.net_total = total
+            print total
+            delivery_note.save()
             res = {
                     'result': 'ok',
-                    'pending_list': ctx_pendinglist,
+                    
                 }
             status = 200
             response = simplejson.dumps(res)
         else:
             res = {
                 'result': 'error',
-                'pending_list': ctx_pendinglist,
+                'message': "There is no pending delivery notes in"+month+"for"+salesman_name ,
             }
             status = 200
             response = simplejson.dumps(res)
