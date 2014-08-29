@@ -1733,6 +1733,7 @@ class CustomerPaymentReport(View):
             else:
                 if customer_name:
                     if customer_name == 'all' or customer_name == 'All':
+                        print "hi"
                         customers = Customer.objects.all()
                     else:
                         try:
@@ -1761,6 +1762,7 @@ class CustomerPaymentReport(View):
             y = y - 50 
             if customer_name == 'all' or customer_name == 'All':
                 if len(customers) > 0:
+                    
                     for customer in customers:
                         
                         customer_payments = CustomerPayment.objects.filter(customer=customer)

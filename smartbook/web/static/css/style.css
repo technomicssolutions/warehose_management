@@ -951,3 +951,23 @@ a {
     /*width: 100%;
     margin: auto;*/
 }
+.monthly_delivery_note{
+	min-height: 40px;
+    width: 33%;
+    float: left;
+}
+.monthly_salesman{
+	min-height: 40px;
+    width: 33%;
+    float: left;
+}
+.monthly_month{
+	min-height: 40px;
+    width: 33%;
+    float: left;
+}
+.monthly_button{
+	width: 50%;
+	float: left;
+	margin-left: 46%;
+}
