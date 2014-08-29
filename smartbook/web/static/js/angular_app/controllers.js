@@ -4326,10 +4326,10 @@ function MonthlyClosingStockController($scope, $element, $http, $location){
         }else if ($scope.delivery_note_existing) {
             $scope.validation_error = "Delivery Note with this delivery note no is already existing" ;
             return false;
-        }else if ($scope.monthly_closing.salesman == 'select') {
+        }else if ($scope.monthly_closing.salesman_name == 'select' || $scope.monthly_closing.salesman_name == '' || $scope.monthly_closing.salesman_name == undefined) {
             $scope.validation_error = "Enter Salesman Name";
             return false;
-        }else if ($scope.monthly_closing.month == ''|| $scope.monthly_closing.month == undefined) {
+        }else if ( $scope.monthly_closing.month == ''|| $scope.monthly_closing.month == undefined) {
             $scope.validation_error = "Enter Month";
             return false;
         } return true;
@@ -4337,32 +4337,35 @@ function MonthlyClosingStockController($scope, $element, $http, $location){
     $scope.save_monthly_closing_stock = function(){
         $scope.monthly_closing.salesman_name = $scope.salesman_name;
         console.log($scope.monthly_closing.salesman_name)
-        $scope.monthly_closing.month = $scope.months;
-        console.log( $scope.monthly_closing.month )
+        // $scope.monthly_closing.month = $scope.months;
+        // console.log( $scope.monthly_closing.month )
         console.log()
-        params = {
-                'monthly_closing':angular.toJson($scope.monthly_closing),
-                "csrfmiddlewaretoken" : $scope.csrf_token,
-            }
-       $http({
-            method : 'post',
-            url : "/sales/closing_month/",
-            data : $.param(params),
-            headers : {
-                'Content-Type' : 'application/x-www-form-urlencoded'
-            }
-        }).success(function(data, status) {
-                
-                if (data.result == 'error'){
-                    $scope.error_flag=true;
-                    $scope.message = data.message;
-                } else {
-                    document.location.href = '/sales/closing_month/';
-
+        if ($scope.delivery_note_validation()){
+           
+            params = {
+                    'monthly_closing':angular.toJson($scope.monthly_closing),
+                    "csrfmiddlewaretoken" : $scope.csrf_token,
                 }
-        }).error(function(data, success){
-                
-        });
+           $http({
+                method : 'post',
+                url : "/sales/closing_month/",
+                data : $.param(params),
+                headers : {
+                    'Content-Type' : 'application/x-www-form-urlencoded'
+                }
+            }).success(function(data, status) {
+                    
+                    if (data.result == 'error'){
+                        $scope.error_flag=true;
+                        $scope.message = data.message;
+                    } else {
+                        document.location.href = '/sales/closing_month/';
+
+                    }
+            }).error(function(data, success){
+                    $scope.message = data.message;
+            });
+        }
     }
     $scope.is_delivery_note_exists = function() {
         var delivery_note_no = $scope.monthly_closing.delivery_note_no;
