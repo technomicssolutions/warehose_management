@@ -1926,10 +1926,10 @@ class ClosingDeliveryNote(View):
     def post(self, request, *args, **kwargs):
 
         monthly_closing_stock = ast.literal_eval(request.POST['monthly_closing'])
-        print monthly_closing_stock
-        # salesman_name = request.POST.get('salesman_name')
+        
+       
         salesman_name = monthly_closing_stock['salesman_name']
-        print salesman_name
+        
         if salesman_name is None:
             return render(request, 'sales/monthly_closing_stock.html', {})
         if salesman_name:
@@ -1942,11 +1942,11 @@ class ClosingDeliveryNote(View):
         salesman = User.objects.get(first_name=salesman_name)
         year = datetime.now().year
         pending_deliverynotes = DeliveryNote.objects.filter(salesman=salesman,date__year=year, date__month=month ,  is_pending=True)
-        # deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_deliverynotes)
+        
         ctx_pendinglist = []
         total = 0
         d_total = 0
-        # print pending_deliverynotes
+        
         if pending_deliverynotes.count() > 0:
             
             delivery_note = DeliveryNote()
@@ -1959,7 +1959,7 @@ class ClosingDeliveryNote(View):
                 total = 0
                 deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_delivery_note)
                 
-                print "sadasd",deliverynote_items
+                
                 for deliverynote_item in deliverynote_items:
                     
                     
@@ -1993,11 +1993,11 @@ class ClosingDeliveryNote(View):
                         new_deliverynote_item.save()
                     else:
                         total = total + deliverynote_item.net_amount
-                        print "dt:",total
+                        
                     
                     
                     
-                    print "total:", total
+                    
                     pending_delivery_note.net_total = total
                     deliverynote_item.is_completed = True
                     deliverynote_item.save()

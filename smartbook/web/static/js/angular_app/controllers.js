@@ -4317,7 +4317,7 @@ function MonthlyClosingStockController($scope, $element, $http, $location){
         
         console.log($scope.months)
         $scope.get_salesman();
-        // $scope.save_monthly_closing_stock();
+        
     }
     $scope.delivery_note_validation = function(){
         if ($scope.monthly_closing.delivery_note_no == '' || $scope.monthly_closing.delivery_note_no == undefined) {
@@ -4337,8 +4337,7 @@ function MonthlyClosingStockController($scope, $element, $http, $location){
     $scope.save_monthly_closing_stock = function(){
         $scope.monthly_closing.salesman_name = $scope.salesman_name;
         console.log($scope.monthly_closing.salesman_name)
-        // $scope.monthly_closing.month = $scope.months;
-        // console.log( $scope.monthly_closing.month )
+        
         console.log()
         if ($scope.delivery_note_validation()){
            
