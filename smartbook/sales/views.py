@@ -1921,111 +1921,110 @@ class ClosingDeliveryNote(View):
 
     def get(self, request, *args, **kwargs):
 
-        return render(request, 'sales/monthly_closing_stock.html', {})
-
-    def post(self, request, *args, **kwargs):
-
-        monthly_closing_stock = ast.literal_eval(request.POST['monthly_closing'])
-        
-       
-        salesman_name = monthly_closing_stock['salesman_name']
-        
-        if salesman_name is None:
-            return render(request, 'sales/monthly_closing_stock.html', {})
-        if salesman_name:
-            if salesman_name == 'select':
-                context = {
-                    'message': 'Please Choose Salesman'
-                }
-                return render(request, 'sales/monthly_closing_stock.html', context) 
-        month = monthly_closing_stock['month']
-        salesman = User.objects.get(first_name=salesman_name)
-        year = datetime.now().year
-        pending_deliverynotes = DeliveryNote.objects.filter(salesman=salesman,date__year=year, date__month=month ,  is_pending=True)
-        
-        ctx_pendinglist = []
-        total = 0
-        d_total = 0
-        
-        if pending_deliverynotes.count() > 0:
-            
-            delivery_note = DeliveryNote()
-            delivery_note.salesman = salesman
-            delivery_note.date = datetime.now()
-            delivery_note.is_pending = True
-            delivery_note.delivery_note_number = monthly_closing_stock['delivery_note_no']
-            delivery_note.save()
-            for pending_delivery_note in pending_deliverynotes:
-                total = 0
-                deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_delivery_note)
-                
-                
-                for deliverynote_item in deliverynote_items:
-                    
-                    
-                    if not deliverynote_item.is_completed:
-                        
-                        
-                        new_deliverynote_item, created = DeliveryNoteItem.objects.get_or_create(item=deliverynote_item.item, delivery_note=delivery_note, is_completed=False)
-                        
-                        
-                        print deliverynote_item
-                        if created :
-                            new_deliverynote_item.total_quantity =  deliverynote_item.total_quantity - deliverynote_item.quantity_sold
-                            
-                            
-                        else :
-                            new_deliverynote_item.total_quantity = new_deliverynote_item.total_quantity + deliverynote_item.total_quantity - deliverynote_item.quantity_sold
-                            
-                    
-                        deliverynote_item.total_quantity = deliverynote_item.quantity_sold
-                        deliverynote_item.net_amount = deliverynote_item.selling_price * deliverynote_item.quantity_sold
-                        new_deliverynote_item.item = deliverynote_item.item
-                        new_deliverynote_item.is_completed = False
-                        new_deliverynote_item.delivery_note = delivery_note
-                        new_deliverynote_item.selling_price = deliverynote_item.selling_price
-                        new_deliverynote_item.discount = deliverynote_item.discount
-                        new_deliverynote_item.net_amount = deliverynote_item.selling_price * new_deliverynote_item.total_quantity
-                        d_total = d_total + new_deliverynote_item.net_amount
-                        total = total + deliverynote_item.net_amount
-                        delivery_note.net_total = d_total 
-                        delivery_note.save()
-                        new_deliverynote_item.save()
-                    else:
-                        total = total + deliverynote_item.net_amount
-                        
-                    
-                    
-                    
-                    
-                    pending_delivery_note.net_total = total
-                    deliverynote_item.is_completed = True
-                    deliverynote_item.save()
-
-                pending_delivery_note.is_pending = False
-                pending_delivery_note.save()
-            total = 0
-            for d_item in delivery_note.deliverynoteitem_set.all():
-                net_amount = d_item.selling_price * d_item.total_quantity
-                print net_amount
-                total = total + net_amount
-            delivery_note.net_total = total
-            print total
-            delivery_note.save()
+        if request.is_ajax():
+            salesman_name = request.GET['salesman_name']
+            month = request.GET['month']
+            salesman = User.objects.get(first_name=salesman_name)
+            year = datetime.now().year
+            pending_deliverynotes = DeliveryNote.objects.filter(salesman=salesman,date__year=year, date__month=month ,  is_pending=True)
+            items = []
+            i = 0
+            item_codes = []
+            if pending_deliverynotes.count() > 0:
+                for pending_delivery_note in pending_deliverynotes:
+                    total = 0
+                    deliverynote_items = DeliveryNoteItem.objects.filter(delivery_note=pending_delivery_note)
+                    for deliverynote_item in deliverynote_items:
+                                         
+                        if not deliverynote_item.is_completed: 
+                            pending_quantity = deliverynote_item.total_quantity - deliverynote_item.quantity_sold
+                            deliverynote_item.total_quantity = deliverynote_item.quantity_sold
+                            deliverynote_item.net_amount = deliverynote_item.selling_price * deliverynote_item.quantity_sold  
+                            net_amount = pending_quantity * deliverynote_item.selling_price
+                            total = total + deliverynote_item.net_amount
+                            i = i + 1 
+                            if deliverynote_item.item.code in item_codes:
+                                index = item_codes.index(deliverynote_item.item.code)
+                                list_item = items[index]
+                                list_item['current_stock'] = list_item['current_stock'] + pending_quantity
+                                list_item['qty_sold'] = list_item['qty_sold'] + pending_quantity
+                                list_item['net_amount'] = list_item['net_amount'] + net_amount
+                            else:
+                                items.append({
+                                    'sl_no': i,
+                                    'item_code': deliverynote_item.item.code,
+                                    'item_name': deliverynote_item.item.name,
+                                    'barcode': deliverynote_item.item.barcode,
+                                    'current_stock': pending_quantity,
+                                    'unit_price': deliverynote_item.selling_price,
+                                    'tax': deliverynote_item.item.tax,
+                                    'tax_amount':0,
+                                    'qty_sold': pending_quantity,
+                                    'uom': deliverynote_item.item.uom.uom,
+                                    'discount_permit': deliverynote_item.item.discount_permit_percentage,
+                                    'discount_permit_amount':0,
+                                    'disc_given': 0,
+                                    'unit_cost':0,
+                                    'net_amount': net_amount,    
+                                })
+                                item_codes.append(deliverynote_item.item.code)
+           
+                        else:
+                            total = total + deliverynote_item.net_amount 
+                        pending_delivery_note.net_total = total
+                        deliverynote_item.is_completed = True
+                        deliverynote_item.save()
+                    pending_delivery_note.is_pending = False
+                    pending_delivery_note.save()
             res = {
-                    'result': 'ok',
-                    
-                }
-            status = 200
-            response = simplejson.dumps(res)
-        else:
-            res = {
-                'result': 'error',
-                'message': "There is no pending delivery notes in"+month+"for"+salesman_name ,
+                'result': 'ok',
+                'items': items                        
             }
             status = 200
             response = simplejson.dumps(res)
-        return HttpResponse(response, status=status, mimetype='application/json')
+            return HttpResponse(response, status=200, mimetype='application/json')
+        return render(request, 'sales/monthly_closing_stock.html', {})
+
+    def post(self, request, *args, **kwargs):        
+       
+        salesman_name = request.POST['salesman_name']
+        month = request.POST['month']
+        
+        # if salesman_name is None:
+        #     return render(request, 'sales/monthly_closing_stock.html', {})
+        # if salesman_name:
+        #     if salesman_name == 'select':
+        #         context = {
+        #             'message': 'Please Choose Salesman'
+        #         }
+        #         return render(request, 'sales/monthly_closing_stock.html', context) 
+        # 
+        # salesman = User.objects.get(first_name=salesman_name)
+        # year = datetime.now().year
+        # pending_deliverynotes = DeliveryNote.objects.filter(salesman=salesman,date__year=year, date__month=month ,  is_pending=True)
+        
+        # ctx_pendinglist = []
+        # total = 0
+        # d_total = 0
+        
+        # else:
+        #     res = {
+        #         'result': 'error',
+        #         'message': "There is no pending delivery notes in"+month+"for"+salesman_name ,
+        #     }
+        #     status = 200
+        #     response = simplejson.dumps(res)
+        ref_number = DeliveryNote.objects.aggregate(Max('id'))['id__max']        
+        if not ref_number:
+            ref_number = 1
+        else:
+            ref_number = ref_number + 1
+        delivery_no = 'DN' + str(ref_number)
+        return render(request, 'sales/direct_delivery_note.html', {
+            'salesman': salesman_name,
+            'month': month,
+            'delivery_no': delivery_no,
+        })
 
 
 class CheckDeliverynoteExistence(View):

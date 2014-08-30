@@ -3,7 +3,7 @@
 {% block body_id %}direct_delivery_note{% endblock %}
 
 {% block title %}Delivery Note To Salesman{% endblock title %}
-{% block controller %}ng-controller="DirectDeliveryNoteController" ng-init="init('{{csrf_token}}', '{{delivery_no}}')"{% endblock controller %}
+{% block controller %}ng-controller="DirectDeliveryNoteController" ng-init="init('{{csrf_token}}', '{{delivery_no}}', '{{salesman}}', '{{month}}')"{% endblock controller %}
 
 {% block dialogue_popup %}
 	{% include 'add_new_customer.html' %}

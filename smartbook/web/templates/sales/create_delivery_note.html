@@ -3,7 +3,7 @@
 {% block body_id %}create_delivery_note{% endblock %}
 
 {% block title %}Create Delivery Note{% endblock title %}
-{% block controller %}ng-controller="DeliveryNoteController" ng-init="init('{{csrf_token}}')"{% endblock controller %}
+{% block controller %}ng-controller="DeliveryNoteController" ng-init="init('{{csrf_token}}', '{{month}}', '{{salesman}}')"{% endblock controller %}
 
 {% block content %}
 

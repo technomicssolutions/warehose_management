@@ -1549,7 +1549,7 @@ class SalesmanStockReports(View):
                 }
                 return render(request, 'reports/salesman_stock_report.html', context) 
             salesman = User.objects.get(first_name=salesman_name)
-            delivery_notes = DeliveryNote.objects.filter(salesman=salesman)
+            delivery_notes = DeliveryNote.objects.filter(salesman=salesman,is_pending = True)
         
         p = header(p)
 

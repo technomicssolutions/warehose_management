@@ -2821,10 +2821,11 @@ function DeliveryNoteController($scope, $element, $http, $timeout, share, $locat
     }
     $scope.quotation.customer = '';
     $scope.quotation_no = ''
-    $scope.init = function(csrf_token, sales_invoice_number)
+    $scope.init = function(csrf_token, month, salesman)
     {
         $scope.csrf_token = csrf_token;
-        $scope.popup = '';    
+        $scope.popup = ''; 
+        
     }
 
     $scope.quotations = [];
@@ -3159,7 +3160,7 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
     }
     $scope.delivery_note_no = '';
     $scope.delivery_note.salesman = 'select';
-    $scope.init = function(csrf_token, delivery_note_number)
+    $scope.init = function(csrf_token, delivery_note_number, salesman, month)
     {
         $scope.csrf_token = csrf_token;
         $scope.popup = '';
@@ -3173,6 +3174,13 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         });   
         $scope.delivery_note.delivery_note_no = delivery_note_number;
         $scope.delivery_no = delivery_note_number; 
+        if(month != '' && salesman != ''){
+            $scope.month = month;
+            $scope.delivery_note.salesman = salesman;
+            $scope.get_opening_stock_items();
+        }
+        
+        
     }
 
     $scope.get_salesman = function() {
@@ -3182,7 +3190,12 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             $scope.salesman_name = 'select';
         })
     }
-
+    $scope.get_opening_stock_items = function(){
+        $http.get('/sales/closing_monthly_stock/?salesman_name='+$scope.delivery_note.salesman+"&month="+$scope.month).success(function(data)
+        {
+            $scope.delivery_note.sales_items = data.items;
+        })
+    }
     $scope.items = [];
     $scope.selected_item = '';
     $scope.selecting_item = false;
@@ -4306,7 +4319,6 @@ function EditDeliveryController($scope, $element, $http, $timeout, share, $locat
 function MonthlyClosingStockController($scope, $element, $http, $location){
     $scope.months = {};
     $scope.monthly_closing = {
-        'delivery_note_no': '',
         'salesman_name': '',
         'month': '',
     }
@@ -4320,34 +4332,27 @@ function MonthlyClosingStockController($scope, $element, $http, $location){
         
     }
     $scope.delivery_note_validation = function(){
-        if ($scope.monthly_closing.delivery_note_no == '' || $scope.monthly_closing.delivery_note_no == undefined) {
-            $scope.validation_error = "Enter delivery note no";
-            return false;
-        }else if ($scope.delivery_note_existing) {
-            $scope.validation_error = "Delivery Note with this delivery note no is already existing" ;
-            return false;
-        }else if ($scope.monthly_closing.salesman_name == 'select' || $scope.monthly_closing.salesman_name == '' || $scope.monthly_closing.salesman_name == undefined) {
+        if ($scope.monthly_closing.salesman_name == 'select' || $scope.monthly_closing.salesman_name == '' || $scope.monthly_closing.salesman_name == undefined) {
             $scope.validation_error = "Enter Salesman Name";
             return false;
         }else if ( $scope.monthly_closing.month == ''|| $scope.monthly_closing.month == undefined) {
             $scope.validation_error = "Enter Month";
             return false;
-        } return true;
+        } else {
+            return true;
+        }
     }
     $scope.save_monthly_closing_stock = function(){
         $scope.monthly_closing.salesman_name = $scope.salesman_name;
-        console.log($scope.monthly_closing.salesman_name)
-        
-        console.log()
         if ($scope.delivery_note_validation()){
            
             params = {
-                    'monthly_closing':angular.toJson($scope.monthly_closing),
-                    "csrfmiddlewaretoken" : $scope.csrf_token,
-                }
+                'monthly_closing':angular.toJson($scope.monthly_closing),
+                "csrfmiddlewaretoken" : $scope.csrf_token,
+            }
            $http({
                 method : 'post',
-                url : "/sales/closing_month/",
+                url : "/sales/closing_monthly_stock/",
                 data : $.param(params),
                 headers : {
                     'Content-Type' : 'application/x-www-form-urlencoded'
@@ -4357,10 +4362,7 @@ function MonthlyClosingStockController($scope, $element, $http, $location){
                     if (data.result == 'error'){
                         $scope.error_flag=true;
                         $scope.message = data.message;
-                    } else {
-                        document.location.href = '/sales/closing_month/';
-
-                    }
+                    } 
             }).error(function(data, success){
                     $scope.message = data.message;
             });
