@@ -3149,6 +3149,8 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
     $scope.selecting_item = false;
     $scope.item_selected = false;
     $scope.delivery_note_existing = false;
+    $scope.opening_stock = false;
+    
     $scope.delivery_note = {
         'sales_items': [],
         'date': '',
@@ -3178,6 +3180,7 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             $scope.month = month;
             $scope.delivery_note.salesman = salesman;
             $scope.get_opening_stock_items();
+            $scope.opening_stock = true;
         }
         
         
@@ -3194,6 +3197,7 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
         $http.get('/sales/closing_monthly_stock/?salesman_name='+$scope.delivery_note.salesman+"&month="+$scope.month).success(function(data)
         {
             $scope.delivery_note.sales_items = data.items;
+
         })
     }
     $scope.items = [];
@@ -3262,15 +3266,17 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
     
     $scope.calculate_net_amount_sale = function(item) {
         $scope.validation_error = "";
-        if(parseInt(item.qty_sold) > parseInt(item.current_stock)) {
-            $scope.validation_error = "Qauntity not in stock";
-            return false;
-        } else {
-            if(item.qty_sold != '' && item.unit_price != ''){
-                item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))).toFixed(2);
+        if( !$scope.opening_stock ) {
+            if(parseInt(item.qty_sold) > parseInt(item.current_stock)) {
+                $scope.validation_error = "Qauntity not in stock";
+                return false;
             } 
-            $scope.calculate_net_total_amount();
         }
+        if(item.qty_sold != '' && item.unit_price != ''){
+            item.net_amount = ((parseFloat(item.qty_sold)*parseFloat(item.unit_price))).toFixed(2);
+        } 
+        $scope.calculate_net_total_amount();
+        
     }
 
     $scope.calculate_net_total_amount = function() {
@@ -3308,10 +3314,13 @@ function DirectDeliveryNoteController($scope, $element, $http, $timeout, share, 
             return false;
         } else if($scope.delivery_note.sales_items.length > 0){
             for (var i=0; i < $scope.delivery_note.sales_items.length; i++){
-                if (parseInt($scope.delivery_note.sales_items[i].current_stock) < parseInt($scope.delivery_note.sales_items[i].qty_sold)){
-                    $scope.validation_error = "Quantity not in stock for item "+$scope.delivery_note.sales_items[i].item_name;
-                    return false;
-                } else if ($scope.delivery_note.sales_items[i].qty_sold == 0) {
+                if (!$scope.opening_stock){
+                    if (parseInt($scope.delivery_note.sales_items[i].current_stock) < parseInt($scope.delivery_note.sales_items[i].qty_sold)){
+                        $scope.validation_error = "Quantity not in stock for item "+$scope.delivery_note.sales_items[i].item_name;
+                        return false;
+                    } 
+                }
+                if ($scope.delivery_note.sales_items[i].qty_sold == 0) {
                     $scope.validation_error = "Please enter quantity for the item "+$scope.delivery_note.sales_items[i].item_name;
                     return false;
                 }
